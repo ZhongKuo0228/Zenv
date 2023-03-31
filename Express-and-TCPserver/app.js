@@ -4,6 +4,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 //---router----------------------------------------
+import { plCodeRouter } from "./routes/api-PLcode.js";
+app.use("/api/1.0/PLcode", plCodeRouter);
 
 //---listen-----------------------------------------
 import dotenv from "dotenv";
