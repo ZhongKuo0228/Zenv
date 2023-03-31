@@ -1,25 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import WriteCode from "./components/WriteCode";
+import Console from "./components/Console";
+import styled from "styled-components";
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+const Wrap = styled.div`
+    display: flex;
+`;
+
+const App = () => {
+    return (
+        <>
+            <header>我是標頭</header>
+            <Wrap>
+                <WriteCode />
+                <Console />
+            </Wrap>
+        </>
+    );
+};
 
 export default App;
