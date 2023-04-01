@@ -8,7 +8,18 @@ export async function sendCodeToTcpClient(userId, executeId, code) {
         executeId: executeId,
         code: code,
     };
+
     if (connections.length > 0) {
-        connections[0].write(JSON.stringify(job));
+        const socket = connections[0];
+        socket.write(JSON.stringify(job));
+        const dataPromise = new Promise((resolve) => {
+            socket.on("data", (data) => {
+                console.log(`Received data from client1: ${data}`);
+                resolve(data);
+            });
+        });
+
+        const data = await dataPromise;
+        return data;
     }
 }

@@ -7,13 +7,15 @@ plCodeRouter.get("/nodejs", async (req, res, next) => {
     res.status(200).json({ data: "good" });
 });
 plCodeRouter.post("/nodejs", async (req, res, next) => {
-    // const code = req.body.code;
+    const code = req.body.code;
     const userId = "xxx";
-    const executeId = "adfasdf";
-    const code = 'console.log("hello tcp");';
-    sendCodeToTcpClient(userId, executeId, code);
-    console.log("api", code);
-    res.status(200).json({ data: code });
+    const executeId = "1234567";
+    // const code = 'console.log("hello tcp");';
+    const runResult = await sendCodeToTcpClient(userId, executeId, code);
+    const result = JSON.parse(runResult.toString()); //buffer轉成JSON格式
+    console.log("result", result);
+
+    res.status(200).json({ data: result.result });
 });
 //---export----------------------------------------------
 export { plCodeRouter };

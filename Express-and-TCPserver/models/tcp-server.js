@@ -8,16 +8,16 @@ function tcpServer() {
         connections.push(socket);
 
         // 當接收到資料時，將資料廣播給所有連線
-        socket.on("data", (data) => {
-            console.log(`Received data from client: ${data}`);
+        // socket.on("data", (data) => {
+        //     console.log(`Received data from client: ${data}`);
 
-            // 將資料廣播給所有連線
-            connections.forEach((conn) => {
-                if (conn !== socket && conn.writable) {
-                    conn.write(data);
-                }
-            });
-        });
+        //     // 將資料廣播給所有連線
+        //     connections.forEach((conn) => {
+        //         if (conn !== socket && conn.writable) {
+        //             conn.write(data);
+        //         }
+        //     });
+        // });
 
         // 當連線關閉時，從陣列中移除 socket 物件
         socket.on("close", () => {
