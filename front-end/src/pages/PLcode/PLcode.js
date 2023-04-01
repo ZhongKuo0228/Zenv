@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
+import CodeEditor from "@uiw/react-textarea-code-editor";
 //---styled-------------------------------------------
 const WorkArea = styled.div`
     width: 49%;
@@ -31,7 +32,7 @@ const WriteCode = () => {
     //---
     const [code, setCode] = useState("");
     const [result, setResult] = useState("請RUN");
-
+    const [codeEdit, setCodeEdit] = React.useState(`function add(a, b) {\n  return a + b;\n}`);
     const handleSubmit = async (event) => {
         event.preventDefault();
         const url = "http://localhost:3001/api/1.0/PLcode/nodejs";
@@ -61,7 +62,19 @@ const WriteCode = () => {
             <WorkArea>
                 <h3>寫code工作區</h3>
                 <form onSubmit={handleSubmit}>
-                    <CodingArea rows={10} cols={50} value={code} onChange={handleChange} />
+                    {/* <CodingArea rows={10} cols={50} value={code} onChange={handleChange} /> */}
+                    <CodeEditor
+                        value={code}
+                        language='js'
+                        placeholder='Please enter JS code.'
+                        onChange={handleChange}
+                        padding={15}
+                        style={{
+                            fontSize: 12,
+                            backgroundColor: "#272727",
+                            fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                        }}
+                    />
                     <button type='submit'>Run</button>
                 </form>
             </WorkArea>
