@@ -1,5 +1,6 @@
 import { exec } from "child_process";
-import { writeFile } from "node:fs/promises";
+import { createPLContainer, rmPLContainer, stopPLContainer, delTempFile } from "./controllers/containerControl.js";
+
 //---tcp server------------------------------------
 import net from "net";
 // 連接TCP server
@@ -10,27 +11,33 @@ const socket = net.createConnection({ port: 8000 }, () => {
 // 收到TCP server的資料時
 socket.on("data", async (data) => {
     console.log("從 TCP server 收到訊息:", data.toString());
-    // 處理資料;
-    // socket.write(data);
-
     const temp = data.toString();
     const job = JSON.parse(temp);
-    const fileName = `${job.executeId}.js`;
 
-    await writeFile(fileName, job.code);
+    const executeId = job.executeId;
+    const programLanguage = job.programLanguage;
+    const code = job.code;
 
-    const path = "/Users/zhongkuo/Desktop/Back-End-Class-Batch19/Zenv/TCPclient/";
-
-    const command = `docker run -v ${path}${fileName}:/app/${fileName} node:18-alpine node /app/${fileName}`; //使用exec所以-it要拿掉
-    const child = exec(command);
+    const createCommand = await createPLContainer(executeId, programLanguage, code);
+    const child = exec(createCommand);
 
     child.stdin.on("exit", (code) => {
         console.log(`Child process exited with code ${code}`);
     });
-    child.stdout.on("data", (data) => {
+    child.stdout.on("data", async (data) => {
         console.log(`回傳程式碼執行結果: ${data}`);
-        job.result = data;
-        socket.write(JSON.stringify(job));
+        const result = {
+            socketId: job.socketId,
+            executeId: executeId,
+            result: data,
+        };
+        //回傳運行結果
+        socket.write(JSON.stringify(result));
+
+        //處理臨時容器及檔案
+        await stopPLContainer(executeId);
+        await rmPLContainer(executeId);
+        await delTempFile(executeId, programLanguage);
     });
     child.stderr.on("data", (data) => {
         console.log(`stderr: ${data}`);
