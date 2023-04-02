@@ -2,12 +2,15 @@ import tcpServer from "../models/tcp-server.js";
 
 const connections = tcpServer();
 
-export async function sendCodeToTcpClient(userId, executeId, code) {
+export async function sendCodeToTcpClient(req) {
+    const code = req.body.data;
     let job = {
-        userId: userId,
-        executeId: executeId,
-        code: code,
+        socketId: code.socketId,
+        executeId: code.executeId,
+        code: code.code,
+        programLanguage: code.programLanguage,
     };
+    // console.log("job", job);
 
     if (connections.length > 0) {
         const socket = connections[0];

@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import CodeEditor from "@uiw/react-textarea-code-editor";
+import webSocket from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
+import { commitPLpage } from "../../util/commitResult.js";
+//使用者頁面後自動存檔------------------------
+commitPLpage();
 //---styled-------------------------------------------
 const WorkArea = styled.div`
     width: 49%;
@@ -34,6 +38,7 @@ const WriteCode = () => {
     const [code, setCode] = React.useState(`function add(a, b) {\n  return a + b;\n}`);
     const [result, setResult] = useState("請RUN");
 
+    //fetch api---
     const handleSubmit = async (event) => {
         event.preventDefault();
         const url = "http://localhost:3001/api/1.0/PLcode/run";
@@ -79,6 +84,22 @@ const WriteCode = () => {
             setCode(storedCode);
         }
     }, []);
+
+    //webSocket---
+    // const [ws, setWs] = useState(null);
+    // const socketRef = useRef(null);
+
+    // useEffect(() => {
+    //     const socket = webSocket("http://localhost:3001");
+    //     socket.on("connect", () => {
+    //         console.log("Successfully connected to server!");
+    //     });
+    //     socketRef.current = socket;
+    //     setWs(socketRef.current);
+    //     return () => {
+    //         socketRef.current.disconnect();
+    //     };
+    // }, []);
 
     return (
         <>

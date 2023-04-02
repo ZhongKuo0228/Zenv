@@ -6,16 +6,16 @@ const plCodeRouter = express.Router();
 plCodeRouter.get("/nodejs", async (req, res, next) => {
     res.status(200).json({ data: "good" });
 });
-plCodeRouter.post("/nodejs", async (req, res, next) => {
-    const code = req.body.code;
-    const userId = "xxx";
-    const executeId = "1234567";
-    // const code = 'console.log("hello tcp");';
-    const runResult = await sendCodeToTcpClient(userId, executeId, code);
+plCodeRouter.post("/run", async (req, res, next) => {
+    const runResult = await sendCodeToTcpClient(req);
     const result = JSON.parse(runResult.toString()); //buffer轉成JSON格式
     console.log("result", result);
 
     res.status(200).json({ data: result.result });
+});
+plCodeRouter.post("/save", async (req, res, next) => {
+    const commit = req.body;
+    console.log(commit);
 });
 //---export----------------------------------------------
 export { plCodeRouter };
