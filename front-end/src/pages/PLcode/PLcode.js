@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import CodeEditor from "@uiw/react-textarea-code-editor";
+import { v4 as uuidv4 } from "uuid";
 //---styled-------------------------------------------
 const WorkArea = styled.div`
     width: 49%;
@@ -30,19 +31,32 @@ const ConsoleResult = styled.textarea`
 //---
 const WriteCode = () => {
     //---
-    const [code, setCode] = useState("");
+    const [code, setCode] = React.useState(`function add(a, b) {\n  return a + b;\n}`);
     const [result, setResult] = useState("請RUN");
-    const [codeEdit, setCodeEdit] = React.useState(`function add(a, b) {\n  return a + b;\n}`);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-        const url = "http://localhost:3001/api/1.0/PLcode/nodejs";
+        const url = "http://localhost:3001/api/1.0/PLcode/run";
         try {
+            const userId = "abc@gmail.com";
+            const socketId = "abc1234";
+            const executeId = uuidv4();
+            const code = localStorage.getItem("code");
+            const programLanguage = "js";
+            const codeData = {
+                userId: userId,
+                socketId: socketId,
+                executeId: executeId,
+                code: code,
+                programLanguage: programLanguage,
+            };
+            console.log("codeData", codeData);
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ code }),
+                body: JSON.stringify({ data: codeData }),
             });
 
             const data = await response.json();
@@ -54,8 +68,17 @@ const WriteCode = () => {
     };
 
     const handleChange = (event) => {
-        setCode(event.target.value);
+        const value = event.target.value;
+        setCode(value);
+        localStorage.setItem("code", value);
     };
+
+    useEffect(() => {
+        const storedCode = localStorage.getItem("code");
+        if (storedCode) {
+            setCode(storedCode);
+        }
+    }, []);
 
     return (
         <>
