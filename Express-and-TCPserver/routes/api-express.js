@@ -5,10 +5,11 @@ const expressRouter = express.Router();
 expressRouter.post("/create", async (req, res, next) => {
     console.log("api", req.body);
     const runResult = await createExpressProject(req);
-    // const result = JSON.parse(runResult.toString()); //buffer轉成JSON格式
-    // console.log("result", result);
+    const result = JSON.parse(runResult.toString()); //buffer轉成JSON格式
+    console.log("result", result);
 
-    // res.status(200).json({ data: result.result });
+    res.status(200).json({ data: result });
 });
+
 //---export----------------------------------------------
 export { expressRouter };

@@ -1,11 +1,11 @@
-//TODO:創立專案後，先創立資料夾，
-//TODO:從github拉資料下來
 import { exec } from "child_process";
 import { writeFile, mkdir, unlink } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
+import { createNodeJSDockerfile, createDockerComposeFile } from "./express_container.js";
 import socket from "../tcp-client.js";
 
+//從github拉資料下來
 function downloadRepo(path, gitUrl) {
     //下載到專案資料中
     const downloadCommend = `git clone ${gitUrl} ${path}`;
@@ -15,17 +15,31 @@ function downloadRepo(path, gitUrl) {
     });
 }
 
+//創立專案後，先創立資料夾
 export async function createFolder(job) {
-    const user = job.user;
-    const projectName = job.projectName;
-    const gitUrl = job.gitRepoUrl;
-    //專案資料夾創立
-    const folderPath = path.join(moduleDir, "../express_project/");
-    const folderName = `${user}_${projectName}`;
-    const newProjectPath = `${folderPath}${folderName}`;
+    try {
+        const userId = job.userId;
+        const projectName = job.projectName;
+        const gitUrl = job.gitRepoUrl;
+        //專案資料夾創立
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const folderName = `${userId}_${projectName}`;
+        const newProjectPath = `${folderPath}${folderName}`;
+        const gitFolderPath = `${newProjectPath}/gitFolder`;
 
-    await mkdir(newProjectPath);
+        await mkdir(newProjectPath);
+        await mkdir(gitFolderPath);
 
-    downloadRepo(newProjectPath, gitUrl);
-    console.log(`專案:${folderName}建立完成、git資料下載完成`);
+        downloadRepo(gitFolderPath, gitUrl);
+        console.log(`專案:${folderName}建立完成、git資料下載完成`);
+
+        await createNodeJSDockerfile(newProjectPath);
+        await createDockerComposeFile(newProjectPath);
+        console.log(`dockerfile及docker-compose.yml建立完成`);
+
+        return "專案資料夾初始化完成";
+    } catch (e) {
+        console.log("創立專案資料及文件時發生錯誤 : ", e);
+        return e;
+    }
 }

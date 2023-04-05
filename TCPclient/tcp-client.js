@@ -30,6 +30,12 @@ function connectToServer() {
     socket.on("end", () => {
         isConnected = false;
         console.log("與 TCP server 連線關閉");
+        console.error("err：", "與 TCP server 連線失敗，5秒後重新連線");
+
+        // 等待 5 秒鐘後重新連線
+        setTimeout(() => {
+            connectToServer();
+        }, 5000);
     });
 
     socket.on("error", (err) => {
