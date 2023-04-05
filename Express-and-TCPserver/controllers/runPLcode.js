@@ -1,6 +1,6 @@
 import tcpServer from "../models/tcp-server.js";
 
-const connections = tcpServer();
+// const connections = tcpServer();
 
 export async function sendCodeToTcpClient(req) {
     const code = req.body.data;
