@@ -1,15 +1,15 @@
 import tcpServer from "../models/tcp-server.js";
+
 const connections = tcpServer();
 
 export async function createExpressProject(req) {
-    console.log("tcp", "123");
+    const project = req.body.data;
     let job = {
-        task: "createServer",
-        user: "testman",
-        projectName: "firstServer",
-        gitRepoUrl: "https://github.com/ZhongKuo0228/express-example.git",
+        task: project.task,
+        userId: project.userId,
+        projectName: project.projectName,
+        gitRepoUrl: project.gitRepoUrl,
     };
-    // console.log("job", job);
 
     if (connections.length > 0) {
         const socket = connections[0];
@@ -17,7 +17,7 @@ export async function createExpressProject(req) {
 
         const dataPromise = new Promise((resolve) => {
             socket.on("data", (data) => {
-                console.log(`Received data from client1: ${data}`);
+                console.log(`Received data from client: ${data}`);
                 resolve(data);
             });
         });
