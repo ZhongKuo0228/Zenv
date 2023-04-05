@@ -11,5 +11,17 @@ expressRouter.post("/create", async (req, res, next) => {
     res.status(200).json({ data: result });
 });
 
+expressRouter.get("/get", async (req, res, next) => {
+    const getFolderIndex = req.query.getFolderIndex;
+    if (getFolderIndex != undefined) {
+    }
+
+    // const runResult = await createExpressProject(req);
+    // const result = JSON.parse(runResult.toString()); //buffer轉成JSON格式
+    // console.log("result", result);
+
+    // res.status(200).json({ data: result });
+});
+
 //---export----------------------------------------------
 export { expressRouter };
