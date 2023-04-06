@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import { writeFile, mkdir, unlink, readdir, stat } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { createNodeJSDockerfile, createDockerComposeFile } from "./express_container.js";
+import { createDockerComposeFile } from "./express_container.js";
 import socket from "../tcp-client.js";
 
 //從github拉資料下來
@@ -48,9 +48,8 @@ export async function createFolder(job) {
         downloadRepo(gitFolderPath, gitUrl);
         console.log(`專案:${folderName}建立完成、git資料下載完成`);
 
-        await createNodeJSDockerfile(newProjectPath);
         await createDockerComposeFile(newProjectPath);
-        console.log(`dockerfile及docker-compose.yml建立完成`);
+        console.log(`docker-compose.yml建立完成`);
 
         return "專案資料夾初始化完成";
     } catch (e) {
