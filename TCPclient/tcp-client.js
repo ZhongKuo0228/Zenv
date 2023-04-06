@@ -50,4 +50,6 @@ function connectToServer() {
 
 connectToServer();
 
+function sendData() {}
+
 export default socket;
