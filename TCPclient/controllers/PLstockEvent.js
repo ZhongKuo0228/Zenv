@@ -22,7 +22,7 @@ export async function PLevent(job) {
             result: data,
         };
         //回傳運行結果
-        socket.write(JSON.stringify(result));
+        await socket.write(JSON.stringify(result));
 
         //處理臨時容器及檔案
         await stopPLContainer(executeId);

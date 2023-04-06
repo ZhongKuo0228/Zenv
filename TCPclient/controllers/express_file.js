@@ -30,7 +30,7 @@ async function listFiles(folderPath) {
     return result;
 }
 
-//創立專案後，先創立資料夾
+//創立專案後，創立資料夾
 export async function createFolder(job) {
     try {
         const userId = job.userId;
@@ -79,3 +79,5 @@ export async function getFolderIndex(job) {
         return e;
     }
 }
+
+//
