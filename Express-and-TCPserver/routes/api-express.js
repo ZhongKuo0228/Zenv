@@ -4,16 +4,17 @@ import { createExpressProject, getFolderIndex } from "../controllers/tcpJob.js";
 const expressRouter = express.Router();
 //---router----------------------------------------------
 expressRouter.post("/create", async (req, res, next) => {
-    console.log("api", req.body);
     const result = await createExpressProject(req);
     res.status(200).json({ data: result });
 });
 
 expressRouter.get("/get", async (req, res, next) => {
+    console.log("api", req.query);
     const job = Object.keys(req.query);
     let result = "";
     if (job == "getFolderIndex") {
         result = await getFolderIndex(req);
+        res.status(200).json({ data: result });
     } else {
         //TODO:其他功能
     }

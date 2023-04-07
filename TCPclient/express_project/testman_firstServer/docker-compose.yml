@@ -1,0 +1,23 @@
+
+    version: "3.8"
+
+    services:
+        zenv-express:
+            image: node/node-express
+            environment:
+                - REDIS_HOST=redis-server
+            networks:
+                - Zenv-network
+            #不指定外部訪問的port，讓系統自動分配
+            ports:
+                - 3000
+            volumes:
+                - "./gitFolder:/usr/src/app"
+
+        redis-server:
+            image: redis:7-alpine
+            networks:
+                - Zenv-network
+
+    networks:
+        Zenv-network:

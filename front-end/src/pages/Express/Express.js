@@ -1,6 +1,9 @@
 import React from "react";
 import styled from "styled-components";
+import { useState, useEffect } from "react";
+import Folder from "./Folder";
 
+//---
 const Area = styled.div`
     width: 100%;
     border: solid 1px black;
@@ -74,17 +77,40 @@ const handleSubmit = async (event) => {
 
 //---
 const Express = () => {
+    //---資料夾樹狀結構
+    const [folderData, setFolderData] = useState(null);
+
+    const getFolderIndex = async () => {
+        const url = "http://localhost:3001/api/1.0/express/get?getFolderIndex";
+        const folderName = "testman_firstServer";
+        try {
+            const response = await fetch(`${url}=${folderName}`);
+            const responseData = await response.json();
+            const data = JSON.parse(responseData.data); // 解析資料
+            setFolderData(data); // 將獲取到的資料儲存在狀態中
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        getFolderIndex(); // 在元件掛載時獲取資料
+    }, []);
+
     return (
         <Area>
             <ButtonArea>
                 <button onClick={handleSubmit}>創立專案</button>
                 <div></div>
                 <button>NodeJS</button>
-                <button>MYSQL</button>
+                <button>Sqlite</button>
                 <button>Redis</button>
             </ButtonArea>
             <WorkArea>
-                <FolderIndex>檔案目錄</FolderIndex>
+                <FolderIndex>
+                    樹狀資料夾
+                    {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
+                </FolderIndex>
                 <EditArea>code edit</EditArea>
                 <ResultArea>Console</ResultArea>
             </WorkArea>
