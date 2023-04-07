@@ -15,10 +15,11 @@ const folderHoverStyle = {
     backgroundColor: "#FFFFCE",
 };
 
-const Folder = ({ folder }) => {
+const Folder = ({ folder, path = "" }) => {
     const [isHovering, setIsHovering] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
+    //資料夾的點擊狀態確認
     const handleClick = () => {
         setIsOpen(!isOpen);
     };
@@ -30,6 +31,13 @@ const Folder = ({ folder }) => {
                 {isOpen ? <AiOutlineFolderOpen /> : <AiOutlineFolder />}
             </span>
         );
+    };
+
+    //取得檔案的完整路徑
+    const fullPath = path ? `${path}/${folder.name}` : folder.name;
+
+    const handleFileClick = (filePath) => {
+        console.log("File path:", filePath);
     };
 
     return (
@@ -47,9 +55,9 @@ const Folder = ({ folder }) => {
                 <div style={{ marginLeft: "20px" }}>
                     {folder.children.map((child) =>
                         child.isDirectory ? (
-                            <Folder key={child.name} folder={child} />
+                            <Folder key={child.name} folder={child} path={fullPath} />
                         ) : (
-                            <File key={child.name} file={child} />
+                            <File key={child.name} file={child} path={fullPath} onFileClick={handleFileClick} />
                         )
                     )}
                 </div>

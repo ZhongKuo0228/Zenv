@@ -1,7 +1,7 @@
 // File.js
 import React, { useState } from "react";
 import { DiJsBadge, DiCss3Full, DiGit } from "react-icons/di";
-import { AiOutlineFile } from "react-icons/ai";
+import { AiOutlineFile, AiOutlineFileText } from "react-icons/ai";
 
 const FileIcon = ({ file }) => {
     const fileExtension = file.name.split(".").pop();
@@ -18,7 +18,7 @@ const FileIcon = ({ file }) => {
             return <AiOutlineFile />;
     }
 };
-//滑鼠移到檔案上，有灰底的效果
+
 const fileStyle = {
     paddingLeft: "40px",
     display: "flex",
@@ -26,34 +26,29 @@ const fileStyle = {
     cursor: "pointer",
     backgroundColor: "transparent",
 };
+
 const fileHoverStyle = {
     ...fileStyle,
     backgroundColor: "#f0f0f0",
 };
 
-const handleFileClick = async (fileName) => {
-    const url = "http://localhost:3001/api/1.0/express/getFileContent";
-    try {
-        const response = await fetch(`${url}?fileName=${fileName}`);
-        const data = await response.json();
-        console.log("File content:", data);
-        // 在此處處理檔案內容，例如將其顯示在編輯器中
-    } catch (error) {
-        console.error(error);
-    }
-};
-
-const File = ({ file }) => {
+const File = ({ file, path, onFileClick }) => {
     const [isHovering, setIsHovering] = useState(false);
+
+    const handleFileClick = () => {
+        if (onFileClick) {
+            onFileClick(`${path}/${file.name}`);
+        }
+    };
 
     return (
         <div
             style={isHovering ? fileHoverStyle : fileStyle}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
-            onClick={() => handleFileClick(file.name)}
+            onClick={handleFileClick}
         >
-            <FileIcon file={file} />
+            <AiOutlineFileText />
             <span style={{ marginLeft: "5px" }}>{file.name}</span>
         </div>
     );
