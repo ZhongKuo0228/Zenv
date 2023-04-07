@@ -32,7 +32,7 @@ export async function sendCodeToTcpClient(req) {
         programLanguage: code.programLanguage,
     };
     const buffer = await socketWrite(job);
-    console.log("buffer", buffer);
+    // console.log("buffer", buffer);
     return bufferToJson(buffer);
 }
 
@@ -50,7 +50,10 @@ export async function createExpressProject(req) {
 }
 
 export async function getFolderIndex(req) {
-    const job = req.query.getFolderIndex;
+    let job = {
+        task: "getFolderIndex",
+        folderName: req.query.getFolderIndex,
+    };
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }

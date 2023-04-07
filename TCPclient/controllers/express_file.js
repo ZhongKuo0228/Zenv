@@ -60,12 +60,10 @@ export async function createFolder(job) {
 
 //確認資料夾目錄
 export async function getFolderIndex(job) {
-    const userId = job.userId;
-    const projectName = job.projectName;
     try {
         //確認資料夾
         const folderPath = path.join(moduleDir, "../express_project/");
-        const folderName = `${userId}_${projectName}`;
+        const folderName = job.folderName;
         const newProjectPath = `${folderPath}${folderName}`;
         const gitFolderPath = `${newProjectPath}/gitFolder`;
 
@@ -74,7 +72,7 @@ export async function getFolderIndex(job) {
 
         return json;
     } catch (e) {
-        console.log("建立專案目錄發生問題 : ", e);
+        console.log("查詢專案目錄發生問題 : ", e);
         return e;
     }
 }
