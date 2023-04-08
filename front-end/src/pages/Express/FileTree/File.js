@@ -49,6 +49,8 @@ const File = ({ file, path, onFileClick }) => {
             onClick={handleFileClick}
         >
             <AiOutlineFileText />
+            {/* icon圖示設定 */}
+            {/* <FileIcon file={file} /> */}
             <span style={{ marginLeft: "5px" }}>{file.name}</span>
         </div>
     );

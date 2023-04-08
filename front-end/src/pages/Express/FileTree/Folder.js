@@ -3,6 +3,8 @@ import { AiOutlineFolder, AiOutlineFolderOpen } from "react-icons/ai";
 import File from "./File";
 import { FileContext } from "../../../context/fileContext";
 
+const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
+
 const folderStyle = {
     paddingLeft: "20px",
     display: "flex",
@@ -17,7 +19,7 @@ const folderHoverStyle = {
 };
 
 const Folder = ({ folder, path = "" }) => {
-    const { setFile } = useContext(FileContext);
+    const { setFile, setFileName } = useContext(FileContext);
     const [isHovering, setIsHovering] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -37,20 +39,48 @@ const Folder = ({ folder, path = "" }) => {
 
     //取得檔案的完整路徑
     const fullPath = path ? `${path}/${folder.name}` : folder.name;
-
+    // 點擊資料文件同時觸發取得檔案和將檔案存檔的功能
     const handleFileClick = async (filePath) => {
-        // console.log("File path:", filePath);
+        await handlePostRewrite();
         const apiUrl = "http://localhost:3001/api/1.0/express/get";
-
         try {
-            const response = await fetch(`${apiUrl}?readFile=testman_firstServer/${filePath}`);
+            const response = await fetch(`${apiUrl}?readFile=${serverName}/${filePath}`);
             const data = await response.json();
             setFile(data.data);
-            // 將取得的資料儲存到 localStorage
             localStorage.setItem("fileData", JSON.stringify(data.data));
-            // console.log("file", data);
+            const trimmedStr = filePath.replace(/^"|"$/g, "");
+            localStorage.setItem("nowChoiceFile", trimmedStr);
+            setFileName(trimmedStr);
+            //覆寫檔案做到即時存檔效果
         } catch (error) {
             console.error("Error fetching file data:", error);
+        }
+    };
+
+    const handlePostRewrite = async () => {
+        const url = "http://localhost:3001/api/1.0/express/rewriteFile";
+        try {
+            const fileName = localStorage.getItem("nowChoiceFile");
+            const editCode = localStorage.getItem("editedFileData");
+            const codeData = {
+                task: "rewriteFile",
+                fileName: `${serverName}/${fileName}`,
+                editCode: editCode,
+            };
+            console.log("codeData", codeData);
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: codeData }),
+            });
+            const data = await response.json();
+            console.log("result", data);
+            localStorage.removeItem("nowChoiceFile");
+            localStorage.removeItem("editedFileData");
+        } catch (error) {
+            console.error("Error fetching POST event data:", error);
         }
     };
 

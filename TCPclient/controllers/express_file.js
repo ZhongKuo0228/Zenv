@@ -1,4 +1,6 @@
 import { exec } from "child_process";
+import util from "util";
+const promisify = util.promisify;
 import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
@@ -95,6 +97,23 @@ export async function toReadFile(job) {
         return file.toString();
     } catch (e) {
         console.log("讀取檔案發生問題 : ", e);
+        return e;
+    }
+}
+
+//讀取資料內容
+export async function rewriteFile(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const fileName = job.fileName;
+        const filePath = `${folderPath}${fileName}`;
+        const editCode = job.editCode;
+
+        await writeFile(filePath, editCode);
+        const result = `覆寫完成 : ${fileName}`;
+        return result;
+    } catch (e) {
+        console.log("覆寫檔案發生問題 : ", e);
         return e;
     }
 }
