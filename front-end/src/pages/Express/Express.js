@@ -5,6 +5,8 @@ import Folder from "./FileTree/Folder";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
 
+const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
+
 //---
 const Area = styled.div`
     width: 100%;
@@ -36,6 +38,12 @@ const FolderIndex = styled.div`
 const EditArea = styled.div`
     width: 59%;
     height: 500px;
+    border: solid 1px black;
+    padding: 10px;
+`;
+const FileName = styled.input`
+    width: 95%;
+    height: 30px;
     border: solid 1px black;
     padding: 10px;
 `;
@@ -80,15 +88,17 @@ const handleSubmit = async (event) => {
 //---
 const Express = () => {
     const { file } = useContext(FileContext);
+    const { fileName } = useContext(FileContext);
+    const [choiceFile, setChoiceFile] = useState("檔名");
     //---資料夾樹狀結構
     const [folderData, setFolderData] = useState(null);
     const [code, setCode] = useState("");
-    //讀取資料夾目錄
+    const [feature, setFeature] = useState("NodeJs");
+    //讀取資料夾目錄------------------------------------------------------------
     const getFolderIndex = async () => {
         const url = "http://localhost:3001/api/1.0/express/get?getFolderIndex";
-        const folderName = "testman_firstServer";
         try {
-            const response = await fetch(`${url}=${folderName}`);
+            const response = await fetch(`${url}=${serverName}`);
             const responseData = await response.json();
             const data = JSON.parse(responseData.data); // 解析資料
             setFolderData(data); // 將獲取到的資料儲存在狀態中
@@ -100,55 +110,101 @@ const Express = () => {
         getFolderIndex(); // 在元件掛載時獲取資料
     }, []);
 
-    //處理檔案被點擊後，將編輯區更新內容
+    //處理檔案被點擊後，將編輯區更新內容------------------------------------------------------------
     const handleCodeChange = (event) => {
         const value = event.target.value;
         setCode(value);
-        localStorage.setItem("editedFileData", encodeURIComponent(value));
+        localStorage.setItem("editedFileData", value);
     };
     useEffect(() => {
         //從localstorage拿到資料並重新解析格式
         const storedCode = localStorage.getItem("fileData");
         if (storedCode) {
             const trimmedCode = decodeURIComponent(storedCode.replace(/^"(.*)"$/, "$1"));
+            //處理換行的\n的問題
             const codeWithNewlines = trimmedCode.replace(/\\n/g, "\n");
-            setCode(codeWithNewlines);
+            //處理空格的反斜線的問題
+            const codeWithoutBackslashes = codeWithNewlines.replace(/\\/g, " ");
+            setCode(codeWithoutBackslashes);
         }
         //動態觀察
     }, [file]);
 
-    //---
+    //處理檔名顯示------------------------------------------------------------
+    const choiceFileChange = (event) => {
+        const value = event.target.value;
+        setChoiceFile(value);
+    };
+    useEffect(() => {
+        //從localstorage取得現在點擊檔案名稱
+        const ChoiceFile = localStorage.getItem("nowChoiceFile");
+        setChoiceFile(ChoiceFile);
+        //動態觀察
+    }, [fileName]);
+
+    const handleFeature = (data) => {
+        setFeature(data);
+    };
+
+    // useEffect(() => console.log(feature), [feature]);
+
+    const features = ["NodeJs", "Sqlite", "Redis"];
+
+    //---------------------------------------------------------------------------
     return (
         <Area>
             <ButtonArea>
                 <button onClick={handleSubmit}>創立專案</button>
+                <button>RUN</button>
+                <button>STOP</button>
                 <div></div>
-                <button>NodeJS</button>
-                <button>Sqlite</button>
-                <button>Redis</button>
+                {features.map((feature, index) => (
+                    <button onClick={(e) => handleFeature(feature)} key={index}>
+                        {feature}
+                    </button>
+                ))}
             </ButtonArea>
             <WorkArea>
-                <FolderIndex>
-                    樹狀資料夾
-                    {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
-                </FolderIndex>
-                <EditArea>
-                    <CodeEditor
-                        value={code}
-                        language='js'
-                        placeholder='Please enter code.'
-                        onChange={handleCodeChange}
-                        padding={15}
-                        style={{
-                            fontSize: 12,
-                            backgroundColor: "#272727",
-                            fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                            height: "100%",
-                            border: "solid 1px black",
-                        }}
-                    />
-                </EditArea>
-                <ResultArea>Console</ResultArea>
+                {feature === "NodeJs" ? (
+                    <>
+                        <FolderIndex>
+                            資料夾
+                            {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
+                        </FolderIndex>
+                        <EditArea>
+                            <FileName value={fileName} onChange={choiceFileChange} readOnly />
+                            <CodeEditor
+                                value={code}
+                                language='js'
+                                placeholder='Please enter code.'
+                                onChange={handleCodeChange}
+                                padding={15}
+                                style={{
+                                    fontSize: 12,
+                                    backgroundColor: "#272727",
+                                    fontFamily:
+                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                    height: "80%",
+                                    border: "solid 1px black",
+                                }}
+                            />
+                        </EditArea>
+                        <ResultArea>Console</ResultArea>
+                    </>
+                ) : feature === "Sqlite" ? (
+                    <>
+                        <FolderIndex>DB資料區</FolderIndex>
+                        <EditArea>終端機區</EditArea>
+                        <ResultArea>Console</ResultArea>
+                    </>
+                ) : (
+                    <>
+                        {" "}
+                        <FolderIndex>Redis沒有資料庫區</FolderIndex>
+                        <EditArea>Redis終端機區</EditArea>
+                        <ResultArea>Console</ResultArea>
+                    </>
+                )}
             </WorkArea>
         </Area>
     );

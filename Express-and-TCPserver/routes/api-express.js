@@ -1,6 +1,6 @@
 import express from "express";
 // import { createExpressProject } from "../controllers/runExpressServer.js";
-import { createExpressProject, getFolderIndex, readFile } from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
+import { createExpressProject, getFolderIndex, readFile, rewriteFile } from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
 const expressRouter = express.Router();
 //---router----------------------------------------------
 expressRouter.post("/create", async (req, res, next) => {
@@ -21,6 +21,11 @@ expressRouter.get("/get", async (req, res, next) => {
     } else {
         //TODO:其他功能
     }
+});
+
+expressRouter.post("/rewriteFile", async (req, res, next) => {
+    const result = await rewriteFile(req);
+    res.status(200).json({ data: result });
 });
 
 //---export----------------------------------------------
