@@ -9,7 +9,7 @@ async function socketWrite(job) {
 
         const dataPromise = new Promise((resolve) => {
             socket.on("data", (data) => {
-                console.log(`Received data from client: ${data}`);
+                // console.log(`Received data from client: ${data}`);
                 resolve(data);
             });
         });
@@ -53,6 +53,15 @@ export async function getFolderIndex(req) {
     let job = {
         task: "getFolderIndex",
         folderName: req.query.getFolderIndex,
+    };
+    const buffer = await socketWrite(job);
+    return bufferToJson(buffer);
+}
+
+export async function readFile(req) {
+    let job = {
+        task: "readFile",
+        fileName: req.query.readFile,
     };
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);

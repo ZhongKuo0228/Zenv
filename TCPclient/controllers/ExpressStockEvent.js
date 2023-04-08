@@ -1,4 +1,4 @@
-import { createFolder, getFolderIndex } from "./express_file.js";
+import { createFolder, getFolderIndex, toReadFile } from "./express_file.js";
 import socket from "../tcp-client.js";
 
 export async function expressEvent(job) {
@@ -9,6 +9,10 @@ export async function expressEvent(job) {
         socket.write(JSON.stringify(result));
     } else if (task == "getFolderIndex") {
         const result = await getFolderIndex(job);
+        //回傳運行結果
+        socket.write(JSON.stringify(result));
+    } else if (task == "readFile") {
+        const result = await toReadFile(job);
         //回傳運行結果
         socket.write(JSON.stringify(result));
     } else {
