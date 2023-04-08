@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { AiOutlineFolder, AiOutlineFolderOpen } from "react-icons/ai";
 import File from "./File";
+import { FileContext } from "../../../context/fileContext";
 
 const folderStyle = {
     paddingLeft: "20px",
@@ -16,6 +17,7 @@ const folderHoverStyle = {
 };
 
 const Folder = ({ folder, path = "" }) => {
+    const { setFile } = useContext(FileContext);
     const [isHovering, setIsHovering] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
 
@@ -36,8 +38,20 @@ const Folder = ({ folder, path = "" }) => {
     //取得檔案的完整路徑
     const fullPath = path ? `${path}/${folder.name}` : folder.name;
 
-    const handleFileClick = (filePath) => {
-        console.log("File path:", filePath);
+    const handleFileClick = async (filePath) => {
+        // console.log("File path:", filePath);
+        const apiUrl = "http://localhost:3001/api/1.0/express/get";
+
+        try {
+            const response = await fetch(`${apiUrl}?readFile=testman_firstServer/${filePath}`);
+            const data = await response.json();
+            setFile(data.data);
+            // 將取得的資料儲存到 localStorage
+            localStorage.setItem("fileData", JSON.stringify(data.data));
+            // console.log("file", data);
+        } catch (error) {
+            console.error("Error fetching file data:", error);
+        }
     };
 
     return (

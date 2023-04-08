@@ -1,5 +1,6 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
+import { FileContextProvider } from "./context/fileContext";
 
 import styled from "styled-components";
 
@@ -20,7 +21,9 @@ const App = () => {
                 <a href='/Express'>Express伺服器</a>
             </li>
             <Wrap>
-                <Outlet />
+                <FileContextProvider>
+                    <Outlet />
+                </FileContextProvider>
             </Wrap>
             <header>我是footer</header>
         </>

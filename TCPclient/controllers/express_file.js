@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import { writeFile, mkdir, unlink, readdir, stat } from "node:fs/promises";
+import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 import { createDockerComposeFile } from "./express_container.js";
@@ -15,6 +15,8 @@ function downloadRepo(path, gitUrl) {
     });
 }
 
+//忽略檔案名稱
+
 async function listFiles(folderPath) {
     const files = await readdir(folderPath);
     const result = { name: path.basename(folderPath), isDirectory: true, children: [] };
@@ -24,7 +26,10 @@ async function listFiles(folderPath) {
         if (stats.isDirectory()) {
             result.children.push(await listFiles(filePath));
         } else {
-            result.children.push({ name: file, isDirectory: false });
+            // 忽略檔案規則
+            if (!file.includes("package-lock.json")) {
+                result.children.push({ name: file, isDirectory: false });
+            }
         }
     }
     return result;
@@ -77,4 +82,19 @@ export async function getFolderIndex(job) {
     }
 }
 
-//
+//讀取資料內容
+export async function toReadFile(job) {
+    try {
+        //確認資料夾
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const fileName = job.fileName;
+        const filePath = `${folderPath}${fileName}`;
+
+        const file = await readFile(filePath);
+
+        return file.toString();
+    } catch (e) {
+        console.log("讀取檔案發生問題 : ", e);
+        return e;
+    }
+}
