@@ -1,7 +1,11 @@
 // File.js
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { DiJsBadge, DiCss3Full, DiGit } from "react-icons/di";
-import { AiOutlineFile, AiOutlineFileText } from "react-icons/ai";
+import { AiOutlineFile, AiOutlineFileText, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+import api from "../../../util/api";
+import { FileContext } from "../../../context/fileContext";
+
+const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
 
 const FileIcon = ({ file }) => {
     const fileExtension = file.name.split(".").pop();
@@ -20,11 +24,12 @@ const FileIcon = ({ file }) => {
 };
 
 const fileStyle = {
-    paddingLeft: "40px",
+    paddingLeft: "33px",
     display: "flex",
     alignItems: "center",
     cursor: "pointer",
     backgroundColor: "transparent",
+    position: "relative",
 };
 
 const fileHoverStyle = {
@@ -32,12 +37,65 @@ const fileHoverStyle = {
     backgroundColor: "#f0f0f0",
 };
 
+const buttonContainerStyle = {
+    display: "flex",
+    alignItems: "center",
+    position: "absolute",
+    right: 0,
+    paddingRight: "5px",
+};
+
 const File = ({ file, path, onFileClick }) => {
+    const [clonedFile, setClonedFile] = useState(file);
     const [isHovering, setIsHovering] = useState(false);
 
     const handleFileClick = () => {
         if (onFileClick) {
             onFileClick(`${path}/${file.name}`);
+        }
+    };
+    const handleDeleteFile = (event) => {
+        event.stopPropagation();
+        // 顯示提示
+        const confirmed = window.confirm(`確認是否要刪除？ : ${path}/${file.name}`);
+
+        // 若用戶確定刪除
+        if (confirmed) {
+            const task = "operDel";
+            const type = "file";
+            const fileName = `${serverName}/${path}/${file.name}`;
+            api.fileOper(task, type, fileName);
+        }
+    };
+
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [newFileName, setNewFileName] = useState(file.name);
+    // const { newFileName, setNewFileName } = useContext(FileContext);
+    const handleRenameFile = (event) => {
+        event.stopPropagation();
+        setIsRenaming(true);
+        // 處理文件重命名的邏輯
+    };
+    useEffect(() => console.log(newFileName), [newFileName]);
+    const handleNameChange = (event) => {
+        setNewFileName(event.target.value);
+    };
+    const handleNameBlur = () => {
+        setIsRenaming(false);
+        // 處理將修改後的檔名保存到後端的邏輯
+    };
+    const handleNameKeyDown = (event) => {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            setIsRenaming(false);
+            // 處理將修改後的檔名保存到後端的邏輯
+            const task = "operRename";
+            const type = "file";
+            const oldName = `${serverName}/${path}/${file.name}`;
+            const newName = `${serverName}/${path}/${newFileName}`;
+            const fileName = [oldName, newName];
+            api.fileOper(task, type, fileName);
+            setClonedFile({ ...clonedFile, newName: newFileName });
         }
     };
 
@@ -51,7 +109,31 @@ const File = ({ file, path, onFileClick }) => {
             <AiOutlineFileText />
             {/* icon圖示設定 */}
             {/* <FileIcon file={file} /> */}
-            <span style={{ marginLeft: "5px" }}>{file.name}</span>
+            {isRenaming ? (
+                <input
+                    type='text'
+                    value={newFileName}
+                    onChange={handleNameChange}
+                    onBlur={handleNameBlur}
+                    onKeyDown={handleNameKeyDown}
+                    autoFocus
+                    style={{ marginLeft: "5px" }}
+                />
+            ) : (
+                <span style={{ marginLeft: "5px" }}>{clonedFile.newName ?? clonedFile.name}</span>
+            )}
+
+            {isHovering && (
+                <div style={buttonContainerStyle}>
+                    {" "}
+                    <button onClick={handleRenameFile}>
+                        <AiOutlineEdit />
+                    </button>
+                    <button onClick={handleDeleteFile}>
+                        <AiOutlineDelete />
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

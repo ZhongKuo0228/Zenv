@@ -36,7 +36,7 @@ export async function sendCodeToTcpClient(req) {
     return bufferToJson(buffer);
 }
 
-//Express Job
+//---Express Job
 export async function createExpressProject(req) {
     const project = req.body.data;
     let job = {
@@ -69,12 +69,32 @@ export async function readFile(req) {
 
 export async function rewriteFile(req) {
     const project = req.body.data;
-   
+
     let job = {
         task: project.task,
         fileName: project.fileName,
         editCode: project.editCode,
     };
+    const buffer = await socketWrite(job);
+    return bufferToJson(buffer);
+}
+
+export async function fileOper(req) {
+    const project = req.body.data;
+    console.log("oper", project);
+
+    //新增檔案 : add
+    //刪除 : del
+    //重新命名 : rename
+
+    let job = {
+        task: project.task,
+        type: project.type,
+        fileName: project.fileName,
+    };
+
+    console.log(job);
+
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
