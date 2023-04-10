@@ -116,6 +116,7 @@ const WriteCode = () => {
                         style={{
                             fontSize: 12,
                             backgroundColor: "#272727",
+                            height: "400px",
                             fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
                         }}
                     />

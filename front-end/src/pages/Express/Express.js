@@ -5,6 +5,7 @@ import Folder from "./FileTree/Folder";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
 import TerminalComponent from "./Terminal";
+import api from "../../util/api";
 
 const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
 
@@ -20,6 +21,8 @@ const ButtonArea = styled.div`
     width: 100%;
     height: 50px;
     border: solid 1px black;
+    display: flex;
+    justify-content: space-around;
     padding: 10px;
 `;
 //---
@@ -56,7 +59,7 @@ const ResultArea = styled.div`
 `;
 
 //---
-const handleSubmit = async (event) => {
+const handleCreateSubmit = async (event) => {
     event.preventDefault();
     const url = "http://localhost:3001/api/1.0/express/create";
     try {
@@ -81,8 +84,17 @@ const handleSubmit = async (event) => {
 
         const data = await response.json();
         console.log("result", data);
+        alert("建立完成");
     } catch (error) {
         console.error(error);
+    }
+};
+const handleInitSubmit = async (event) => {
+    event.preventDefault();
+    const task = "jsOperInit";
+    const result = await api.jsOper(task, serverName);
+    if (result) {
+        alert("初始化完成");
     }
 };
 
@@ -112,19 +124,14 @@ const Express = () => {
     };
 
     //讀取資料夾目錄------------------------------------------------------------
-    const getFolderIndex = async () => {
-        const url = "http://localhost:3001/api/1.0/express/get?getFolderIndex";
-        try {
-            const response = await fetch(`${url}=${serverName}`);
-            const responseData = await response.json();
-            const data = JSON.parse(responseData.data); // 解析資料
-            setFolderData(data); // 將獲取到的資料儲存在狀態中
-        } catch (error) {
-            console.error(error);
-        }
-    };
+
     useEffect(() => {
-        getFolderIndex(); // 在元件掛載時獲取資料
+        const fetchData = async () => {
+            const data = await api.getFolderIndex(serverName);
+            setFolderData(data);
+        };
+
+        fetchData();
     }, []);
 
     //處理檔案被點擊後，將編輯區更新內容------------------------------------------------------------
@@ -165,10 +172,15 @@ const Express = () => {
     return (
         <Area>
             <ButtonArea>
-                <button onClick={handleSubmit}>創立專案</button>
-                <button>RUN</button>
-                <button>STOP</button>
-                <div></div>
+                <button onClick={handleCreateSubmit}>創立專案</button>
+                <button onClick={handleInitSubmit}>初始化 INIT</button>
+                <button>運行 RUN</button>
+                <button>暫停 STOP</button>
+                <form>
+                    npm
+                    <input type='text' placeholder='npm指令' />
+                    <button>送出</button>
+                </form>
                 {features.map((feature, index) => (
                     <button onClick={(e) => handleFeature(feature)} key={index}>
                         {feature}
@@ -180,6 +192,9 @@ const Express = () => {
                     <>
                         <FolderIndex>
                             資料夾
+                            <hr />
+                            (忽略規則： .git 、 node_modules 、package-lock.json);
+                            <hr />
                             {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
                         </FolderIndex>
                         <EditArea>

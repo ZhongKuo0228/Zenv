@@ -22,6 +22,13 @@ async function listFiles(folderPath) {
     const files = await readdir(folderPath);
     const result = { name: path.basename(folderPath), isDirectory: true, children: [] };
     for (const file of files) {
+        if (file === "node_modules") {
+            continue;
+        }
+
+        if (file === ".git") {
+            continue;
+        }
         const filePath = path.join(folderPath, file);
         const stats = await stat(filePath);
         if (stats.isDirectory()) {
@@ -54,7 +61,7 @@ export async function createFolder(job) {
         downloadRepo(gitFolderPath, gitUrl);
         console.log(`專案:${folderName}建立完成、git資料下載完成`);
 
-        await createDockerComposeFile(newProjectPath);
+        await createDockerComposeFile(folderName, newProjectPath);
         console.log(`docker-compose.yml建立完成`);
 
         return "專案資料夾初始化完成";
