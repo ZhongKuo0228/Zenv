@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext, useRef } from "react";
 import Folder from "./FileTree/Folder";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
+import TerminalComponent from "./Terminal";
 
 const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
 
@@ -89,11 +90,27 @@ const handleSubmit = async (event) => {
 const Express = () => {
     const { file } = useContext(FileContext);
     const { fileName } = useContext(FileContext);
-    const [choiceFile, setChoiceFile] = useState("檔名");
+    //---功能選擇
+    const [feature, setFeature] = useState("NodeJs");
+    const handleFeature = (data) => {
+        setFeature(data);
+    };
+    const features = ["NodeJs", "Sqlite", "Redis"];
+
     //---資料夾樹狀結構
     const [folderData, setFolderData] = useState(null);
     const [code, setCode] = useState("");
-    const [feature, setFeature] = useState("NodeJs");
+    const [choiceFile, setChoiceFile] = useState("檔名");
+
+    //---內嵌終端機
+    const commands = {
+        echo: {
+            method: (args, print) => {
+                print(args.join(" "));
+            },
+        },
+    };
+
     //讀取資料夾目錄------------------------------------------------------------
     const getFolderIndex = async () => {
         const url = "http://localhost:3001/api/1.0/express/get?getFolderIndex";
@@ -142,13 +159,7 @@ const Express = () => {
         //動態觀察
     }, [fileName]);
 
-    const handleFeature = (data) => {
-        setFeature(data);
-    };
-
-    // useEffect(() => console.log(feature), [feature]);
-
-    const features = ["NodeJs", "Sqlite", "Redis"];
+    //內嵌終端機
 
     //---------------------------------------------------------------------------
     return (
@@ -194,7 +205,11 @@ const Express = () => {
                 ) : feature === "Sqlite" ? (
                     <>
                         <FolderIndex>DB資料區</FolderIndex>
-                        <EditArea>終端機區</EditArea>
+                        <EditArea>
+                            <div style={{ width: "100%", height: "100%" }}>
+                                <TerminalComponent />
+                            </div>
+                        </EditArea>
                         <ResultArea>Console</ResultArea>
                     </>
                 ) : (

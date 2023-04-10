@@ -18,7 +18,6 @@ function downloadRepo(path, gitUrl) {
 }
 
 //忽略檔案名稱
-
 async function listFiles(folderPath) {
     const files = await readdir(folderPath);
     const result = { name: path.basename(folderPath), isDirectory: true, children: [] };
@@ -114,6 +113,59 @@ export async function rewriteFile(job) {
         return result;
     } catch (e) {
         console.log("覆寫檔案發生問題 : ", e);
+        return e;
+    }
+}
+
+//檔案操作：新增、刪除、重新命名
+export async function operAdd(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const fileName = job.fileName;
+        const filePath = `${folderPath}${fileName}`;
+        const type = job.type;
+        let result;
+        if (type == "folder") {
+            await mkdir(filePath);
+            result = `新增資料夾完成 : ${fileName}`;
+        } else {
+            await writeFile(filePath, "");
+            result = `新增文件完成 : ${fileName}`;
+        }
+        return result;
+    } catch (e) {
+        console.log("新增資料夾、檔案發生問題 : ", e);
+        return e;
+    }
+}
+
+export async function operDel(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const fileName = job.fileName;
+        const filePath = `${folderPath}${fileName}`;
+        const delCommand = `rm -rf "${filePath}"`;
+        exec(delCommand);
+        let result = `刪除檔案完成 : ${fileName}`;
+        return result;
+    } catch (e) {
+        console.log("新增資料夾、檔案發生問題 : ", e);
+        return e;
+    }
+}
+
+export async function operRename(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const fileName = job.fileName[0];
+        const newFileName = job.fileName[1];
+        const renameCommand = `mv ${folderPath}${fileName} ${folderPath}${newFileName}`;
+        exec(renameCommand);
+        let result = `重新命名檔案完成 : ${folderPath}${newFileName}`;
+        console.log(`${folderPath}${fileName}`, `${folderPath}${newFileName}`);
+        return result;
+    } catch (e) {
+        console.log("重新命名檔案發生問題 : ", e);
         return e;
     }
 }
