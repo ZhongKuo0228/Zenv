@@ -1,6 +1,8 @@
 import { writeFile, unlink } from "node:fs/promises";
 import path from "path";
 import { exec } from "child_process";
+import { promisify } from "util";
+const execAsync = promisify(exec);
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 import { stopPLContainer, rmPLContainer } from "../controllers/PLcontainer.js";
 
@@ -52,12 +54,31 @@ async function composeStop(vPath, service) {
     });
 }
 
-async function getOutPort() {
-    const command = "docker-compose ps | grep zenv-express| awk '{print $11}' | cut -d ':' -f 2 | cut -d '-' -f 1";
-    const result = exec(command);
-    result.stdout.on("data", async (data) => {
-        console.log(`回傳程式碼執行結果: ${data}`);
+async function composeRun(vPath, service) {
+    return new Promise(async (resolve, reject) => {
+        const container = "docker-compose";
+        const action = "start";
+        const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${service}`; //使用exec所以-it要拿掉
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
     });
+}
+
+async function getOutPort(vPath, serviceName) {
+    const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
+    console.log("command", command);
+    try {
+        const { stdout } = await execAsync(command);
+        console.log(`回傳程式碼執行結果: ${stdout}`);
+        return stdout;
+    } catch (error) {
+        console.error(`執行命令時出錯: ${error}`);
+    }
 }
 
 export async function createDockerComposeFile(serverName, filePath) {
@@ -97,7 +118,6 @@ export async function createDockerComposeFile(serverName, filePath) {
 
 export async function jsOperInit(job) {
     //node/npm-install → docker-compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker-compose stop -t 1 <container>
-    console.log("job", job);
     try {
         const folderPath = path.join(moduleDir, "../express_project/");
         const serverName = job.serverName;
@@ -117,6 +137,41 @@ export async function jsOperInit(job) {
         await executeCommands();
 
         const result = `初始化完成 : ${serverName}`;
+        return result;
+
+        //控制容器指令
+    } catch (e) {
+        console.log("初始化環境發生問題 : ", e);
+        return e;
+    }
+}
+
+export async function jsOperRun(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const serverName = job.serverName;
+        const ymlPath = `${folderPath}${serverName}`;
+
+        await composeRun(ymlPath, `${serverName}-express`);
+        const result = await getOutPort(ymlPath, `${serverName}-express`);
+        console.log("result", result);
+        return result;
+
+        //控制容器指令
+    } catch (e) {
+        console.log("覆寫檔案發生問題 : ", e);
+        return e;
+    }
+}
+
+export async function jsOperStop(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const serverName = job.serverName;
+        const ymlPath = `${folderPath}${serverName}`;
+
+        await composeStop(ymlPath, `${serverName}-express`);
+        const result = `伺服器停止 : ${serverName}`;
         return result;
 
         //控制容器指令

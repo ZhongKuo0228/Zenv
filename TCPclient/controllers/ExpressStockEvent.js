@@ -1,6 +1,6 @@
 import { createFolder, getFolderIndex, toReadFile, rewriteFile, operAdd, operDel, operRename } from "./express_file.js";
-import { jsOperInit } from "./express_container.js";
-//jsOperRun, jsOperStop, jsOperNpm
+import { jsOperInit, jsOperRun, jsOperStop } from "./express_container.js";
+//, , jsOperNpm
 import socket from "../tcp-client.js";
 
 export async function expressEvent(job) {
@@ -44,14 +44,14 @@ export async function expressEvent(job) {
             result = await jsOperInit(job);
             socket.write(JSON.stringify(result));
             break;
-            // case "jsOperRun":
-            //     result = await jsOperRun(job);
-            //     socket.write(JSON.stringify(result));
-            //     break;
-            // case "jsOperStop":
-            //     result = await jsOperStop(job);
-            //     socket.write(JSON.stringify(result));
-            //     break;
+        case "jsOperRun":
+            result = await jsOperRun(job);
+            socket.write(JSON.stringify(result));
+            break;
+        case "jsOperStop":
+            result = await jsOperStop(job);
+            socket.write(JSON.stringify(result));
+            break;
             // case "jsOperNpm":
             //     result = await jsOperNpm(job);
             //     socket.write(JSON.stringify(result));
