@@ -35,7 +35,7 @@ const ConsoleResult = styled.textarea`
 //---
 const WriteCode = () => {
     //---
-    const [code, setCode] = React.useState(`function add(a, b) {\n  return a + b;\n}`);
+    const [code, setCode] = useState("");
     const [result, setResult] = useState("請RUN");
 
     //fetch api---

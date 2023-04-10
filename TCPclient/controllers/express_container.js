@@ -74,7 +74,7 @@ async function getOutPort(vPath, serviceName) {
     console.log("command", command);
     try {
         const { stdout } = await execAsync(command);
-        console.log(`回傳程式碼執行結果: ${stdout}`);
+        console.log(`取得port: ${stdout}`);
         return stdout;
     } catch (error) {
         console.error(`執行命令時出錯: ${error}`);
@@ -159,7 +159,7 @@ export async function jsOperRun(job) {
 
         //控制容器指令
     } catch (e) {
-        console.log("覆寫檔案發生問題 : ", e);
+        console.log(`啓動 ${serverName}-express 發生問題: `, e);
         return e;
     }
 }
@@ -176,7 +176,33 @@ export async function jsOperStop(job) {
 
         //控制容器指令
     } catch (e) {
-        console.log("覆寫檔案發生問題 : ", e);
+        console.log(`停止 ${serverName}-express 發生問題: `, e);
+        return e;
+    }
+}
+
+export async function jsOperNpm(job) {
+    try {
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const serverName = job.serverName;
+        const filePath = `${folderPath}${serverName}/gitFolder`;
+        const doJob = job.doJob;
+        console.log("doJob", doJob);
+
+        async function executeCommands() {
+            //先安裝一次npm install、並刪除臨時產生的container
+            await npmCommand(serverName, filePath, doJob);
+            await stopPLContainer(serverName);
+            await rmPLContainer(serverName);
+        }
+        await executeCommands();
+
+        const result = `npm 指令完成 : ${doJob}`;
+        return result;
+
+        //控制容器指令
+    } catch (e) {
+        console.log("執行 npm 指令發生問題 : ", e);
         return e;
     }
 }

@@ -59,10 +59,11 @@ const api = {
             console.error("Error fileOper fetching POST event data:", error);
         }
     },
-    async jsOper(task, serverName) {
+    async jsOper(task, serverName, doJob) {
         const data = {
             task: task,
             serverName: serverName,
+            doJob: doJob,
         };
         try {
             const response = await fetch(`${this.hostname}/express/jsOper`, {

@@ -107,6 +107,7 @@ export async function jsOper(req) {
     let job = {
         task: project.task,
         serverName: project.serverName,
+        doJob: project.doJob,
     };
 
     console.log(job);

@@ -1,6 +1,5 @@
 import { createFolder, getFolderIndex, toReadFile, rewriteFile, operAdd, operDel, operRename } from "./express_file.js";
-import { jsOperInit, jsOperRun, jsOperStop } from "./express_container.js";
-//, , jsOperNpm
+import { jsOperInit, jsOperRun, jsOperStop, jsOperNpm } from "./express_container.js";
 import socket from "../tcp-client.js";
 
 export async function expressEvent(job) {
@@ -52,9 +51,9 @@ export async function expressEvent(job) {
             result = await jsOperStop(job);
             socket.write(JSON.stringify(result));
             break;
-            // case "jsOperNpm":
-            //     result = await jsOperNpm(job);
-            //     socket.write(JSON.stringify(result));
+        case "jsOperNpm":
+            result = await jsOperNpm(job);
+            socket.write(JSON.stringify(result));
             break;
         //未定義狀況
         default:

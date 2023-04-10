@@ -64,6 +64,7 @@ const Express = () => {
     const { fileName } = useContext(FileContext);
     const [shouldFetchData, setShouldFetchData] = useState(true);
     const [runPort, setRunPort] = useState("伺服器未啓動");
+    const [npmCommand, setNpmCommand] = useState("");
     //---功能選擇
     const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
@@ -195,6 +196,14 @@ const Express = () => {
         }
         setRunPort("伺服器未啓動");
     };
+    const handleNpmSubmit = async (event) => {
+        event.preventDefault();
+        const task = "jsOperNpm";
+        const result = await api.jsOper(task, serverName, npmCommand);
+        if (result) {
+            alert(`npm 指令 ${npmCommand} 完成`);
+        }
+    };
     //---------------------------------------------------------------------------
     return (
         <Area>
@@ -206,10 +215,15 @@ const Express = () => {
                     {runPort}
                 </a>
                 <button onClick={handleStopSubmit}>暫停 STOP</button>
-                <form>
+                <form onSubmit={handleNpmSubmit}>
                     npm
-                    <input type='text' placeholder='npm指令' />
-                    <button>送出</button>
+                    <input
+                        type='text'
+                        placeholder='npm指令'
+                        value={npmCommand}
+                        onChange={(e) => setNpmCommand(e.target.value)}
+                    />
+                    <button type='submit'>送出</button>
                 </form>
                 {features.map((feature, index) => (
                     <button onClick={(e) => handleFeature(feature)} key={index}>
