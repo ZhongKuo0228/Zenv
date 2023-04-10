@@ -1,6 +1,13 @@
 import express from "express";
 // import { createExpressProject } from "../controllers/runExpressServer.js";
-import { createExpressProject, getFolderIndex, readFile, rewriteFile, fileOper } from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
+import {
+    createExpressProject,
+    getFolderIndex,
+    readFile,
+    rewriteFile,
+    fileOper,
+    jsOper,
+} from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
 const expressRouter = express.Router();
 //---router----------------------------------------------
 expressRouter.post("/create", async (req, res, next) => {
@@ -9,7 +16,6 @@ expressRouter.post("/create", async (req, res, next) => {
 });
 
 expressRouter.get("/get", async (req, res, next) => {
-    console.log("api", req.query);
     const job = Object.keys(req.query);
     let result = "";
     if (job == "getFolderIndex") {
@@ -30,6 +36,12 @@ expressRouter.post("/rewriteFile", async (req, res, next) => {
 
 expressRouter.post("/fileOper", async (req, res, next) => {
     const result = await fileOper(req);
+    res.status(200).json({ data: result });
+});
+
+expressRouter.post("/jsOper", async (req, res, next) => {
+    const result = await jsOper(req);
+    console.log("JS", result);
     res.status(200).json({ data: result });
 });
 

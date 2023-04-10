@@ -36,6 +36,7 @@ const buttonContainerStyle = {
 };
 
 const Folder = ({ folder, path = "" }) => {
+    const [clonedFolder, setClonedFolder] = useState(folder);
     const { setFile, setFileName } = useContext(FileContext);
     const [isHovering, setIsHovering] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -150,8 +151,11 @@ const Folder = ({ folder, path = "" }) => {
     const handleNameChange = (event) => {
         setNewFolderName(event.target.value);
     };
-    const handleNameBlur = () => {
+
+    const handleBlur = () => {
         setIsRenaming(false);
+        setIsAddingFolder(false);
+        setIsAddingFile(false);
         // 處理將修改後的檔名保存到後端的邏輯
     };
     const handleNameKeyDown = (event) => {
@@ -165,6 +169,7 @@ const Folder = ({ folder, path = "" }) => {
             const newName = `${serverName}/${path}/${newFolderName}`;
             const fileName = [oldName, newName];
             api.fileOper(task, type, fileName);
+            setClonedFolder({ ...clonedFolder, newName: newFolderName });
         }
     };
 
@@ -226,13 +231,13 @@ const Folder = ({ folder, path = "" }) => {
                         type='text'
                         value={newFolderName}
                         onChange={handleNameChange}
-                        onBlur={handleNameBlur}
+                        onBlur={handleBlur}
                         onKeyDown={handleNameKeyDown}
                         autoFocus
                         style={{ marginLeft: "5px" }}
                     />
                 ) : (
-                    <span style={{ marginLeft: "5px" }}>{folder.name}</span>
+                    <span style={{ marginLeft: "5px" }}>{clonedFolder.newName ?? clonedFolder.name}</span>
                 )}
                 {isHovering && (
                     <div style={buttonContainerStyle}>
@@ -265,6 +270,7 @@ const Folder = ({ folder, path = "" }) => {
                             type='text'
                             value={newSubfolderName}
                             onChange={handleSubfolderNameChange}
+                            onBlur={handleBlur}
                             onKeyDown={handleSubfolderNameKeyDown}
                             autoFocus
                             style={{ marginLeft: "20px" }}
@@ -275,6 +281,7 @@ const Folder = ({ folder, path = "" }) => {
                             type='text'
                             value={newSubfileName}
                             onChange={handleSubfileNameChange}
+                            onBlur={handleBlur}
                             onKeyDown={handleSubfileNameKeyDown}
                             autoFocus
                             style={{ marginLeft: "20px" }}

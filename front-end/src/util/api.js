@@ -30,6 +30,16 @@ const api = {
 
     //Express
     //資料夾文件操作
+    async getFolderIndex(serverName) {
+        try {
+            const response = await fetch(`${this.hostname}/express/get?getFolderIndex=${serverName}`);
+            const responseData = await response.json();
+            return JSON.parse(responseData.data); // 解析資料
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
     async fileOper(task, type, fileName) {
         const data = {
             task: task,
@@ -47,6 +57,25 @@ const api = {
             return await response.json();
         } catch (error) {
             console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async jsOper(task, serverName, doJob) {
+        const data = {
+            task: task,
+            serverName: serverName,
+            doJob: doJob,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/express/jsOper`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error jsOper fetching POST event data:", error);
         }
     },
 };

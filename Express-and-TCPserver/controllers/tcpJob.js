@@ -9,7 +9,6 @@ async function socketWrite(job) {
 
         const dataPromise = new Promise((resolve) => {
             socket.on("data", (data) => {
-                // console.log(`Received data from client: ${data}`);
                 resolve(data);
             });
         });
@@ -81,7 +80,6 @@ export async function rewriteFile(req) {
 
 export async function fileOper(req) {
     const project = req.body.data;
-    console.log("oper", project);
 
     //新增檔案 : add
     //刪除 : del
@@ -91,6 +89,25 @@ export async function fileOper(req) {
         task: project.task,
         type: project.type,
         fileName: project.fileName,
+    };
+
+    const buffer = await socketWrite(job);
+    return bufferToJson(buffer);
+}
+
+export async function jsOper(req) {
+    const project = req.body.data;
+    console.log("jsOper", project);
+
+    //初始化：init  ：node/npm-install → docker-compose up → 取得port → docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
+    //啓動： run  : docker-compose start <container>
+    //停止 ：stop : docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
+    //npm 操作： npm  :node/npm "指令"
+
+    let job = {
+        task: project.task,
+        serverName: project.serverName,
+        doJob: project.doJob,
     };
 
     console.log(job);

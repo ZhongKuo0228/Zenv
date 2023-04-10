@@ -5,6 +5,7 @@ import Folder from "./FileTree/Folder";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
 import TerminalComponent from "./Terminal";
+import api from "../../util/api";
 
 const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
 
@@ -20,6 +21,8 @@ const ButtonArea = styled.div`
     width: 100%;
     height: 50px;
     border: solid 1px black;
+    display: flex;
+    justify-content: space-around;
     padding: 10px;
 `;
 //---
@@ -56,40 +59,12 @@ const ResultArea = styled.div`
 `;
 
 //---
-const handleSubmit = async (event) => {
-    event.preventDefault();
-    const url = "http://localhost:3001/api/1.0/express/create";
-    try {
-        const userId = "testman";
-        const task = "createServer";
-        const projectName = "firstServer";
-        const gitRepoUrl = "https://github.com/ZhongKuo0228/express-example.git";
-        const projectData = {
-            task: task,
-            userId: userId,
-            projectName: projectName,
-            gitRepoUrl: gitRepoUrl,
-        };
-        console.log("projectData", projectData);
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ data: projectData }),
-        });
-
-        const data = await response.json();
-        console.log("result", data);
-    } catch (error) {
-        console.error(error);
-    }
-};
-
-//---
 const Express = () => {
     const { file } = useContext(FileContext);
     const { fileName } = useContext(FileContext);
+    const [shouldFetchData, setShouldFetchData] = useState(true);
+    const [runPort, setRunPort] = useState("伺服器未啓動");
+    const [npmCommand, setNpmCommand] = useState("");
     //---功能選擇
     const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
@@ -112,20 +87,21 @@ const Express = () => {
     };
 
     //讀取資料夾目錄------------------------------------------------------------
-    const getFolderIndex = async () => {
-        const url = "http://localhost:3001/api/1.0/express/get?getFolderIndex";
-        try {
-            const response = await fetch(`${url}=${serverName}`);
-            const responseData = await response.json();
-            const data = JSON.parse(responseData.data); // 解析資料
-            setFolderData(data); // 將獲取到的資料儲存在狀態中
-        } catch (error) {
-            console.error(error);
-        }
+    const fetchData = async () => {
+        const data = await api.getFolderIndex(serverName);
+        setFolderData(data);
+        setShouldFetchData(false);
     };
+
     useEffect(() => {
-        getFolderIndex(); // 在元件掛載時獲取資料
-    }, []);
+        if (shouldFetchData) {
+            fetchData();
+        }
+    }, [shouldFetchData]);
+
+    const handleIndexRefresh = () => {
+        fetchData();
+    };
 
     //處理檔案被點擊後，將編輯區更新內容------------------------------------------------------------
     const handleCodeChange = (event) => {
@@ -141,7 +117,7 @@ const Express = () => {
             //處理換行的\n的問題
             const codeWithNewlines = trimmedCode.replace(/\\n/g, "\n");
             //處理空格的反斜線的問題
-            const codeWithoutBackslashes = codeWithNewlines.replace(/\\/g, " ");
+            const codeWithoutBackslashes = codeWithNewlines.replace(/\\/g, "");
             setCode(codeWithoutBackslashes);
         }
         //動態觀察
@@ -161,14 +137,94 @@ const Express = () => {
 
     //內嵌終端機
 
+    //按鈕動作
+    const handleCreateSubmit = async (event) => {
+        event.preventDefault();
+        const url = "http://localhost:3001/api/1.0/express/create";
+        try {
+            const userId = "testman";
+            const task = "createServer";
+            const projectName = "firstServer";
+            const gitRepoUrl = "https://github.com/ZhongKuo0228/express-example.git";
+            const projectData = {
+                task: task,
+                userId: userId,
+                projectName: projectName,
+                gitRepoUrl: gitRepoUrl,
+            };
+            console.log("projectData", projectData);
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: projectData }),
+            });
+
+            const data = await response.json();
+            console.log("result", data);
+            alert("建立完成");
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    const handleInitSubmit = async (event) => {
+        event.preventDefault();
+        const task = "jsOperInit";
+        const result = await api.jsOper(task, serverName);
+        if (result) {
+            alert("初始化完成");
+        }
+    };
+
+    const handleRunSubmit = async (event) => {
+        event.preventDefault();
+        const task = "jsOperRun";
+        const result = await api.jsOper(task, serverName);
+        if (result) {
+            alert(`express running on port : ${result.data}`);
+        }
+        setRunPort(`http://localhost:${result.data}`);
+    };
+
+    const handleStopSubmit = async (event) => {
+        event.preventDefault();
+        const task = "jsOperStop";
+        const result = await api.jsOper(task, serverName);
+        if (result) {
+            alert("伺服器已停止");
+        }
+        setRunPort("伺服器未啓動");
+    };
+    const handleNpmSubmit = async (event) => {
+        event.preventDefault();
+        const task = "jsOperNpm";
+        const result = await api.jsOper(task, serverName, npmCommand);
+        if (result) {
+            alert(`npm 指令 ${npmCommand} 完成`);
+        }
+    };
     //---------------------------------------------------------------------------
     return (
         <Area>
             <ButtonArea>
-                <button onClick={handleSubmit}>創立專案</button>
-                <button>RUN</button>
-                <button>STOP</button>
-                <div></div>
+                <button onClick={handleCreateSubmit}>創立專案</button>
+                <button onClick={handleInitSubmit}>初始化 INIT</button>
+                <button onClick={handleRunSubmit}>運行 RUN</button>
+                <a href={`${runPort}`} target='_blank' onChange={handleRunSubmit}>
+                    {runPort}
+                </a>
+                <button onClick={handleStopSubmit}>暫停 STOP</button>
+                <form onSubmit={handleNpmSubmit}>
+                    npm
+                    <input
+                        type='text'
+                        placeholder='npm指令'
+                        value={npmCommand}
+                        onChange={(e) => setNpmCommand(e.target.value)}
+                    />
+                    <button type='submit'>送出</button>
+                </form>
                 {features.map((feature, index) => (
                     <button onClick={(e) => handleFeature(feature)} key={index}>
                         {feature}
@@ -180,6 +236,11 @@ const Express = () => {
                     <>
                         <FolderIndex>
                             資料夾
+                            <hr />
+                            (忽略規則： .git 、 node_modules 、package-lock.json);
+                            <hr />
+                            <button onClick={handleIndexRefresh}>Refresh</button>
+                            <hr />
                             {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
                         </FolderIndex>
                         <EditArea>

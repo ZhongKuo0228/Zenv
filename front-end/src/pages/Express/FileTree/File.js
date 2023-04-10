@@ -48,6 +48,8 @@ const buttonContainerStyle = {
 const File = ({ file, path, onFileClick }) => {
     const [clonedFile, setClonedFile] = useState(file);
     const [isHovering, setIsHovering] = useState(false);
+    const [isRenaming, setIsRenaming] = useState(false);
+    const [newFileName, setNewFileName] = useState(file.name);
 
     const handleFileClick = () => {
         if (onFileClick) {
@@ -68,15 +70,13 @@ const File = ({ file, path, onFileClick }) => {
         }
     };
 
-    const [isRenaming, setIsRenaming] = useState(false);
-    const [newFileName, setNewFileName] = useState(file.name);
     // const { newFileName, setNewFileName } = useContext(FileContext);
     const handleRenameFile = (event) => {
         event.stopPropagation();
         setIsRenaming(true);
         // 處理文件重命名的邏輯
     };
-    useEffect(() => console.log(newFileName), [newFileName]);
+
     const handleNameChange = (event) => {
         setNewFileName(event.target.value);
     };

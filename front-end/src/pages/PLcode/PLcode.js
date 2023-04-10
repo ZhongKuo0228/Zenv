@@ -35,7 +35,7 @@ const ConsoleResult = styled.textarea`
 //---
 const WriteCode = () => {
     //---
-    const [code, setCode] = React.useState(`function add(a, b) {\n  return a + b;\n}`);
+    const [code, setCode] = useState("");
     const [result, setResult] = useState("請RUN");
 
     //fetch api---
@@ -116,6 +116,7 @@ const WriteCode = () => {
                         style={{
                             fontSize: 12,
                             backgroundColor: "#272727",
+                            height: "400px",
                             fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
                         }}
                     />
