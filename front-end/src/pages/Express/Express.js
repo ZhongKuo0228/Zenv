@@ -266,7 +266,8 @@ const Express = () => {
         const task = "redisCommand";
         const redisCommand = localStorage.getItem("redisCommand");
         const result = await api.redisCommand(task, serverName, redisCommand);
-        setRedisResult(result);
+        console.log("redis", result.data);
+        setRedisResult(result.data);
     };
     const handleRedisChange = (event) => {
         const value = event.target.value;
