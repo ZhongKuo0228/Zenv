@@ -28,8 +28,8 @@ const api = {
         return await response.json();
     },
 
-    //Express
-    //資料夾文件操作
+    //Express------------------------------------------------------------------------------------------
+    //NodeJS操作
     async getFolderIndex(serverName) {
         try {
             const response = await fetch(`${this.hostname}/express/get?getFolderIndex=${serverName}`);
@@ -67,6 +67,46 @@ const api = {
         };
         try {
             const response = await fetch(`${this.hostname}/express/jsOper`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error jsOper fetching POST event data:", error);
+        }
+    },
+    //Sqlite操作
+    async sqliteCommand(task, serverName, command) {
+        const data = {
+            task: task,
+            serverName: serverName,
+            command: command,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/express/dbOper`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error jsOper fetching POST event data:", error);
+        }
+    },
+    //redis操作
+    async redisCommand(task, serverName, command) {
+        const data = {
+            task: task,
+            serverName: serverName,
+            command: command,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/express/dbOper`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

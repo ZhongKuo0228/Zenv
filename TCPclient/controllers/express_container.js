@@ -111,11 +111,6 @@ export async function createDockerComposeFile(serverName, filePath) {
     await writeFile(`${filePath}/${fileName}`, dockerComposeFile);
 }
 
-//TODO:使用docker執行npm install指令
-//TODO:使用docker執行node app.js指令
-//TODO:使用docker-compose 重新啓動 node app.js指令
-//jsOperInit, jsOperRun, jsOperStop, jsOperNpm
-
 export async function jsOperInit(job) {
     //node/npm-install → docker-compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker-compose stop -t 1 <container>
     try {
@@ -206,3 +201,5 @@ export async function jsOperNpm(job) {
         return e;
     }
 }
+
+

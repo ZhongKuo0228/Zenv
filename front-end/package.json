@@ -12,14 +12,12 @@
     "react-icons": "^4.8.0",
     "react-router-dom": "^6.10.0",
     "react-scripts": "5.0.1",
+    "react-table": "^7.8.0",
     "socket.io-client": "^4.6.1",
     "styled": "^1.0.0",
     "styled-components": "^5.3.9",
     "uuid": "^9.0.0",
-    "web-vitals": "^2.1.4",
-    "xterm": "^5.1.0",
-    "xterm-addon-attach": "^0.8.0",
-    "xterm-addon-fit": "^0.7.0"
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "react-scripts start",

@@ -9,5 +9,12 @@
     },
     "keywords": [],
     "author": "",
-    "license": "ISC"
+    "license": "ISC",
+    "dependencies": {
+        "cli-table3": "^0.6.3",
+        "ioredis": "^5.3.1",
+        "sqlite": "^4.1.2",
+        "sqlite3": "^5.1.6",
+        "strip-ansi": "^7.0.1"
+    }
 }
