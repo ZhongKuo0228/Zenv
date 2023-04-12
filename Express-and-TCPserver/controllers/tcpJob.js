@@ -115,3 +115,19 @@ export async function jsOper(req) {
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
+
+export async function dbOper(req) {
+    const project = req.body.data;
+    console.log("dbOper", project);
+
+    let job = {
+        task: project.task,
+        serverName: project.serverName,
+        command: project.command,
+    };
+
+    console.log(job);
+
+    const buffer = await socketWrite(job);
+    return bufferToJson(buffer);
+}

@@ -1,5 +1,8 @@
 import { createFolder, getFolderIndex, toReadFile, rewriteFile, operAdd, operDel, operRename } from "./express_file.js";
 import { jsOperInit, jsOperRun, jsOperStop, jsOperNpm } from "./express_container.js";
+import { sqliteCommand } from "../models/sqlite_client.js";
+import { redisCommand } from "../models/redis_client.js";
+//TODO: sqlite , redis command
 import socket from "../tcp-client.js";
 
 export async function expressEvent(job) {
@@ -53,6 +56,16 @@ export async function expressEvent(job) {
             break;
         case "jsOperNpm":
             result = await jsOperNpm(job);
+            socket.write(JSON.stringify(result));
+            break;
+
+        //DB下指令
+        case "sqliteCommand":
+            result = await sqliteCommand(job);
+            socket.write(JSON.stringify(result));
+            break;
+        case "redisCommand":
+            result = await redisCommand(job);
             socket.write(JSON.stringify(result));
             break;
         //未定義狀況

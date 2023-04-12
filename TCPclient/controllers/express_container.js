@@ -1,9 +1,9 @@
 import { writeFile, unlink } from "node:fs/promises";
 import path from "path";
+const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 import { exec } from "child_process";
 import { promisify } from "util";
 const execAsync = promisify(exec);
-const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 import { stopPLContainer, rmPLContainer } from "../controllers/PLcontainer.js";
 
 async function npmCommand(serverName, vPath, doJob) {
@@ -69,7 +69,7 @@ async function composeRun(vPath, service) {
     });
 }
 
-async function getOutPort(vPath, serviceName) {
+export async function getOutPort(vPath, serviceName) {
     const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
     console.log("command", command);
     try {
@@ -89,7 +89,7 @@ export async function createDockerComposeFile(serverName, filePath) {
         ${serverName}-express:
             image: node/node-express
             environment:
-                - REDIS_HOST=redis-server
+                - REDIS_HOST=${serverName}-redis
             networks:
                 - ${serverName}-network
             #不指定外部訪問的port，讓系統自動分配
@@ -102,6 +102,8 @@ export async function createDockerComposeFile(serverName, filePath) {
             image: redis:7-alpine
             networks:
                 - ${serverName}-network
+            ports:
+                - 6379
 
     networks:
        ${serverName}-network:`;
@@ -110,11 +112,6 @@ export async function createDockerComposeFile(serverName, filePath) {
     const fileName = `docker-compose.yml`;
     await writeFile(`${filePath}/${fileName}`, dockerComposeFile);
 }
-
-//TODO:使用docker執行npm install指令
-//TODO:使用docker執行node app.js指令
-//TODO:使用docker-compose 重新啓動 node app.js指令
-//jsOperInit, jsOperRun, jsOperStop, jsOperNpm
 
 export async function jsOperInit(job) {
     //node/npm-install → docker-compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker-compose stop -t 1 <container>

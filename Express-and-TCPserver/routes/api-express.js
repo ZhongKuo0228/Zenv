@@ -7,6 +7,7 @@ import {
     rewriteFile,
     fileOper,
     jsOper,
+    dbOper,
 } from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
 const expressRouter = express.Router();
 //---router----------------------------------------------
@@ -42,6 +43,12 @@ expressRouter.post("/fileOper", async (req, res, next) => {
 expressRouter.post("/jsOper", async (req, res, next) => {
     const result = await jsOper(req);
     console.log("JS", result);
+    res.status(200).json({ data: result });
+});
+
+expressRouter.post("/dbOper", async (req, res, next) => {
+    const result = await dbOper(req);
+    console.log("DB", result);
     res.status(200).json({ data: result });
 });
 

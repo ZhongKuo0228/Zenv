@@ -2,9 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import { useState, useEffect, useContext, useRef } from "react";
 import Folder from "./FileTree/Folder";
+import Table from "./SqlTable/SqlTable";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
-import TerminalComponent from "./Terminal";
+// import TerminalComponent from "./Terminal";
 import api from "../../util/api";
 
 const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
@@ -58,6 +59,31 @@ const ResultArea = styled.div`
     padding: 10px;
 `;
 
+const SqliteCommand = styled.div`
+    width: 90%;
+    height: 300px;
+    border: solid 1px black;
+    padding: 10px;
+`;
+const SqliteResult = styled.div`
+    width: 90%;
+    height: 100px;
+    border: solid 1px black;
+    padding: 10px;
+`;
+
+const RedisCommand = styled.div`
+    width: 90%;
+    height: 300px;
+    border: solid 1px black;
+    padding: 10px;
+`;
+const RedisResult = styled.div`
+    width: 90%;
+    height: 100px;
+    border: solid 1px black;
+    padding: 10px;
+`;
 //---
 const Express = () => {
     const { file } = useContext(FileContext);
@@ -65,6 +91,10 @@ const Express = () => {
     const [shouldFetchData, setShouldFetchData] = useState(true);
     const [runPort, setRunPort] = useState("伺服器未啓動");
     const [npmCommand, setNpmCommand] = useState("");
+    const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table'");
+    const [sqliteResult, setSqliteResult] = useState("sqlite執行結果");
+    const [redisCommand, setRedisCommand] = useState("");
+    const [redisResult, setRedisResult] = useState("redis執行結果");
     //---功能選擇
     const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
@@ -135,9 +165,7 @@ const Express = () => {
         //動態觀察
     }, [fileName]);
 
-    //內嵌終端機
-
-    //按鈕動作
+    //NodeJS按鈕動作
     const handleCreateSubmit = async (event) => {
         event.preventDefault();
         const url = "http://localhost:3001/api/1.0/express/create";
@@ -204,6 +232,55 @@ const Express = () => {
             alert(`npm 指令 ${npmCommand} 完成`);
         }
     };
+
+    //sqlite指令操作
+    const handleSqliteCommand = async (event) => {
+        event.preventDefault();
+        const task = "sqliteCommand";
+        const sqliteCommand = localStorage.getItem("sqliteCommand");
+        const result = await api.sqliteCommand(task, serverName, sqliteCommand);
+        console.log("result", result.data);
+        if (Array.isArray(result.data)) {
+            // 確認資料為陣列
+            console.log("result", result.data);
+            setSqliteResult(result.data);
+        } else {
+            setSqliteResult(result.data);
+        }
+    };
+    const handleSqliteChange = (event) => {
+        const value = event.target.value;
+        setSqliteCommand(value);
+        localStorage.setItem("sqliteCommand", value);
+    };
+    useEffect(() => {
+        const storedCode = localStorage.getItem("sqliteCommand");
+        if (storedCode) {
+            setSqliteCommand(storedCode);
+        }
+    }, []);
+
+    //redis指令操作
+    const handleRedisCommand = async (event) => {
+        event.preventDefault();
+        const task = "redisCommand";
+        const redisCommand = localStorage.getItem("redisCommand");
+        const result = await api.redisCommand(task, serverName, redisCommand);
+        console.log("redis", result.data);
+        setRedisResult(result.data);
+    };
+    const handleRedisChange = (event) => {
+        const value = event.target.value;
+        setRedisCommand(value);
+        localStorage.setItem("redisCommand", value);
+    };
+    useEffect(() => {
+        const storedCode = localStorage.getItem("redisCommand");
+        if (storedCode) {
+            setRedisCommand(storedCode);
+        }
+    }, []);
+
     //---------------------------------------------------------------------------
     return (
         <Area>
@@ -226,7 +303,11 @@ const Express = () => {
                     <button type='submit'>送出</button>
                 </form>
                 {features.map((feature, index) => (
-                    <button onClick={(e) => handleFeature(feature)} key={index}>
+                    <button
+                        style={{ background: "#3630a3", color: "white" }}
+                        onClick={(e) => handleFeature(feature)}
+                        key={index}
+                    >
                         {feature}
                     </button>
                 ))}
@@ -246,6 +327,7 @@ const Express = () => {
                         <EditArea>
                             <FileName value={fileName} onChange={choiceFileChange} readOnly />
                             <CodeEditor
+                                data-color-mode='dark'
                                 value={code}
                                 language='js'
                                 placeholder='Please enter code.'
@@ -267,9 +349,36 @@ const Express = () => {
                     <>
                         <FolderIndex>DB資料區</FolderIndex>
                         <EditArea>
-                            <div style={{ width: "100%", height: "100%" }}>
-                                <TerminalComponent />
-                            </div>
+                            <SqliteCommand>
+                                <div>Sqlite Commands</div>
+                                <form onSubmit={handleSqliteCommand}>
+                                    <CodeEditor
+                                        data-color-mode='dark'
+                                        value={sqliteCommand}
+                                        language='sql'
+                                        placeholder='Please enter code.'
+                                        onChange={handleSqliteChange}
+                                        padding={15}
+                                        style={{
+                                            fontSize: 12,
+                                            backgroundColor: "#272727",
+                                            fontFamily:
+                                                "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                            height: "250px",
+                                            border: "solid 1px black",
+                                        }}
+                                    />
+                                    <button type='submit'>送出指令</button>
+                                </form>
+                            </SqliteCommand>
+                            <div>Sqlite Result（標題）</div>
+                            <SqliteResult>
+                                {typeof sqliteResult === "string" ? (
+                                    <div>{sqliteResult}</div>
+                                ) : (
+                                    <SqliteResult>{sqliteResult && <Table data={sqliteResult} />}</SqliteResult>
+                                )}
+                            </SqliteResult>
                         </EditArea>
                         <ResultArea>Console</ResultArea>
                     </>
@@ -277,7 +386,32 @@ const Express = () => {
                     <>
                         {" "}
                         <FolderIndex>Redis沒有資料庫區</FolderIndex>
-                        <EditArea>Redis終端機區</EditArea>
+                        <EditArea>
+                            <RedisCommand>
+                                <div>Redis Commands</div>
+                                <form onSubmit={handleRedisCommand}>
+                                    <CodeEditor
+                                        data-color-mode='dark'
+                                        value={redisCommand}
+                                        language='sql'
+                                        placeholder='Please enter code.'
+                                        onChange={handleRedisChange}
+                                        padding={15}
+                                        style={{
+                                            fontSize: 12,
+                                            backgroundColor: "#BB3D00",
+                                            fontFamily:
+                                                "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                            height: "250px",
+                                            border: "solid 1px black",
+                                        }}
+                                    />
+                                    <button type='submit'>送出指令</button>
+                                </form>
+                            </RedisCommand>
+                            <div>Redis Result（標題）</div>
+                            <RedisResult>{redisResult}</RedisResult>
+                        </EditArea>
                         <ResultArea>Console</ResultArea>
                     </>
                 )}
