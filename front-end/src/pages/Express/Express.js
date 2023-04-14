@@ -107,22 +107,14 @@ const Express = () => {
     const [code, setCode] = useState("");
     const [choiceFile, setChoiceFile] = useState("檔名");
 
-    //---內嵌終端機
-    const commands = {
-        echo: {
-            method: (args, print) => {
-                print(args.join(" "));
-            },
-        },
-    };
 
     //讀取資料夾目錄------------------------------------------------------------
     const fetchData = async () => {
         const data = await api.getFolderIndex(serverName);
         setFolderData(data);
         setShouldFetchData(false);
-    };
 
+    };
     useEffect(() => {
         if (shouldFetchData) {
             fetchData();

@@ -4,7 +4,7 @@ const promisify = util.promisify;
 import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { createDockerComposeFile } from "./express_container.js";
+import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH } from "./express_container.js";
 import socket from "../tcp-client.js";
 
 //從github拉資料下來
@@ -51,6 +51,7 @@ export async function createFolder(job) {
         const gitUrl = job.gitRepoUrl;
         //專案資料夾創立
         const folderPath = path.join(moduleDir, "../express_project/");
+        const logPath = path.join(moduleDir, "../express_project/server_logs");
         const folderName = `${userId}_${projectName}`;
         const newProjectPath = `${folderPath}${folderName}`;
         const gitFolderPath = `${newProjectPath}/gitFolder`;
@@ -63,6 +64,12 @@ export async function createFolder(job) {
 
         await createDockerComposeFile(folderName, newProjectPath);
         console.log(`docker-compose.yml建立完成`);
+
+        await createLogSH(logPath, folderName, newProjectPath);
+        console.log(`docker-compose-express log腳本建立完成`);
+
+        await chmodLogSH(folderName, newProjectPath);
+        // await runLogSH(folderName, newProjectPath);
 
         return "專案資料夾初始化完成";
     } catch (e) {

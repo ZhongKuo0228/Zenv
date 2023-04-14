@@ -52,5 +52,10 @@ expressRouter.post("/dbOper", async (req, res, next) => {
     res.status(200).json({ data: result });
 });
 
+expressRouter.post("/reviceLog", async (req, res, next) => {
+    const result = req.body.message;
+    console.log("log", result);
+});
+
 //---export----------------------------------------------
 export { expressRouter };

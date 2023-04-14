@@ -1,0 +1,16 @@
+filebeat.inputs:
+    - type: log
+      enabled: true
+      paths:
+          - /Users/zhongkuo/Desktop/Back-End-Class-Batch19/Zenv/TCPclient/express_project/server_logs/*.log
+
+logging.level: debug
+logging.to_files: true
+logging.files:
+    path: /Users/zhongkuo/Desktop/Back-End-Class-Batch19/Zenv/TCPclient/express_project/server_logs/
+    name: filebeat.log
+    keepfiles: 7
+    permissions: 0644
+
+output.logstash:
+    hosts: ["localhost:5044"]
