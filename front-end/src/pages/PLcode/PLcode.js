@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import CodeEditor from "@uiw/react-textarea-code-editor";
-import webSocket from "socket.io-client";
 import { v4 as uuidv4 } from "uuid";
 import { commitPLpage } from "../../util/commitResult.js";
 //使用者頁面後自動存檔------------------------
@@ -84,22 +83,6 @@ const WriteCode = () => {
             setCode(storedCode);
         }
     }, []);
-
-    // webSocket---
-    // const [ws, setWs] = useState(null);
-    // const socketRef = useRef(null);
-
-    // useEffect(() => {
-    //     const socket = webSocket("http://localhost:3001");
-    //     socket.on("connect", () => {
-    //         console.log("Successfully connected to server!");
-    //     });
-    //     socketRef.current = socket;
-    //     setWs(socketRef.current);
-    //     return () => {
-    //         socketRef.current.disconnect();
-    //     };
-    // }, []);
 
     return (
         <>

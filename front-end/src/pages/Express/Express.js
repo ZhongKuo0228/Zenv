@@ -7,8 +7,10 @@ import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
 // import TerminalComponent from "./Terminal";
 import api from "../../util/api";
+import webSocket from "socket.io-client";
 
 const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
+//---
 
 //---
 const Area = styled.div`
@@ -84,6 +86,14 @@ const RedisResult = styled.div`
     border: solid 1px black;
     padding: 10px;
 `;
+const ExpressLog = styled.div`
+    width: 90%;
+    border: solid 1px black;
+    padding: 10px;
+    height: 450px;
+    overflow-y: scroll;
+    white-space: nowrap;
+`;
 //---
 const Express = () => {
     const { file } = useContext(FileContext);
@@ -95,6 +105,8 @@ const Express = () => {
     const [sqliteResult, setSqliteResult] = useState("sqlite執行結果");
     const [redisCommand, setRedisCommand] = useState("");
     const [redisResult, setRedisResult] = useState("redis執行結果");
+    const [expressLog, setExpressLog] = useState([]);
+    const logEndRef = useRef(null);
     //---功能選擇
     const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
@@ -107,22 +119,12 @@ const Express = () => {
     const [code, setCode] = useState("");
     const [choiceFile, setChoiceFile] = useState("檔名");
 
-    //---內嵌終端機
-    const commands = {
-        echo: {
-            method: (args, print) => {
-                print(args.join(" "));
-            },
-        },
-    };
-
     //讀取資料夾目錄------------------------------------------------------------
     const fetchData = async () => {
         const data = await api.getFolderIndex(serverName);
         setFolderData(data);
         setShouldFetchData(false);
     };
-
     useEffect(() => {
         if (shouldFetchData) {
             fetchData();
@@ -280,6 +282,33 @@ const Express = () => {
             setRedisCommand(storedCode);
         }
     }, []);
+    //---
+    // webSocket---
+    const [ws, setWs] = useState(null);
+    const socketRef = useRef(null);
+
+    useEffect(() => {
+        const socket = webSocket("http://localhost:3001");
+        socket.on("connect", () => {
+            console.log("Successfully connected to server!");
+        });
+        socket.on(serverName, (data) => {
+            console.log("Received log data:", data);
+            setExpressLog((prevLogs) => [...prevLogs, JSON.stringify(data)]); // 將接收到的資料設置為 expressLog 的新值
+        });
+        socketRef.current = socket;
+        setWs(socketRef.current);
+        return () => {
+            socketRef.current.disconnect();
+        };
+    }, []);
+
+    const scrollToBottom = () => {
+        logEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+    useEffect(() => {
+        scrollToBottom();
+    }, [expressLog]);
 
     //---------------------------------------------------------------------------
     return (
@@ -343,7 +372,16 @@ const Express = () => {
                                 }}
                             />
                         </EditArea>
-                        <ResultArea>Console</ResultArea>
+                        <ResultArea>
+                            <div>Console</div>
+                            <hr />
+                            <ExpressLog>
+                                {expressLog.map((log, index) => (
+                                    <div key={index}>{log}</div>
+                                ))}
+                                <div ref={logEndRef} />
+                            </ExpressLog>
+                        </ResultArea>
                     </>
                 ) : feature === "Sqlite" ? (
                     <>

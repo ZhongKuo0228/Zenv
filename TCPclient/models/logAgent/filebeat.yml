@@ -1,0 +1,10 @@
+filebeat.inputs:
+    - type: log
+      paths:
+          - /Users/zhongkuo/Desktop/Back-End-Class-Batch19/Zenv/TCPclient/express_project/server_logs/*.log
+      harvester_limit: 1
+      scan.sort: modtime
+      scan.order: asc
+
+output.logstash:
+    hosts: ["localhost:5044"]

@@ -1,7 +1,7 @@
 import { writeFile, unlink } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 const execAsync = promisify(exec);
 import { stopPLContainer, rmPLContainer } from "../controllers/PLcontainer.js";
@@ -97,6 +97,7 @@ export async function createDockerComposeFile(serverName, filePath) {
                 - 3000
             volumes:
                 - "./gitFolder:/usr/src/app"
+    
 
         ${serverName}-redis:
             image: redis:7-alpine
@@ -113,14 +114,77 @@ export async function createDockerComposeFile(serverName, filePath) {
     await writeFile(`${filePath}/${fileName}`, dockerComposeFile);
 }
 
+export async function createLogSH(logPath, folderName, newProjectPath) {
+    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
+
+    //生成log的腳本檔案建立
+    const fileName = `${folderName}-express.sh`;
+    await writeFile(`${newProjectPath}/${fileName}`, createLogSH);
+}
+
+export async function chmodLogSH(folderName, newProjectPath) {
+    return new Promise((resolve, reject) => {
+        const command = `chmod +x ${newProjectPath}/${folderName}-express.sh`;
+        console.log("chmodLogSH", command);
+
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
+
+export async function runLogSH(folderName, newProjectPath) {
+    return new Promise((resolve, reject) => {
+        const command = `${newProjectPath}/${folderName}-express.sh &`;
+        console.log("runLogSH", command);
+        //使用exec會需要等待回覆，但這個腳本會在後臺執行，所以會有卡住的感覺
+        const childProcess = spawn(command, {
+            detached: true,
+            stdio: "ignore",
+            shell: true,
+        });
+
+        childProcess.on("error", (error) => {
+            reject(error);
+        });
+
+        childProcess.on("close", (code) => {
+            if (code !== 0) {
+                reject(new Error(`子進程退出，退出碼：${code}`));
+            } else {
+                resolve();
+            }
+        });
+
+        childProcess.unref();
+    });
+}
+
+export async function stopLogSH(folderName, newProjectPath) {
+    return new Promise((resolve, reject) => {
+        const command = `pkill -f ${newProjectPath}/${folderName}-express.sh`;
+        console.log("stopLogSH", command);
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
+
 export async function jsOperInit(job) {
     //node/npm-install → docker-compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker-compose stop -t 1 <container>
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const serverName = job.serverName;
+    const ymlPath = `${folderPath}${serverName}`;
+    const filePath = `${folderPath}${serverName}/gitFolder`;
     try {
-        const folderPath = path.join(moduleDir, "../express_project/");
-        const serverName = job.serverName;
-        const ymlPath = `${folderPath}${serverName}`;
-        const filePath = `${folderPath}${serverName}/gitFolder`;
-
         async function executeCommands() {
             //先安裝一次npm install、並刪除臨時產生的container
             await npmCommand(serverName, filePath, "install");
@@ -137,44 +201,44 @@ export async function jsOperInit(job) {
         return result;
 
         //控制容器指令
-    } catch (e) {
-        console.log("初始化環境發生問題 : ", e);
-        return e;
+    } catch (err) {
+        console.log("初始化環境發生問題 : ", err.message);
+        return err.message;
     }
 }
 
 export async function jsOperRun(job) {
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const serverName = job.serverName;
+    const ymlPath = `${folderPath}${serverName}`;
     try {
-        const folderPath = path.join(moduleDir, "../express_project/");
-        const serverName = job.serverName;
-        const ymlPath = `${folderPath}${serverName}`;
-
         await composeRun(ymlPath, `${serverName}-express`);
         const result = await getOutPort(ymlPath, `${serverName}-express`);
-        console.log("result", result);
+        //開啓log記錄
+        await runLogSH(serverName, ymlPath);
         return result;
 
         //控制容器指令
-    } catch (e) {
-        console.log(`啓動 ${serverName}-express 發生問題: `, e);
-        return e;
+    } catch (err) {
+        console.log(`啓動 ${serverName}-express 發生問題: `, err.message);
+        return err.message;
     }
 }
 
 export async function jsOperStop(job) {
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const serverName = job.serverName;
+    const ymlPath = `${folderPath}${serverName}`;
     try {
-        const folderPath = path.join(moduleDir, "../express_project/");
-        const serverName = job.serverName;
-        const ymlPath = `${folderPath}${serverName}`;
-
         await composeStop(ymlPath, `${serverName}-express`);
         const result = `伺服器停止 : ${serverName}`;
+        await stopLogSH(serverName, ymlPath);
         return result;
 
         //控制容器指令
-    } catch (e) {
-        console.log(`停止 ${serverName}-express 發生問題: `, e);
-        return e;
+    } catch (err) {
+        console.log(`停止 ${serverName}-express 發生問題: `, err.message);
+        return err.message;
     }
 }
 
