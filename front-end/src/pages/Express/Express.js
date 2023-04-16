@@ -294,7 +294,7 @@ const Express = () => {
         });
         socket.on(serverName, (data) => {
             console.log("Received log data:", data);
-            setExpressLog((prevLogs) => [...prevLogs, JSON.stringify(data)]); // 將接收到的資料設置為 expressLog 的新值
+            setExpressLog((prevLogs) => [...prevLogs, data]); // 將接收到的資料設置為 expressLog 的新值
         });
         socketRef.current = socket;
         setWs(socketRef.current);

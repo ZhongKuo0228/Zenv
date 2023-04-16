@@ -8,7 +8,7 @@
 #資料夾--------------
 .DS_Store
 node_modules/
-
+gitFolder/
 #環境檔--------------
 .env
 
@@ -22,3 +22,12 @@ node_modules/
 images/
 origin/
 webimage/
+
+#隨express專案生成的log檔-------
+*.log
+
+#隨express專案生成的sh---------
+*express.sh
+
+#隨express專案生成的docker-compose.yml---------
+docker-compose.yml

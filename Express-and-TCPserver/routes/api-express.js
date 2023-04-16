@@ -10,11 +10,11 @@ import {
     dbOper,
 } from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
 import { logFormat } from "../models/logAgent/reviceLogAgent.js";
-import { getIo } from "../models/webSocket.js";
+
+import { sendToQueue } from "../models/queue.js";
 const expressRouter = express.Router();
 //---router----------------------------------------------
 expressRouter.post("/create", async (req, res, next) => {
-    getIo;
     const result = await createExpressProject(req);
     res.status(200).json({ data: result });
 });
@@ -56,12 +56,14 @@ expressRouter.post("/dbOper", async (req, res, next) => {
 });
 
 expressRouter.post("/reviceLog", async (req, res, next) => {
-    const result = await logFormat(req);
-    console.log("log", result.data);
+    const logs = req.body;
+    // const result = await logFormat(req);
+    console.log("log", logs);
+
+    const queue = "logSort";
+    sendToQueue(queue, logs);
+
     res.status(200).json({ message: "Log received successfully." });
-    //將log用webSocket送到前端
-    const io = getIo();
-    io.emit(result.data.serverName, result.data.message);
 });
 
 //---export----------------------------------------------
