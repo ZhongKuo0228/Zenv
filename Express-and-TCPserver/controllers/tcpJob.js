@@ -18,7 +18,13 @@ async function socketWrite(job) {
 }
 
 function bufferToJson(buffer) {
-    return JSON.parse(buffer.toString()); //buffer轉成JSON格式
+    if (buffer == undefined) {
+        buffer = "tcp Client 回覆異常";
+        console.log(buffer);
+        return buffer;
+    } else {
+        return JSON.parse(buffer.toString()); //buffer轉成JSON格式
+    }
 }
 
 //---PLcode Job

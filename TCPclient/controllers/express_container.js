@@ -1,7 +1,7 @@
 import { writeFile, unlink } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { promisify } from "util";
 const execAsync = promisify(exec);
 import { stopPLContainer, rmPLContainer } from "../controllers/PLcontainer.js";
@@ -97,6 +97,7 @@ export async function createDockerComposeFile(serverName, filePath) {
                 - 3000
             volumes:
                 - "./gitFolder:/usr/src/app"
+    
 
         ${serverName}-redis:
             image: redis:7-alpine
@@ -114,7 +115,7 @@ export async function createDockerComposeFile(serverName, filePath) {
 }
 
 export async function createLogSH(logPath, folderName, newProjectPath) {
-    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f ${folderName}-express > ${logPath}/${folderName}.log`;
+    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
 
     //生成log的腳本檔案建立
     const fileName = `${folderName}-express.sh`;
@@ -125,6 +126,7 @@ export async function chmodLogSH(folderName, newProjectPath) {
     return new Promise((resolve, reject) => {
         const command = `chmod +x ${newProjectPath}/${folderName}-express.sh`;
         console.log("chmodLogSH", command);
+
         exec(command, (error, stdout, stderr) => {
             if (error) {
                 reject(error);
@@ -139,13 +141,26 @@ export async function runLogSH(folderName, newProjectPath) {
     return new Promise((resolve, reject) => {
         const command = `${newProjectPath}/${folderName}-express.sh &`;
         console.log("runLogSH", command);
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
+        //使用exec會需要等待回覆，但這個腳本會在後臺執行，所以會有卡住的感覺
+        const childProcess = spawn(command, {
+            detached: true,
+            stdio: "ignore",
+            shell: true,
+        });
+
+        childProcess.on("error", (error) => {
+            reject(error);
+        });
+
+        childProcess.on("close", (code) => {
+            if (code !== 0) {
+                reject(new Error(`子進程退出，退出碼：${code}`));
             } else {
                 resolve();
             }
         });
+
+        childProcess.unref();
     });
 }
 
@@ -199,7 +214,7 @@ export async function jsOperRun(job) {
     try {
         await composeRun(ymlPath, `${serverName}-express`);
         const result = await getOutPort(ymlPath, `${serverName}-express`);
-        console.log("result", result);
+        //開啓log記錄
         await runLogSH(serverName, ymlPath);
         return result;
 
