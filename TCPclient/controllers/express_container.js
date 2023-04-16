@@ -115,7 +115,7 @@ export async function createDockerComposeFile(serverName, filePath) {
 }
 
 export async function createLogSH(logPath, folderName, newProjectPath) {
-    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
+    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
 
     //生成log的腳本檔案建立
     const fileName = `${folderName}-express.sh`;
@@ -232,7 +232,7 @@ export async function jsOperStop(job) {
     try {
         await composeStop(ymlPath, `${serverName}-express`);
         const result = `伺服器停止 : ${serverName}`;
-        await stopLogSH(serverName, ymlPath);
+        // await stopLogSH(serverName, ymlPath);
         return result;
 
         //控制容器指令

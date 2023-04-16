@@ -7,16 +7,33 @@ function messageFormat(message) {
     }
 }
 
-export async function logFormat(req) {
-    const log = req.body;
-    const serverName = log.log.file.path.match(/\/([^/]+)\.log/)[1];
-    const message = log.message;
+export async function logFormat(batchData) {
+    // console.log("batchData", batchData);
+    const serverName = batchData.log.file.path.match(/\/([^/]+)\.log/)[1];
+    const logMessage = batchData.message;
+
     let result;
-    if (message.includes("exited with code")) {
-        result = { data: { serverName: serverName, message: "伺服器暫停中" } };
+    if (logMessage.includes("exited with code")) {
+        result = { data: { serverName: serverName, timestamp: Date.now(), message: "伺服器暫停中" } };
     } else {
-        const newMessage = messageFormat(message);
-        result = { data: { serverName: serverName, message: newMessage } };
+        const regex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z) (.*)$/;
+        const match = logMessage.match(regex);
+        // console.log("match", match);
+        let timestamp;
+        let message;
+
+        if (match == null) {
+            timestamp = "0001-01-01T00:00:00.000000000Z"; //最小的ISO 8601 格式時間戳
+            const regexZ = /Z\s+(.*)$/;
+            const matchZ = logMessage.match(regexZ);
+            message = matchZ[1];
+        } else {
+            timestamp = match[1];
+            message = match[2];
+        }
+        result = { data: { serverName: serverName, timestamp: timestamp, message: message } };
     }
     return result;
 }
+
+export async function groupedLogs(logs) {}

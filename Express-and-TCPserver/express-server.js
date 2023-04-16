@@ -6,6 +6,7 @@ import { plCodeRouter } from "./routes/api-PLcode.js";
 import { expressRouter } from "./routes/api-express.js";
 import dotenv from "dotenv";
 import { websStock } from "./models/webSocket.js";
+import { sendLogToWeb } from "./controllers/consumerLogSort.js";
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -32,3 +33,6 @@ app.set("views", "./views");
 app.use("/", function (req, res, next) {
     res.render("index.ejs");
 });
+
+//---other-----------------------------------------
+await sendLogToWeb();
