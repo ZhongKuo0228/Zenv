@@ -14,7 +14,9 @@ export async function logFormat(batchData) {
 
     let result;
     if (logMessage.includes("exited with code")) {
-        result = { data: { serverName: serverName, timestamp: Date.now(), message: "伺服器暫停中" } };
+        result = {
+            data: { serverName: serverName, timestamp: "9999-01-01T00:00:00.000000000Z", message: "伺服器暫停中" },
+        };
     } else {
         const regex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z) (.*)$/;
         const match = logMessage.match(regex);

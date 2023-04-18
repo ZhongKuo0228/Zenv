@@ -1,6 +1,9 @@
 import React from "react";
+import ProgressBar from "react-bootstrap/ProgressBar";
+import { ClipLoader } from "react-spinners";
+import { css } from "@emotion/react";
 import styled from "styled-components";
-import { useState, useEffect, useContext, useRef } from "react";
+import { useState, useEffect, useContext, useRef, CSSProperties } from "react";
 import Folder from "./FileTree/Folder";
 import Table from "./SqlTable/SqlTable";
 import CodeEditor from "@uiw/react-textarea-code-editor";
@@ -94,11 +97,14 @@ const ExpressLog = styled.div`
     overflow-y: scroll;
     white-space: nowrap;
 `;
+
 //---
 const Express = () => {
     const { file } = useContext(FileContext);
     const { fileName } = useContext(FileContext);
     const [shouldFetchData, setShouldFetchData] = useState(true);
+    const [initLoading, setInitLoading] = useState(false);
+    const [initProgress, setInitProgress] = useState(0);
     const [runPort, setRunPort] = useState("伺服器未啓動");
     const [npmCommand, setNpmCommand] = useState("");
     const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table'");
@@ -200,22 +206,103 @@ const Express = () => {
     };
     const handleInitSubmit = async (event) => {
         event.preventDefault();
-        const task = "jsOperInit";
-        const result = await api.jsOper(task, serverName);
-        if (result) {
-            alert("初始化完成");
-        }
+        setInitLoading(true);
+        setInitProgress(0);
+
+        // 模擬進度條
+        const simulateProgress = () => {
+            return new Promise((resolve) => {
+                let progress = 0;
+                let decimalPlaces = 0;
+                const intervalId = setInterval(() => {
+                    if (progress < 99) {
+                        const remainingProgress = 99 - progress;
+                        const randomIncrement = Math.floor(Math.random() * 20);
+
+                        // 確保進度值不超過 99
+                        progress += Math.min(randomIncrement, remainingProgress);
+                    } else {
+                        // 每秒添加一個小數位的 9
+                        decimalPlaces += 1;
+                        progress = parseFloat((progress + 9 * Math.pow(10, -decimalPlaces)).toFixed(decimalPlaces));
+                    }
+                    setInitProgress(progress);
+
+                    if (decimalPlaces >= 99) {
+                        clearInterval(intervalId);
+                        resolve();
+                    }
+                }, 300); // 每秒更新一次
+            });
+        };
+
+        // 調用 API
+        const callApi = async () => {
+            const task = "jsOperInit";
+            const result = await api.jsOper(task, serverName);
+            if (result) {
+                setInitProgress(100);
+                alert("初始化完成");
+            }
+            setInitLoading(false); // 隱藏動畫
+        };
+
+        // 同時運行進度條模擬和 API 調用
+        await Promise.all([simulateProgress(), callApi()]);
+    };
+    const spinnerStyle = {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        height: "100vh",
+        width: "100%",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        zIndex: 9999,
     };
 
+    const progressBarStyle = {
+        width: "150px",
+        height: "5px",
+        backgroundColor: "#ccc",
+        marginTop: "10px",
+    };
+
+    const progressStyle = {
+        width: `${initProgress}%`,
+        height: "100%",
+        backgroundColor: "#f11946",
+    };
+
+    const progressTextStyle = {
+        color: "#fff",
+        marginTop: "10px",
+    };
+    //---
     const handleRunSubmit = async (event) => {
         event.preventDefault();
+
         const task = "jsOperRun";
         const result = await api.jsOper(task, serverName);
         if (result) {
             alert(`express running on port : ${result.data}`);
+            localStorage.setItem("port", result.data);
         }
         setRunPort(`http://localhost:${result.data}`);
     };
+    useEffect(() => {
+        const port = localStorage.getItem("port");
+        fetchData();
+        if (port) {
+            setRunPort(`http://localhost:${port}`);
+        } else {
+            setRunPort("伺服器未啓動");
+            localStorage.removeItem("port");
+        }
+    }, []);
 
     const handleStopSubmit = async (event) => {
         event.preventDefault();
@@ -313,6 +400,15 @@ const Express = () => {
     //---------------------------------------------------------------------------
     return (
         <Area>
+            {initLoading && (
+                <div style={spinnerStyle}>
+                    <ClipLoader size={150} color='#fff' />
+                    <div style={progressBarStyle}>
+                        <div style={progressStyle} />
+                    </div>
+                    <p style={progressTextStyle}>{`${initProgress}%`}</p>
+                </div>
+            )}
             <ButtonArea>
                 <button onClick={handleCreateSubmit}>創立專案</button>
                 <button onClick={handleInitSubmit}>初始化 INIT</button>
@@ -342,17 +438,17 @@ const Express = () => {
                 ))}
             </ButtonArea>
             <WorkArea>
-                {feature === "NodeJs" ? (
-                    <>
-                        <FolderIndex>
-                            資料夾
-                            <hr />
-                            (忽略規則： .git 、 node_modules 、package-lock.json);
-                            <hr />
-                            <button onClick={handleIndexRefresh}>Refresh</button>
-                            <hr />
-                            {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
-                        </FolderIndex>
+                <>
+                    <FolderIndex>
+                        資料夾
+                        <hr />
+                        (忽略規則： .git 、 node_modules 、package-lock.json);
+                        <hr />
+                        <button onClick={handleIndexRefresh}>Refresh</button>
+                        <hr />
+                        {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
+                    </FolderIndex>
+                    {feature === "NodeJs" ? (
                         <EditArea>
                             <FileName value={fileName} onChange={choiceFileChange} readOnly />
                             <CodeEditor
@@ -372,87 +468,83 @@ const Express = () => {
                                 }}
                             />
                         </EditArea>
-                        <ResultArea>
-                            <div>Console</div>
-                            <hr />
-                            <ExpressLog>
-                                {expressLog.map((log, index) => (
-                                    <div key={index}>{log}</div>
-                                ))}
-                                <div ref={logEndRef} />
-                            </ExpressLog>
-                        </ResultArea>
-                    </>
-                ) : feature === "Sqlite" ? (
-                    <>
-                        <FolderIndex>DB資料區</FolderIndex>
-                        <EditArea>
-                            <SqliteCommand>
-                                <div>Sqlite Commands</div>
-                                <form onSubmit={handleSqliteCommand}>
-                                    <CodeEditor
-                                        data-color-mode='dark'
-                                        value={sqliteCommand}
-                                        language='sql'
-                                        placeholder='Please enter code.'
-                                        onChange={handleSqliteChange}
-                                        padding={15}
-                                        style={{
-                                            fontSize: 12,
-                                            backgroundColor: "#272727",
-                                            fontFamily:
-                                                "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                            height: "250px",
-                                            border: "solid 1px black",
-                                        }}
-                                    />
-                                    <button type='submit'>送出指令</button>
-                                </form>
-                            </SqliteCommand>
-                            <div>Sqlite Result（標題）</div>
-                            <SqliteResult>
-                                {typeof sqliteResult === "string" ? (
-                                    <div>{sqliteResult}</div>
-                                ) : (
-                                    <SqliteResult>{sqliteResult && <Table data={sqliteResult} />}</SqliteResult>
-                                )}
-                            </SqliteResult>
-                        </EditArea>
-                        <ResultArea>Console</ResultArea>
-                    </>
-                ) : (
-                    <>
-                        {" "}
-                        <FolderIndex>Redis沒有資料庫區</FolderIndex>
-                        <EditArea>
-                            <RedisCommand>
-                                <div>Redis Commands</div>
-                                <form onSubmit={handleRedisCommand}>
-                                    <CodeEditor
-                                        data-color-mode='dark'
-                                        value={redisCommand}
-                                        language='sql'
-                                        placeholder='Please enter code.'
-                                        onChange={handleRedisChange}
-                                        padding={15}
-                                        style={{
-                                            fontSize: 12,
-                                            backgroundColor: "#BB3D00",
-                                            fontFamily:
-                                                "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                            height: "250px",
-                                            border: "solid 1px black",
-                                        }}
-                                    />
-                                    <button type='submit'>送出指令</button>
-                                </form>
-                            </RedisCommand>
-                            <div>Redis Result（標題）</div>
-                            <RedisResult>{redisResult}</RedisResult>
-                        </EditArea>
-                        <ResultArea>Console</ResultArea>
-                    </>
-                )}
+                    ) : feature === "Sqlite" ? (
+                        <>
+                            <EditArea>
+                                <SqliteCommand>
+                                    <div>Sqlite Commands</div>
+                                    <form onSubmit={handleSqliteCommand}>
+                                        <CodeEditor
+                                            data-color-mode='dark'
+                                            value={sqliteCommand}
+                                            language='sql'
+                                            placeholder='Please enter code.'
+                                            onChange={handleSqliteChange}
+                                            padding={15}
+                                            style={{
+                                                fontSize: 12,
+                                                backgroundColor: "#272727",
+                                                fontFamily:
+                                                    "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                                height: "250px",
+                                                border: "solid 1px black",
+                                            }}
+                                        />
+                                        <button type='submit'>送出指令</button>
+                                    </form>
+                                </SqliteCommand>
+                                <div>Sqlite Result（標題）</div>
+                                <SqliteResult>
+                                    {typeof sqliteResult === "string" ? (
+                                        <div>{sqliteResult}</div>
+                                    ) : (
+                                        <SqliteResult>{sqliteResult && <Table data={sqliteResult} />}</SqliteResult>
+                                    )}
+                                </SqliteResult>
+                            </EditArea>
+                        </>
+                    ) : (
+                        <>
+                            {" "}
+                            <EditArea>
+                                <RedisCommand>
+                                    <div>Redis Commands</div>
+                                    <form onSubmit={handleRedisCommand}>
+                                        <CodeEditor
+                                            data-color-mode='dark'
+                                            value={redisCommand}
+                                            language='sql'
+                                            placeholder='Please enter code.'
+                                            onChange={handleRedisChange}
+                                            padding={15}
+                                            style={{
+                                                fontSize: 12,
+                                                backgroundColor: "#BB3D00",
+                                                fontFamily:
+                                                    "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                                height: "250px",
+                                                border: "solid 1px black",
+                                            }}
+                                        />
+                                        <button type='submit'>送出指令</button>
+                                    </form>
+                                </RedisCommand>
+                                <div>Redis Result（標題）</div>
+                                <RedisResult>{redisResult}</RedisResult>
+                            </EditArea>
+                        </>
+                    )}
+                    <ResultArea>
+                        <div>Console</div>
+                        <hr />
+                        <ExpressLog>
+                            {expressLog.map((log, index) => (
+                                <div key={index}>{log}</div>
+                            ))}
+                            <div ref={logEndRef} />
+                        </ExpressLog>
+                    </ResultArea>
+                </>
             </WorkArea>
         </Area>
     );

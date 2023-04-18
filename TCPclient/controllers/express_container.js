@@ -194,6 +194,8 @@ export async function jsOperInit(job) {
             // 起compose，並關掉express，redis維持
             await composeUp(ymlPath);
             await composeStop(ymlPath, `${serverName}-express`);
+            //開啓log記錄
+            await runLogSH(serverName, ymlPath);
         }
         await executeCommands();
 
