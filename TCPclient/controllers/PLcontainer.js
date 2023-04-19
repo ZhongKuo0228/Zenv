@@ -35,6 +35,17 @@ export async function createPLContainer(executeId, programLanguage, code) {
     return command;
 }
 
+export async function readResult(executeId) {
+    //讀取容器的輸出結果
+    const container = "docker";
+    const action = "logs";
+    const containerName = executeId;
+
+    const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
+    console.log(command);
+    return command;
+}
+
 export async function rmPLContainer(executeId) {
     //刪除已使用的容器
     const container = "docker";

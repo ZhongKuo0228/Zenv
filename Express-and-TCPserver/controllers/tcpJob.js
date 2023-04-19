@@ -3,17 +3,39 @@ import tcpServer from "../models/tcpServer.js";
 const connections = tcpServer();
 
 async function socketWrite(job) {
-    if (connections.length > 0) {
-        const socket = connections[0];
-        socket.write(JSON.stringify(job));
+    try {
+        if (connections.length > 0) {
+            const socket = connections[0];
+            socket.write(JSON.stringify(job));
 
-        const dataPromise = new Promise((resolve) => {
-            socket.on("data", (data) => {
-                resolve(data);
+            // Remove existing 'data' event handler before adding a new one
+            socket.removeAllListeners("data");
+
+            const dataPromise = new Promise((resolve, reject) => {
+                const timeout = setTimeout(() => {
+                    reject(new Error("Data receive timeout"));
+                }, 10000); // Set your desired timeout value (e.g., 10000 milliseconds)
+
+                socket.on("data", (data) => {
+                    console.log("收到client", data);
+                    clearTimeout(timeout);
+                    resolve(data);
+                });
             });
-        });
-        const data = await dataPromise;
-        return data;
+
+            const data = await dataPromise;
+            return data;
+        } else {
+            // Return a rejected Promise when there are no connections
+            return Promise.reject(new Error("No available connections"));
+        }
+    } catch (error) {
+        if (error.message === "Data receive timeout") {
+            console.error("Data receive timeout. Retrying...");
+            // Retry sending data or notify the user...
+        } else {
+            console.error("An error occurred:", error);
+        }
     }
 }
 

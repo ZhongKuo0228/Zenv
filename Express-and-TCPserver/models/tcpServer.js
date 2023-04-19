@@ -7,11 +7,13 @@ function tcpServer() {
 
         // 將 socket 物件保存到陣列中
         connections.push(socket);
+        console.log(`There are currently ${connections.length} connections.`);
+        // console.log(socket);
 
-        // 當接收到資料時，將資料廣播給所有連線
+        // // 當接收到資料時，將資料廣播給所有連線
         // socket.on("data", (data) => {
         //     console.log(`Received data from client: ${data}`);
-
+        // });
         //     // 將資料廣播給所有連線
         //     connections.forEach((conn) => {
         //         if (conn !== socket && conn.writable) {

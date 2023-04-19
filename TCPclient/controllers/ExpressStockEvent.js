@@ -1,76 +1,27 @@
-import { createFolder, getFolderIndex, toReadFile, rewriteFile, operAdd, operDel, operRename } from "./express_file.js";
-import { jsOperInit, jsOperRun, jsOperStop, jsOperNpm } from "./express_container.js";
+import * as fileHandler from "./express_file.js";
+import * as jsHandler from "./express_container.js";
 import { sqliteCommand } from "../models/sqlite_client.js";
 import { redisCommand } from "../models/redis_client.js";
 //TODO: sqlite , redis command
-import socket from "../tcp-client.js";
+import { sendToServer } from "../tcp-client.js";
+
+const handlerMap = {
+    ...fileHandler,
+    createServer: fileHandler.createFolder,
+    readFile: fileHandler.toReadFile,
+    ...jsHandler,
+    sqliteCommand,
+    redisCommand,
+};
 
 export async function expressEvent(job) {
     const task = job.task;
     console.log("task", task);
     let result;
-    switch (task) {
-        case "createServer":
-            result = await createFolder(job);
-            socket.write(JSON.stringify(result));
-            break;
-
-        //文件操作
-        case "getFolderIndex":
-            result = await getFolderIndex(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "readFile":
-            result = await toReadFile(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "rewriteFile":
-            result = await rewriteFile(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "operAdd":
-            result = await operAdd(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "operDel":
-            result = await operDel(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "operRename":
-            result = await operRename(job);
-            socket.write(JSON.stringify(result));
-            break;
-
-        //NodeJS操作
-        case "jsOperInit":
-            result = await jsOperInit(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "jsOperRun":
-            result = await jsOperRun(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "jsOperStop":
-            result = await jsOperStop(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "jsOperNpm":
-            result = await jsOperNpm(job);
-            socket.write(JSON.stringify(result));
-            break;
-
-        //DB下指令
-        case "sqliteCommand":
-            result = await sqliteCommand(job);
-            socket.write(JSON.stringify(result));
-            break;
-        case "redisCommand":
-            result = await redisCommand(job);
-            socket.write(JSON.stringify(result));
-            break;
-        //未定義狀況
-        default:
-            throw new Error();
+    if (handlerMap[task]) {
+        result = await handlerMap[task](job);
+        sendToServer(JSON.stringify(result));
+    } else {
+        throw new Error();
     }
 }
-
