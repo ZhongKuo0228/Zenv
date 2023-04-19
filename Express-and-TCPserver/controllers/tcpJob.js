@@ -42,7 +42,7 @@ async function socketWrite(job) {
 function bufferToJson(buffer) {
     if (buffer == undefined) {
         buffer = "tcp Client 回覆異常";
-        console.log(buffer);
+        // console.log(buffer);
         return buffer;
     } else {
         return JSON.parse(buffer.toString()); //buffer轉成JSON格式

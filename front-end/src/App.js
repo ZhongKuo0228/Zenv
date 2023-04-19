@@ -6,7 +6,7 @@ import styled from "styled-components";
 
 const Wrap = styled.div`
     display: flex;
-    height: 600px;
+    height: 100%;
     border: solid 1px black;
 `;
 
@@ -14,12 +14,6 @@ const App = () => {
     return (
         <>
             <header>我是header</header>
-            <li>
-                <a href='/PLpage'>單一語言編譯</a>
-            </li>
-            <li>
-                <a href='/Express'>Express伺服器</a>
-            </li>
             <Wrap>
                 <FileContextProvider>
                     <Outlet />

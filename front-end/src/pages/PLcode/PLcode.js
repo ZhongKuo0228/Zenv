@@ -1,26 +1,40 @@
 import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import CodeEditor from "@uiw/react-textarea-code-editor";
+import CodeMirror from "@uiw/react-codemirror";
+import { okaidia } from "@uiw/codemirror-theme-okaidia";
+import { javascript } from "@codemirror/lang-javascript";
 import { v4 as uuidv4 } from "uuid";
 import { commitPLpage } from "../../util/commitResult.js";
 //使用者頁面後自動存檔------------------------
 commitPLpage();
 //---styled-------------------------------------------
-const WorkArea = styled.div`
-    width: 49%;
-    height: 500px;
+
+const Container_all = styled.div`
+    display: flex;
+    width: 100vw;
+    flex-direction: column;
+    height: 90vh;
+`;
+const ProjectInfo = styled.div`
+    height: 30px;
     border: solid 1px black;
     padding: 10px;
 `;
-const CodingArea = styled.textarea`
-    width: 80%;
-    height: 300px;
+const Container_work = styled.div`
+    display: flex;
+    height: 100%;
+`;
+const WorkArea = styled.div`
+    width: 70%;
+    height: 100%;
     border: solid 1px black;
+    padding: 10px;
 `;
 
 const ConsoleArea = styled.div`
-    width: 50%;
-    height: 500px;
+    width: 30%;
+    height: 100%;
     padding: 10px;
     border: solid 1px black;
 `;
@@ -71,11 +85,10 @@ const WriteCode = () => {
         }
     };
 
-    const handleChange = (event) => {
-        const value = event.target.value;
+    const handleChange = React.useCallback((value, viewUpdate) => {
         setCode(value);
         localStorage.setItem("code", value);
-    };
+    }, []);
 
     useEffect(() => {
         const storedCode = localStorage.getItem("code");
@@ -85,32 +98,28 @@ const WriteCode = () => {
     }, []);
 
     return (
-        <>
-            <WorkArea>
-                <h3>寫code工作區</h3>
-                <form onSubmit={handleSubmit}>
-                    {/* <CodingArea rows={10} cols={50} value={code} onChange={handleChange} /> */}
-                    <CodeEditor
-                        value={code}
-                        language='js'
-                        placeholder='Please enter JS code.'
-                        onChange={handleChange}
-                        padding={15}
-                        style={{
-                            fontSize: 12,
-                            backgroundColor: "#272727",
-                            height: "400px",
-                            fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                        }}
-                    />
-                    <button type='submit'>Run</button>
-                </form>
-            </WorkArea>
-            <ConsoleArea>
-                <h3>Console</h3>
-                <ConsoleResult value={result} readOnly />
-            </ConsoleArea>
-        </>
+        <Container_all>
+            <ProjectInfo></ProjectInfo>
+            <Container_work>
+                <WorkArea>
+                    <h3>寫code工作區</h3>
+                    <form onSubmit={handleSubmit}>
+                        <CodeMirror
+                            value={code}
+                            height='400px'
+                            theme={okaidia}
+                            extensions={[javascript({ jsx: true })]}
+                            onChange={handleChange}
+                        />
+                        <button type='submit'>Run</button>
+                    </form>
+                </WorkArea>
+                <ConsoleArea>
+                    <h3>Console</h3>
+                    <ConsoleResult value={result} readOnly />
+                </ConsoleArea>
+            </Container_work>
+        </Container_all>
     );
 };
 
