@@ -1,5 +1,5 @@
 import { exec } from "child_process";
-import socket from "../tcp-client.js";
+import { sendToServer } from "../tcp-client.js";
 import { createPLContainer, rmPLContainer, stopPLContainer, delTempFile } from "./PLcontainer.js";
 
 export async function PLevent(job) {
@@ -22,12 +22,12 @@ export async function PLevent(job) {
             result: data,
         };
         //回傳運行結果
-        await socket.write(JSON.stringify(result));
+        await sendToServer(JSON.stringify(result));
 
         //處理臨時容器及檔案
         await stopPLContainer(executeId);
         await rmPLContainer(executeId);
-        await delTempFile(executeId, programLanguage);
+        // await delTempFile(executeId, programLanguage);
     });
     child.stderr.on("data", (data) => {
         console.log(`stderr: ${data}`);
