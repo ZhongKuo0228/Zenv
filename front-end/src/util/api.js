@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+
 const api = {
     hostname: "http://localhost:3001/api/1.0",
 
@@ -26,6 +28,73 @@ const api = {
     async getRevenue() {
         const response = await fetch(`${this.hostname}/reports/revenue`);
         return await response.json();
+    },
+    //PL----------------------------------------------------------------------------------------------
+    async getPLInfo(userName, projectName) {
+        const JWT = localStorage.getItem("jwt");
+        const data = {
+            userName: userName,
+            projectName: projectName,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/PLcode/getInfo`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async PLcodeRun() {
+        const JWT = localStorage.getItem("jwt");
+        try {
+            const codeData = {
+                task: "runCode",
+                executeId: uuidv4(),
+                code: localStorage.getItem("code"),
+                programLanguage: localStorage.getItem("prog_lang"),
+                projectID: localStorage.getItem("projectID"),
+                editorID: localStorage.getItem("editor"),
+            };
+            const response = await fetch(`${this.hostname}/PLcode/run`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: codeData }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async PLcodeSave() {
+        const JWT = localStorage.getItem("jwt");
+        try {
+            const codeData = {
+                task: "saveCode",
+                code: localStorage.getItem("code"),
+                projectID: localStorage.getItem("projectID"),
+                editorID: localStorage.getItem("editor"),
+            };
+            const response = await fetch(`${this.hostname}/PLcode/save`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: codeData }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
     },
 
     //Express------------------------------------------------------------------------------------------

@@ -17,7 +17,7 @@ async function socketWrite(job) {
                 }, 10000); // Set your desired timeout value (e.g., 10000 milliseconds)
 
                 socket.on("data", (data) => {
-                    console.log("收到client", data);
+                    // console.log("收到client", data);
                     clearTimeout(timeout);
                     resolve(data);
                 });
@@ -53,7 +53,7 @@ function bufferToJson(buffer) {
 export async function sendCodeToTcpClient(req) {
     const code = req.body.data;
     let job = {
-        socketId: code.socketId,
+        task: code.task,
         executeId: code.executeId,
         code: code.code,
         programLanguage: code.programLanguage,

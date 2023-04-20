@@ -10,7 +10,7 @@ root.render(
     <BrowserRouter>
         <Routes>
             <Route path='/' element={<App />}>
-                <Route path='PLpage' element={<PLpage />} />
+                <Route path='PLpage/:username/:projectName' element={<PLpage />} />
                 <Route path='Express' element={<Express />} />
             </Route>
         </Routes>

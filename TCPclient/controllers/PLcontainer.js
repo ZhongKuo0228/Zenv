@@ -4,10 +4,10 @@ import { exec } from "child_process";
 
 function programLanguageSelect(programLanguage) {
     let image = "";
-    if (programLanguage == "js") {
+    if (programLanguage == "JavaScript") {
         image = "node:18-alpine node";
         return image;
-    } else if (programLanguage == "py") {
+    } else if (programLanguage == "Python") {
         //TODO: 加入對應的image和執行指令
     } else if (programLanguage == "cpp") {
         //TODO: 加入對應的image和執行指令
