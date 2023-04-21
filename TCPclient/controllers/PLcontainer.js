@@ -2,11 +2,14 @@ import { writeFile, unlink } from "node:fs/promises";
 import path from "path";
 import { exec } from "child_process";
 
+
+
 function programLanguageSelect(programLanguage) {
-    let image = "";
+    let ext;
+    let image;
     if (programLanguage == "JavaScript") {
+        ext = "js";
         image = "node:18-alpine node";
-        return image;
     } else if (programLanguage == "Python") {
         //TODO: 加入對應的image和執行指令
     } else if (programLanguage == "cpp") {
@@ -16,12 +19,16 @@ function programLanguageSelect(programLanguage) {
     } else {
         console.log("非預設程式語言");
     }
+    return [ext, image];
 }
 
 export async function createPLContainer(executeId, programLanguage, code) {
+    const prog_lang = programLanguageSelect(programLanguage);
+    const ext = prog_lang[0];
+
     //臨時檔案建立
     const filePath = path.join("./controllers/tempFile");
-    const fileName = `${executeId}.${programLanguage}`;
+    const fileName = `${executeId}.${ext}`;
     await writeFile(`${filePath}/${fileName}`, code);
 
     //控制容器指令
@@ -29,7 +36,7 @@ export async function createPLContainer(executeId, programLanguage, code) {
     const action = "run --name";
     const containerName = executeId;
     const vPath = path.join(process.cwd(), "./controllers/tempFile");
-    const imagesAndRun = programLanguageSelect(programLanguage);
+    const imagesAndRun = prog_lang[1];
 
     const command = `${container} ${action} ${containerName} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
     return command;
@@ -67,7 +74,9 @@ export async function stopPLContainer(executeId) {
 }
 
 export async function delTempFile(executeId, programLanguage) {
+    const prog_lang = programLanguageSelect(programLanguage);
+    const ext = prog_lang[0];
     const filePath = path.join("./controllers/tempFile");
-    const fileName = `${executeId}.${programLanguage}`;
+    const fileName = `${executeId}.${ext}`;
     await unlink(`${filePath}/${fileName}`);
 }

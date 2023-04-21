@@ -1,6 +1,6 @@
 //---MySQL Connect------------------------------------
 import pool from "../models/DBpool.js";
-import { timestamp, showTime } from "../util/timestamp.js";
+import { timestamp } from "../util/timestamp.js";
 //sql用的async------------------------------------------
 
 async function getServiceItems(id) {

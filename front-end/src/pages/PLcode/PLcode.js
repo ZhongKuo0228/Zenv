@@ -5,6 +5,7 @@ import CodeMirror from "@uiw/react-codemirror";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { javascript } from "@codemirror/lang-javascript";
 import api from "../../util/api";
+import { timestamp, timeFormat } from "../../util/timestamp";
 //使用者頁面後自動存檔------------------------
 function commitPLpage() {
     //使用者關閉頁面後
@@ -66,6 +67,7 @@ const WriteCode = () => {
     const [execTime, setExecTime] = useState("");
     const [saveTime, setSaveTime] = useState("");
     const [permissions, setPermissions] = useState("");
+    const [shareBtn, setShareBtn] = useState("");
     const [icon, setIcon] = useState("");
     const [extensions, setExtensions] = useState();
     const [result, setResult] = useState("請RUN");
@@ -79,18 +81,19 @@ const WriteCode = () => {
             const usePL = data.data.service_item;
             localStorage.setItem("prog_lang", usePL);
             setProgLang(usePL);
-            setExecTime(data.data.last_execution);
-            setSaveTime(data.data.save_time);
+            setExecTime(timeFormat(data.data.last_execution));
+            setSaveTime(timeFormat(data.data.save_time));
 
             if (usePL === "JavaScript") {
                 setExtensions([javascript({ jsx: true })]);
                 setIcon(`${process.env.PUBLIC_URL}/images/icon_js.webp`);
             }
             const projectID = data.data.id;
-            localStorage.setItem("projectID", projectID);
+            localStorage.setItem("PLprojectID", projectID);
 
             if (data.data.permissions === "private") {
-                setPermissions("分享專案");
+                setPermissions("private");
+                setShareBtn("分享專案");
             }
         } catch (error) {
             console.error(error);
@@ -106,6 +109,8 @@ const WriteCode = () => {
         try {
             const data = await api.PLcodeRun();
             setResult(data.data);
+            setExecTime(timestamp());
+            setSaveTime(timestamp());
         } catch (error) {
             console.error(error);
         }
@@ -115,6 +120,7 @@ const WriteCode = () => {
         try {
             const data = await api.PLcodeSave();
             setResult(data.data);
+            setSaveTime(timestamp());
         } catch (error) {
             console.error(error);
         }
@@ -132,6 +138,11 @@ const WriteCode = () => {
         }
     }, []);
 
+    const handleShareBtn = async (event) => {
+        event.preventDefault();
+        alert("預計 Sprint 4 開放分享功能，敬請期待");
+    };
+
     return (
         <Container_all>
             <ProjectInfo>
@@ -142,12 +153,16 @@ const WriteCode = () => {
                 <button onClick={handleRunCodeSubmit}>
                     執行按鈕，啓動時會顯示停止，會跑倒數1分鐘的的進度條，然後改回停止
                 </button>
-                <div>{execTime}</div>
+                <div>上次執行時間 {execTime}</div>
                 <button onClick={handleSaveCodeSubmit}>存檔</button>
-                <div>{saveTime}</div>
-                <button>{permissions}</button>
-                <div>分享連結：.........</div>
-                <button>複製按鈕</button>
+                <div>上次存檔時間 {saveTime}</div>
+                {permissions === "private" ? null : (
+                    <>
+                        <div>分享連結：.........</div>
+                        <button>複製按鈕</button>
+                    </>
+                )}
+                <button onClick={handleShareBtn}>{shareBtn}</button>
             </ProjectInfo>
             <Container_work>
                 <WorkArea>

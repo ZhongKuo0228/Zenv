@@ -22,6 +22,11 @@ export async function checkName(name) {
     }
 }
 
+export async function getUserID(userName) {
+    const [rows] = await pool.query(`SELECT id FROM users WHERE user_name = ?`, [userName]);
+    return rows[0];
+}
+
 export async function checkUserTable(email) {
     const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
     return rows[0];
