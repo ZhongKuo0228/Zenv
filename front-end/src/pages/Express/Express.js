@@ -1,4 +1,5 @@
 import React from "react";
+import { useParams } from "react-router-dom";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { ClipLoader } from "react-spinners";
 import { css } from "@emotion/react";
@@ -8,21 +9,31 @@ import Folder from "./FileTree/Folder";
 import Table from "./SqlTable/SqlTable";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
+import CodeMirror from "@uiw/react-codemirror";
+import { okaidia } from "@uiw/codemirror-theme-okaidia";
+import { javascript } from "@codemirror/lang-javascript";
 // import TerminalComponent from "./Terminal";
 import api from "../../util/api";
+import { timestampWithDaysOffset } from "../../util/timestamp";
 import webSocket from "socket.io-client";
-
-const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
-//---
 
 //---
 const Area = styled.div`
     width: 100%;
     border: solid 1px black;
     display: flex;
+
     flex-direction: column;
 `;
 //---
+const ButtonArea1 = styled.div`
+    width: 100%;
+    height: 50px;
+    border: solid 1px black;
+    display: none;
+    justify-content: space-around;
+    padding: 10px;
+`;
 const ButtonArea = styled.div`
     width: 100%;
     height: 50px;
@@ -36,18 +47,22 @@ const WorkArea = styled.div`
     width: 100%;
     border: solid 1px black;
     display: flex;
+    height: 90vh;
     flex-direction: row;
 `;
 
 const FolderIndex = styled.div`
     width: 20%;
-    height: 500px;
+    border: solid 1px black;
+    padding: 10px;
+`;
+const MainArea = styled.div`
+    width: 59%;
     border: solid 1px black;
     padding: 10px;
 `;
 const EditArea = styled.div`
-    width: 59%;
-    height: 500px;
+    width: 100%;
     border: solid 1px black;
     padding: 10px;
 `;
@@ -59,7 +74,6 @@ const FileName = styled.input`
 `;
 const ResultArea = styled.div`
     width: 20%;
-    height: 500px;
     border: solid 1px black;
     padding: 10px;
 `;
@@ -93,15 +107,17 @@ const ExpressLog = styled.div`
     width: 90%;
     border: solid 1px black;
     padding: 10px;
-    height: 450px;
+    height: 600px;
     overflow-y: scroll;
     white-space: nowrap;
 `;
 
 //---
 const Express = () => {
+    const { username, projectName } = useParams();
     const { file } = useContext(FileContext);
     const { fileName } = useContext(FileContext);
+    const [expiredTime, setExpiredTime] = useState("");
     const [shouldFetchData, setShouldFetchData] = useState(true);
     const [initLoading, setInitLoading] = useState(false);
     const [initProgress, setInitProgress] = useState(0);
@@ -113,6 +129,9 @@ const Express = () => {
     const [redisResult, setRedisResult] = useState("redis執行結果");
     const [expressLog, setExpressLog] = useState([]);
     const logEndRef = useRef(null);
+
+    const serverName = `${username}_${projectName}`;
+
     //---功能選擇
     const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
@@ -130,6 +149,9 @@ const Express = () => {
         const data = await api.getFolderIndex(serverName);
         setFolderData(data);
         setShouldFetchData(false);
+        //使用者進入網頁後自動刷新過期時間------------------------
+        await api.updateExpiredTime(username, projectName);
+        setExpiredTime(timestampWithDaysOffset(7));
     };
     useEffect(() => {
         if (shouldFetchData) {
@@ -142,11 +164,11 @@ const Express = () => {
     };
 
     //處理檔案被點擊後，將編輯區更新內容------------------------------------------------------------
-    const handleCodeChange = (event) => {
-        const value = event.target.value;
+    const handleCodeChange = React.useCallback((value, viewUpdate, event) => {
         setCode(value);
         localStorage.setItem("editedFileData", value);
-    };
+    }, []);
+
     useEffect(() => {
         //從localstorage拿到資料並重新解析格式
         const storedCode = localStorage.getItem("fileData");
@@ -176,34 +198,10 @@ const Express = () => {
     //NodeJS按鈕動作
     const handleCreateSubmit = async (event) => {
         event.preventDefault();
-        const url = "http://localhost:3001/api/1.0/express/create";
-        try {
-            const userId = "testman";
-            const task = "createServer";
-            const projectName = "firstServer";
-            const gitRepoUrl = "https://github.com/ZhongKuo0228/express-example.git";
-            const projectData = {
-                task: task,
-                userId: userId,
-                projectName: projectName,
-                gitRepoUrl: gitRepoUrl,
-            };
-            console.log("projectData", projectData);
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ data: projectData }),
-            });
-
-            const data = await response.json();
-            console.log("result", data);
-            alert("建立完成");
-        } catch (error) {
-            console.error(error);
-        }
+        const task = "createServer";
+        await api.resetFile(task, serverName);
     };
+
     const handleInitSubmit = async (event) => {
         event.preventDefault();
         setInitLoading(true);
@@ -282,11 +280,12 @@ const Express = () => {
         marginTop: "10px",
     };
     //---
+
     const handleRunSubmit = async (event) => {
         event.preventDefault();
 
         const task = "jsOperRun";
-        const result = await api.jsOper(task, serverName);
+        const result = await api.jsOper(task, serverName, projectName);
         if (result) {
             alert(`express running on port : ${result.data}`);
             localStorage.setItem("port", result.data);
@@ -409,33 +408,24 @@ const Express = () => {
                     <p style={progressTextStyle}>{`${initProgress}%`}</p>
                 </div>
             )}
-            <ButtonArea>
+            <ButtonArea1>
                 <button onClick={handleCreateSubmit}>創立專案</button>
                 <button onClick={handleInitSubmit}>初始化 INIT</button>
+            </ButtonArea1>
+            <ButtonArea>
+                <div>icon</div>
+                <div>{projectName}</div>
                 <button onClick={handleRunSubmit}>運行 RUN</button>
-                <a href={`${runPort}`} target='_blank' onChange={handleRunSubmit}>
-                    {runPort}
-                </a>
                 <button onClick={handleStopSubmit}>暫停 STOP</button>
-                <form onSubmit={handleNpmSubmit}>
-                    npm
-                    <input
-                        type='text'
-                        placeholder='npm指令'
-                        value={npmCommand}
-                        onChange={(e) => setNpmCommand(e.target.value)}
-                    />
-                    <button type='submit'>送出</button>
-                </form>
-                {features.map((feature, index) => (
-                    <button
-                        style={{ background: "#3630a3", color: "white" }}
-                        onClick={(e) => handleFeature(feature)}
-                        key={index}
-                    >
-                        {feature}
-                    </button>
-                ))}
+                <div>上次執行時間</div>
+                <div>倒數30分鐘停止伺服器</div>
+                <div>
+                    開啓網頁按鈕
+                    <a href={`${runPort}`} target='_blank' onChange={handleRunSubmit}>
+                        {runPort}
+                    </a>
+                </div>
+                <div>伺服器資料{expiredTime}後進行封存</div>
             </ButtonArea>
             <WorkArea>
                 <>
@@ -448,92 +438,106 @@ const Express = () => {
                         <hr />
                         {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
                     </FolderIndex>
-                    {feature === "NodeJs" ? (
-                        <EditArea>
-                            <FileName value={fileName} onChange={choiceFileChange} readOnly />
-                            <CodeEditor
-                                data-color-mode='dark'
-                                value={code}
-                                language='js'
-                                placeholder='Please enter code.'
-                                onChange={handleCodeChange}
-                                padding={15}
-                                style={{
-                                    fontSize: 12,
-                                    backgroundColor: "#272727",
-                                    fontFamily:
-                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                    height: "80%",
-                                    border: "solid 1px black",
-                                }}
-                            />
-                        </EditArea>
-                    ) : feature === "Sqlite" ? (
-                        <>
+                    <MainArea>
+                        <div>
+                            {features.map((feature, index) => (
+                                <button
+                                    style={{ background: "#3630a3", color: "white" }}
+                                    onClick={(e) => handleFeature(feature)}
+                                    key={index}
+                                >
+                                    {feature}
+                                </button>
+                            ))}
+                            <form onSubmit={handleNpmSubmit}>
+                                npm
+                                <input
+                                    type='text'
+                                    placeholder='npm指令'
+                                    value={npmCommand}
+                                    onChange={(e) => setNpmCommand(e.target.value)}
+                                />
+                                <button type='submit'>送出</button>
+                            </form>
+                        </div>
+                        {feature === "NodeJs" ? (
                             <EditArea>
-                                <SqliteCommand>
-                                    <div>Sqlite Commands</div>
-                                    <form onSubmit={handleSqliteCommand}>
-                                        <CodeEditor
-                                            data-color-mode='dark'
-                                            value={sqliteCommand}
-                                            language='sql'
-                                            placeholder='Please enter code.'
-                                            onChange={handleSqliteChange}
-                                            padding={15}
-                                            style={{
-                                                fontSize: 12,
-                                                backgroundColor: "#272727",
-                                                fontFamily:
-                                                    "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                                height: "250px",
-                                                border: "solid 1px black",
-                                            }}
-                                        />
-                                        <button type='submit'>送出指令</button>
-                                    </form>
-                                </SqliteCommand>
-                                <div>Sqlite Result（標題）</div>
-                                <SqliteResult>
-                                    {typeof sqliteResult === "string" ? (
-                                        <div>{sqliteResult}</div>
-                                    ) : (
-                                        <SqliteResult>{sqliteResult && <Table data={sqliteResult} />}</SqliteResult>
-                                    )}
-                                </SqliteResult>
+                                <FileName value={fileName} onChange={choiceFileChange} readOnly />
+                                <CodeMirror
+                                    value={code}
+                                    height='80vh'
+                                    theme={okaidia}
+                                    extensions={[javascript({ jsx: true })]}
+                                    onChange={handleCodeChange}
+                                />
                             </EditArea>
-                        </>
-                    ) : (
-                        <>
-                            {" "}
-                            <EditArea>
-                                <RedisCommand>
-                                    <div>Redis Commands</div>
-                                    <form onSubmit={handleRedisCommand}>
-                                        <CodeEditor
-                                            data-color-mode='dark'
-                                            value={redisCommand}
-                                            language='sql'
-                                            placeholder='Please enter code.'
-                                            onChange={handleRedisChange}
-                                            padding={15}
-                                            style={{
-                                                fontSize: 12,
-                                                backgroundColor: "#BB3D00",
-                                                fontFamily:
-                                                    "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                                height: "250px",
-                                                border: "solid 1px black",
-                                            }}
-                                        />
-                                        <button type='submit'>送出指令</button>
-                                    </form>
-                                </RedisCommand>
-                                <div>Redis Result（標題）</div>
-                                <RedisResult>{redisResult}</RedisResult>
-                            </EditArea>
-                        </>
-                    )}
+                        ) : feature === "Sqlite" ? (
+                            <>
+                                <EditArea>
+                                    <SqliteCommand>
+                                        <div>Sqlite Commands</div>
+                                        <form onSubmit={handleSqliteCommand}>
+                                            <CodeEditor
+                                                data-color-mode='dark'
+                                                value={sqliteCommand}
+                                                language='sql'
+                                                placeholder='Please enter code.'
+                                                onChange={handleSqliteChange}
+                                                padding={15}
+                                                style={{
+                                                    fontSize: 12,
+                                                    backgroundColor: "#272727",
+                                                    fontFamily:
+                                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                                    height: "250px",
+                                                    border: "solid 1px black",
+                                                }}
+                                            />
+                                            <button type='submit'>送出指令</button>
+                                        </form>
+                                    </SqliteCommand>
+                                    <div>Sqlite Result（標題）</div>
+                                    <SqliteResult>
+                                        {typeof sqliteResult === "string" ? (
+                                            <div>{sqliteResult}</div>
+                                        ) : (
+                                            <SqliteResult>{sqliteResult && <Table data={sqliteResult} />}</SqliteResult>
+                                        )}
+                                    </SqliteResult>
+                                </EditArea>
+                            </>
+                        ) : (
+                            <>
+                                {" "}
+                                <EditArea>
+                                    <RedisCommand>
+                                        <div>Redis Commands</div>
+                                        <form onSubmit={handleRedisCommand}>
+                                            <CodeEditor
+                                                data-color-mode='dark'
+                                                value={redisCommand}
+                                                language='sql'
+                                                placeholder='Please enter code.'
+                                                onChange={handleRedisChange}
+                                                padding={15}
+                                                style={{
+                                                    fontSize: 12,
+                                                    backgroundColor: "#BB3D00",
+                                                    fontFamily:
+                                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
+                                                    height: "250px",
+                                                    border: "solid 1px black",
+                                                }}
+                                            />
+                                            <button type='submit'>送出指令</button>
+                                        </form>
+                                    </RedisCommand>
+                                    <div>Redis Result（標題）</div>
+                                    <RedisResult>{redisResult}</RedisResult>
+                                </EditArea>
+                            </>
+                        )}
+                    </MainArea>
                     <ResultArea>
                         <div>Console</div>
                         <hr />

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
+import { useParams } from "react-router-dom";
 import api from "../../../util/api";
 import {
     AiOutlineFolder,
@@ -10,8 +11,6 @@ import {
 } from "react-icons/ai";
 import File from "./File";
 import { FileContext } from "../../../context/fileContext";
-
-const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
 
 const folderStyle = {
     paddingLeft: "20px",
@@ -36,6 +35,7 @@ const buttonContainerStyle = {
 };
 
 const Folder = ({ folder, path = "" }) => {
+    const { username, projectName } = useParams();
     const [clonedFolder, setClonedFolder] = useState(folder);
     const { setFile, setFileName } = useContext(FileContext);
     const [isHovering, setIsHovering] = useState(false);
@@ -50,6 +50,8 @@ const Folder = ({ folder, path = "" }) => {
     const [newSubfolderName, setNewSubfolderName] = useState("");
     const [isAddingFile, setIsAddingFile] = useState(false);
     const [newSubfileName, setNewSubfileName] = useState("");
+
+    const serverName = `${username}_${projectName}`;
 
     //取得檔案的完整路徑
     const fullPath = path ? `${path}/${folder.name}` : folder.name;
@@ -84,12 +86,10 @@ const Folder = ({ folder, path = "" }) => {
             await handlePostRewrite();
         }
         //讀取檔案內容
-        const apiUrl = "http://localhost:3001/api/1.0/express/get";
         try {
-            const response = await fetch(`${apiUrl}?readFile=${serverName}/${filePath}`);
-            const data = await response.json();
-            setFile(data.data);
-            localStorage.setItem("fileData", JSON.stringify(data.data));
+            const response = await api.readFile(serverName, filePath);
+            setFile(response);
+            localStorage.setItem("fileData", JSON.stringify(response));
             const trimmedStr = filePath.replace(/^"|"$/g, "");
             localStorage.setItem("nowChoiceFile", trimmedStr);
             setFileName(trimmedStr);
@@ -99,25 +99,11 @@ const Folder = ({ folder, path = "" }) => {
     };
 
     const handlePostRewrite = async () => {
-        const url = "http://localhost:3001/api/1.0/express/rewriteFile";
+        const fileName = localStorage.getItem("nowChoiceFile");
+        const editCode = localStorage.getItem("editedFileData");
+        const task = "rewriteFile";
         try {
-            const fileName = localStorage.getItem("nowChoiceFile");
-            const editCode = localStorage.getItem("editedFileData");
-            const codeData = {
-                task: "rewriteFile",
-                fileName: `${serverName}/${fileName}`,
-                editCode: editCode,
-            };
-            console.log("codeData", codeData);
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ data: codeData }),
-            });
-            const data = await response.json();
-            console.log("result", data);
+            await api.rewriteFile(task, serverName, fileName, editCode);
             localStorage.removeItem("nowChoiceFile");
             localStorage.removeItem("editedFileData");
         } catch (error) {

@@ -1,81 +1,158 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
-import CodeEditor from "@uiw/react-textarea-code-editor";
-import { v4 as uuidv4 } from "uuid";
-import { commitPLpage } from "../../util/commitResult.js";
+import CodeMirror from "@uiw/react-codemirror";
+import { createTheme } from "@uiw/codemirror-themes";
+import { okaidia } from "@uiw/codemirror-theme-okaidia";
+import { javascript } from "@codemirror/lang-javascript";
+import api from "../../util/api";
+import { timestamp, timeFormat } from "../../util/timestamp";
 //使用者頁面後自動存檔------------------------
+function commitPLpage() {
+    //使用者關閉頁面後
+    window.onbeforeunload = async function () {
+        try {
+            await api.PLcodeSave();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+}
+
 commitPLpage();
 //---styled-------------------------------------------
+
+const Container_all = styled.div`
+    font-family: Arial, sans-serif;
+    display: flex;
+    width: 100vw;
+    flex-direction: column;
+    height: 90vh;
+    color: #fff;
+    background-color: #272727;
+`;
+const ProjectInfo = styled.div`
+    height: 30px;
+    border: solid 1px #6c6c6c;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+`;
+const Container_work = styled.div`
+    display: flex;
+    height: 100%;
+`;
 const WorkArea = styled.div`
-    width: 49%;
-    height: 500px;
-    border: solid 1px black;
+    width: 70%;
+    height: 100%;
+    border: solid 1px #6c6c6c;
     padding: 10px;
 `;
-const CodingArea = styled.textarea`
-    width: 80%;
-    height: 300px;
-    border: solid 1px black;
+const BarTitle = styled.div`
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+`;
+
+const ProjectName = styled.div`
+    font-size: 30px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #333;
+    color: #83cd29;
+    transition: all 0.3s ease-in-out;
+    &:hover {
+        transform: scale(1.1);
+        text-shadow: 2px 2px 3px #333;
+    }
 `;
 
 const ConsoleArea = styled.div`
-    width: 50%;
-    height: 500px;
+    width: 30%;
+    height: 100%;
     padding: 10px;
-    border: solid 1px black;
+    border: solid 1px #6c6c6c;
 `;
 const ConsoleResult = styled.textarea`
-    width: 80%;
-    height: 400px;
+    width: 95%;
+    font-size: 16px;
+    height: 73vh;
     padding: 10px;
-    border: solid 1px black;
+    background-color: #272727;
+    color: #fff;
 `;
 
 //---
 const WriteCode = () => {
     //---
+    const { username, projectName } = useParams();
     const [code, setCode] = useState("");
-    const [result, setResult] = useState("請RUN");
+    const [progLang, setProgLang] = useState("");
+    const [execTime, setExecTime] = useState("");
+    const [saveTime, setSaveTime] = useState("");
+    const [permissions, setPermissions] = useState("");
+    const [shareBtn, setShareBtn] = useState("");
+    const [icon, setIcon] = useState("");
+    const [extensions, setExtensions] = useState();
+    const [result, setResult] = useState("");
 
     //fetch api---
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        const url = "http://localhost:3001/api/1.0/PLcode/run";
-        try {
-            const userId = "abc@gmail.com";
-            const socketId = "abc1234";
-            const executeId = uuidv4();
-            const code = localStorage.getItem("code");
-            const programLanguage = "js";
-            const codeData = {
-                userId: userId,
-                socketId: socketId,
-                executeId: executeId,
-                code: code,
-                programLanguage: programLanguage,
-            };
-            console.log("codeData", codeData);
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ data: codeData }),
-            });
 
-            const data = await response.json();
-            console.log("result", data);
+    const getProjectInfo = async () => {
+        try {
+            const data = await api.getPLInfo(username, projectName);
+            localStorage.setItem("editor", data.data.user_id);
+            const usePL = data.data.service_item;
+            localStorage.setItem("prog_lang", usePL);
+            setProgLang(usePL);
+            setExecTime(timeFormat(data.data.last_execution));
+            setSaveTime(timeFormat(data.data.save_time));
+
+            if (usePL === "JavaScript") {
+                setExtensions([javascript({ jsx: true })]);
+                setIcon(`${process.env.PUBLIC_URL}/images/icon_js.webp`);
+            }
+            const projectID = data.data.id;
+            localStorage.setItem("PLprojectID", projectID);
+
+            if (data.data.permissions === "private") {
+                setPermissions("private");
+                setShareBtn("分享專案");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    useEffect(() => {
+        // 在頁面首次加載時自動執行 getProjectInfo 函數
+        getProjectInfo();
+    }, []);
+
+    const handleRunCodeSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const data = await api.PLcodeRun();
             setResult(data.data);
+            setExecTime(timestamp());
+            setSaveTime(timestamp());
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    const handleSaveCodeSubmit = async (event) => {
+        event.preventDefault();
+        try {
+            const data = await api.PLcodeSave();
+            setResult(data.data);
+            setSaveTime(timestamp());
         } catch (error) {
             console.error(error);
         }
     };
 
-    const handleChange = (event) => {
-        const value = event.target.value;
+    const handleChange = React.useCallback((value, viewUpdate) => {
         setCode(value);
         localStorage.setItem("code", value);
-    };
+    }, []);
 
     useEffect(() => {
         const storedCode = localStorage.getItem("code");
@@ -84,33 +161,51 @@ const WriteCode = () => {
         }
     }, []);
 
+    const handleShareBtn = async (event) => {
+        event.preventDefault();
+        alert("預計 Sprint 4 開放分享功能，敬請期待");
+    };
+
     return (
-        <>
-            <WorkArea>
-                <h3>寫code工作區</h3>
-                <form onSubmit={handleSubmit}>
-                    {/* <CodingArea rows={10} cols={50} value={code} onChange={handleChange} /> */}
-                    <CodeEditor
+        <Container_all>
+            <ProjectInfo>
+                <div>
+                    <img src={icon} alt='icon' style={{ width: "40px", height: "40px" }} />
+                </div>
+                <ProjectName>{projectName}</ProjectName>
+                <button onClick={handleRunCodeSubmit}>
+                    執行按鈕，啓動時會顯示停止，會跑倒數1分鐘的的進度條，然後改回停止
+                </button>
+                <div>上次執行時間 {execTime}</div>
+                <button onClick={handleSaveCodeSubmit}>存檔</button>
+                <div>上次存檔時間 {saveTime}</div>
+                {permissions === "private" ? null : (
+                    <>
+                        <div>分享連結：.........</div>
+                        <button>複製按鈕</button>
+                    </>
+                )}
+                <button onClick={handleShareBtn}>{shareBtn}</button>
+            </ProjectInfo>
+            <Container_work>
+                <WorkArea>
+                    <BarTitle>{progLang}</BarTitle>
+                    <hr />
+                    <CodeMirror
                         value={code}
-                        language='js'
-                        placeholder='Please enter JS code.'
+                        height='75vh'
+                        theme={okaidia}
+                        extensions={extensions}
                         onChange={handleChange}
-                        padding={15}
-                        style={{
-                            fontSize: 12,
-                            backgroundColor: "#272727",
-                            height: "400px",
-                            fontFamily: "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                        }}
                     />
-                    <button type='submit'>Run</button>
-                </form>
-            </WorkArea>
-            <ConsoleArea>
-                <h3>Console</h3>
-                <ConsoleResult value={result} readOnly />
-            </ConsoleArea>
-        </>
+                </WorkArea>
+                <ConsoleArea>
+                    <BarTitle>Console</BarTitle>
+                    <hr />
+                    <ConsoleResult value={result} readOnly />
+                </ConsoleArea>
+            </Container_work>
+        </Container_all>
     );
 };
 

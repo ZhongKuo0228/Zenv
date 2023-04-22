@@ -1,4 +1,7 @@
 import tcpServer from "../models/tcpServer.js";
+import { updateExpiredTime } from "../models/db-webServices.js";
+import { getUserID } from "../models/db-user.js";
+
 //---使用TCP功能
 const connections = tcpServer();
 
@@ -17,7 +20,7 @@ async function socketWrite(job) {
                 }, 10000); // Set your desired timeout value (e.g., 10000 milliseconds)
 
                 socket.on("data", (data) => {
-                    console.log("收到client", data);
+                    // console.log("收到client", data);
                     clearTimeout(timeout);
                     resolve(data);
                 });
@@ -42,7 +45,7 @@ async function socketWrite(job) {
 function bufferToJson(buffer) {
     if (buffer == undefined) {
         buffer = "tcp Client 回覆異常";
-        console.log(buffer);
+        // console.log(buffer);
         return buffer;
     } else {
         return JSON.parse(buffer.toString()); //buffer轉成JSON格式
@@ -53,7 +56,7 @@ function bufferToJson(buffer) {
 export async function sendCodeToTcpClient(req) {
     const code = req.body.data;
     let job = {
-        socketId: code.socketId,
+        task: code.task,
         executeId: code.executeId,
         code: code.code,
         programLanguage: code.programLanguage,
@@ -66,21 +69,24 @@ export async function sendCodeToTcpClient(req) {
 //---Express Job
 export async function createExpressProject(req) {
     const project = req.body.data;
+
     let job = {
         task: project.task,
-        userId: project.userId,
-        projectName: project.projectName,
+        serverName: project.serverName,
         gitRepoUrl: project.gitRepoUrl,
     };
+
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
 
 export async function getFolderIndex(req) {
+    const folderName = req.query.getFolderIndex;
     let job = {
         task: "getFolderIndex",
-        folderName: req.query.getFolderIndex,
+        folderName: folderName,
     };
+    
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
@@ -96,12 +102,7 @@ export async function readFile(req) {
 
 export async function rewriteFile(req) {
     const project = req.body.data;
-
-    let job = {
-        task: project.task,
-        fileName: project.fileName,
-        editCode: project.editCode,
-    };
+    console.log("r", project);
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }

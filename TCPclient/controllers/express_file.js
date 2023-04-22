@@ -6,7 +6,6 @@ import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH } from "./express_container.js";
 
-
 //從github拉資料下來
 function downloadRepo(path, gitUrl) {
     //下載到專案資料中
@@ -46,13 +45,12 @@ async function listFiles(folderPath) {
 //創立專案後，創立資料夾
 export async function createFolder(job) {
     try {
-        const userId = job.userId;
-        const projectName = job.projectName;
+        const serverName = job.serverName;
         const gitUrl = job.gitRepoUrl;
         //專案資料夾創立
         const folderPath = path.join(moduleDir, "../express_project/");
         const logPath = path.join(moduleDir, "../express_project/server_logs");
-        const folderName = `${userId}_${projectName}`;
+        const folderName = serverName;
         const newProjectPath = `${folderPath}${folderName}`;
         const gitFolderPath = `${newProjectPath}/gitFolder`;
 

@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from "uuid";
+const JWT = localStorage.getItem("jwt");
 const api = {
     hostname: "http://localhost:3001/api/1.0",
 
@@ -27,30 +29,18 @@ const api = {
         const response = await fetch(`${this.hostname}/reports/revenue`);
         return await response.json();
     },
-
-    //Express------------------------------------------------------------------------------------------
-    //NodeJS操作
-    async getFolderIndex(serverName) {
-        try {
-            const response = await fetch(`${this.hostname}/express/get?getFolderIndex=${serverName}`);
-            const responseData = await response.json();
-            return JSON.parse(responseData.data); // 解析資料
-        } catch (error) {
-            console.error(error);
-        }
-    },
-
-    async fileOper(task, type, fileName) {
+    //PL----------------------------------------------------------------------------------------------
+    async getPLInfo(userName, projectName) {
         const data = {
-            task: task,
-            type: type,
-            fileName: fileName,
+            userName: userName,
+            projectName: projectName,
         };
         try {
-            const response = await fetch(`${this.hostname}/express/fileOper`, {
+            const response = await fetch(`${this.hostname}/PLcode/getInfo`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
                 },
                 body: JSON.stringify({ data: data }),
             });
@@ -59,17 +49,178 @@ const api = {
             console.error("Error fileOper fetching POST event data:", error);
         }
     },
-    async jsOper(task, serverName, doJob) {
+    async PLcodeRun() {
+        const JWT = localStorage.getItem("jwt");
+        try {
+            const codeData = {
+                task: "runCode",
+                executeId: uuidv4(),
+                code: localStorage.getItem("code"),
+                programLanguage: localStorage.getItem("prog_lang"),
+                projectID: localStorage.getItem("PLprojectID"),
+                editorID: localStorage.getItem("editor"),
+            };
+            const response = await fetch(`${this.hostname}/PLcode/run`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: codeData }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async PLcodeSave() {
+        const JWT = localStorage.getItem("jwt");
+        try {
+            const codeData = {
+                task: "saveCode",
+                code: localStorage.getItem("code"),
+                projectID: localStorage.getItem("PLprojectID"),
+                editorID: localStorage.getItem("editor"),
+            };
+            const response = await fetch(`${this.hostname}/PLcode/save`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: codeData }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+
+    //Express------------------------------------------------------------------------------------------
+    //創建專案
+    async resetFile(task, serverName) {
+        try {
+            const gitRepoUrl = "https://github.com/ZhongKuo0228/express-example.git";
+            const projectData = {
+                task: task,
+                serverName: serverName,
+                gitRepoUrl: gitRepoUrl,
+            };
+            const response = await fetch(`${this.hostname}/webServices/resetFile`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: projectData }),
+            });
+            return response;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    //刷新封存期限
+    async updateExpiredTime(userName, projectName) {
+        const JWT = localStorage.getItem("jwt");
+        try {
+            const serverName = {
+                userName: userName,
+                projectName: projectName,
+            };
+            const response = await fetch(`${this.hostname}/WebServices/update`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: serverName }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    //NodeJS操作
+    async getFolderIndex(serverName) {
+        try {
+            const response = await fetch(`${this.hostname}/webServices/get?getFolderIndex=${serverName}`, {
+                headers: {
+                    Authorization: `Bearer ${JWT}`,
+                },
+            });
+            const responseData = await response.json();
+            return JSON.parse(responseData.data); // 解析資料
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    async readFile(serverName, filePath) {
+        try {
+            const response = await fetch(`${this.hostname}/webServices/get?readFile=${serverName}/${filePath}`, {
+                headers: {
+                    Authorization: `Bearer ${JWT}`,
+                },
+            });
+            const responseData = await response.json();
+            return responseData.data; // 解析資料
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    async rewriteFile(task, serverName, fileName, editCode) {
         const data = {
             task: task,
+            fileName: `${serverName}/${fileName}`,
+            editCode: editCode,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/webServices/rewriteFile`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async fileOper(task, type, fileName) {
+        const data = {
+            task: task,
+            type: type,
+            fileName: fileName,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/webServices/fileOper`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async jsOper(task, serverName, doJob, projectName) {
+        const data = {
+            task: task,
+            userId: localStorage.getItem("editor"),
+            projectName: projectName,
             serverName: serverName,
             doJob: doJob,
         };
         try {
-            const response = await fetch(`${this.hostname}/express/jsOper`, {
+            const response = await fetch(`${this.hostname}/webServices/jsOper`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
                 },
                 body: JSON.stringify({ data: data }),
             });
@@ -86,10 +237,11 @@ const api = {
             command: command,
         };
         try {
-            const response = await fetch(`${this.hostname}/express/dbOper`, {
+            const response = await fetch(`${this.hostname}/webServices/dbOper`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
                 },
                 body: JSON.stringify({ data: data }),
             });
@@ -106,10 +258,11 @@ const api = {
             command: command,
         };
         try {
-            const response = await fetch(`${this.hostname}/express/dbOper`, {
+            const response = await fetch(`${this.hostname}/webServices/dbOper`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
                 },
                 body: JSON.stringify({ data: data }),
             });

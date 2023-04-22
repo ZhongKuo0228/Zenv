@@ -6,6 +6,8 @@ import { promisify } from "util";
 const execAsync = promisify(exec);
 import { stopPLContainer, rmPLContainer } from "../controllers/PLcontainer.js";
 
+const timers = {}; //放置定時器
+
 async function npmCommand(serverName, vPath, doJob) {
     return new Promise(async (resolve, reject) => {
         const container = "docker";
@@ -218,9 +220,15 @@ export async function jsOperRun(job) {
         const result = await getOutPort(ymlPath, `${serverName}-express`);
         //開啓log記錄
         await runLogSH(serverName, ymlPath);
-        return result;
 
-        //控制容器指令
+        //30分鐘後自動停止
+        timers[serverName] = setTimeout(async () => {
+            await composeStop(ymlPath, `${serverName}-express`);
+            delete timers[serverName];
+            console.log(`${serverName}伺服器時間到`);
+        }, 30 * 60 * 1000);
+
+        return result;
     } catch (err) {
         console.log(`啓動 ${serverName}-express 發生問題: `, err.message);
         return err.message;
@@ -235,9 +243,12 @@ export async function jsOperStop(job) {
         await composeStop(ymlPath, `${serverName}-express`);
         const result = `伺服器停止 : ${serverName}`;
         // await stopLogSH(serverName, ymlPath);
-        return result;
 
-        //控制容器指令
+        //清除定時器
+        clearTimeout(timers[serverName]);
+        delete timers[serverName];
+
+        return result;
     } catch (err) {
         console.log(`停止 ${serverName}-express 發生問題: `, err.message);
         return err.message;

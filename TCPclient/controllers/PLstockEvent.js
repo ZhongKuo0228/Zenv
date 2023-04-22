@@ -2,6 +2,8 @@ import { exec } from "child_process";
 import { sendToServer } from "../tcp-client.js";
 import { createPLContainer, rmPLContainer, stopPLContainer, delTempFile } from "./PLcontainer.js";
 
+const timers = {}; //放置定時器
+
 export async function PLevent(job) {
     console.log("job", job);
     const executeId = job.executeId;
@@ -10,6 +12,14 @@ export async function PLevent(job) {
 
     const createCommand = await createPLContainer(executeId, programLanguage, code);
     const child = exec(createCommand);
+
+    timers[executeId] = setTimeout(async () => {
+        await stopPLContainer(executeId);
+        await rmPLContainer(executeId);
+        await delTempFile(executeId, programLanguage);
+        delete timers[executeId];
+        console.log(`${executeId}執行時間超過1分鐘`);
+    }, 1 * 60 * 1000);
 
     child.stdin.on("exit", (code) => {
         console.log(`Child process exited with code ${code}`);
@@ -20,6 +30,12 @@ export async function PLevent(job) {
     child.stdout.on("data", (data) => {
         // console.log(`stdout: ${data}`);
         //將結果串在一起
+        output += data;
+    });
+
+    child.stderr.on("data", async (data) => {
+        //回傳運行結果
+        console.log("stderr", data);
         output += data;
     });
 
@@ -37,9 +53,5 @@ export async function PLevent(job) {
         await stopPLContainer(executeId);
         await rmPLContainer(executeId);
         await delTempFile(executeId, programLanguage);
-    });
-
-    child.stderr.on("data", (data) => {
-        console.log(`stderr: ${data}`);
     });
 }
