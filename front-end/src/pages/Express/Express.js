@@ -1,6 +1,5 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import ProgressBar from "react-bootstrap/ProgressBar";
 import { ClipLoader } from "react-spinners";
 import { css } from "@emotion/react";
 import styled from "styled-components";
@@ -30,7 +29,6 @@ const ButtonArea1 = styled.div`
     width: 100%;
     height: 50px;
     border: solid 1px black;
-    display: none;
     justify-content: space-around;
     padding: 10px;
 `;
@@ -310,6 +308,7 @@ const Express = () => {
         if (result) {
             alert("伺服器已停止");
         }
+        localStorage.removeItem("port");
         setRunPort("伺服器未啓動");
     };
     const handleNpmSubmit = async (event) => {

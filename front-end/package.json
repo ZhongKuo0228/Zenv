@@ -12,7 +12,6 @@
     "@uiw/react-codemirror": "^4.19.16",
     "@uiw/react-textarea-code-editor": "^2.1.1",
     "react": "^18.2.0",
-    "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
     "react-icons": "^4.8.0",
     "react-resizable": "^3.0.5",

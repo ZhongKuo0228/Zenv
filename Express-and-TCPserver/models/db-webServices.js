@@ -2,6 +2,12 @@
 import pool from "../models/DBpool.js";
 import { timestamp } from "../util/timestamp.js";
 //sql用的async------------------------------------------
+
+export async function webServiceItems() {
+    const [rows] = await pool.query(`SELECT * FROM service_items WHERE service_type = "web" `);
+    return rows;
+}
+
 export async function getUserName(userId) {
     const [rows] = await pool.query(`SELECT user_name FROM users WHERE id = ?`, [userId]);
     return rows[0];
@@ -36,4 +42,47 @@ export async function updateExpiredTime(userId, projectName) {
         [expired_time, userId, projectName]
     );
     return rows[0];
+}
+
+export async function getUserWebProjects(userId) {
+    const [rows] = await pool.query(
+        `SELECT ws.*, si.items
+    FROM web_services ws
+    JOIN service_items si ON ws.service_item = si.id
+    WHERE ws.user_id = ?`,
+        [userId]
+    );
+    return rows;
+}
+
+async function getServiceItemID(items) {
+    const [rows] = await pool.query(`SELECT * FROM service_items WHERE items  = ?`, [items]);
+    return rows[0].id;
+}
+
+async function checkProjectName(userId, projectName) {
+    const [rows] = await pool.query(`SELECT * FROM web_services WHERE user_id = ? AND project_name = ?`, [
+        userId,
+        projectName,
+    ]);
+    return rows;
+}
+export async function createWebProjects(req) {
+    const userID = req.user.userID;
+    const serviceItem = req.body.data.serviceItem;
+    const projectName = req.body.data.projectName;
+    const checkProject = await checkProjectName(userID, projectName);
+
+    if (checkProject.length === 0) {
+        const createTime = timestamp();
+        const itemsID = await getServiceItemID(serviceItem);
+        const expired_time = new Date(new Date(createTime).getTime() + 7 * 24 * 60 * 60 * 1000);
+        const [rows] = await pool.query(
+            `INSERT INTO web_services (user_id, project_name, service_item,  create_time,expired_time ) VALUES (?, ?, ?, ?,?)`,
+            [userID, projectName, itemsID, createTime, expired_time]
+        );
+        return rows.insertId;
+    } else {
+        return false;
+    }
 }

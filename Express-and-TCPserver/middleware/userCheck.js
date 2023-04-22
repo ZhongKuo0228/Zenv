@@ -20,7 +20,8 @@ async function userCheck(req, res, next) {
         return;
     } else {
         const userName = data.name;
-        req.user = { name: userName };
+        const userID = data.id;
+        req.user = { userID: userID, name: userName };
         next();
     }
 }

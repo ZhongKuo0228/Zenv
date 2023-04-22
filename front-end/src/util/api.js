@@ -29,6 +29,100 @@ const api = {
         const response = await fetch(`${this.hostname}/reports/revenue`);
         return await response.json();
     },
+    //Profile----------------------------------------------------------------------------------------
+    async getUserProfile() {
+        try {
+            const response = await fetch(`${this.hostname}/user/profile`, {
+                headers: {
+                    Authorization: `Bearer ${JWT}`,
+                },
+            });
+            const responseData = await response.json();
+            return responseData.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    async getUserProjects() {
+        try {
+            const response = await fetch(`${this.hostname}/user/userProjects`, {
+                headers: {
+                    Authorization: `Bearer ${JWT}`,
+                },
+            });
+            const responseData = await response.json();
+            return responseData.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    async createPLProject(projectName, serviceItem, selectedItemsType) {
+        const data = {
+            projectName: projectName,
+            serviceItem: serviceItem,
+            itemsType: selectedItemsType,
+        };
+
+        console.log("data", data);
+        try {
+            const response = await fetch(`${this.hostname}/serviceItems/createProject`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async getPLServiceItems() {
+        try {
+            const response = await fetch(`${this.hostname}/serviceItems/plServices`, {
+                headers: {
+                    Authorization: `Bearer ${JWT}`,
+                },
+            });
+            const responseData = await response.json();
+            return responseData.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    async getWebServiceItems() {
+        try {
+            const response = await fetch(`${this.hostname}/serviceItems/webServices`, {
+                headers: {
+                    Authorization: `Bearer ${JWT}`,
+                },
+            });
+            const responseData = await response.json();
+            return responseData.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+    async editProject(serviceItem, projectId) {
+        const data = {
+            serviceItem: serviceItem,
+            projectId: projectId,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/serviceItems/createPLProject`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
     //PL----------------------------------------------------------------------------------------------
     async getPLInfo(userName, projectName) {
         const data = {

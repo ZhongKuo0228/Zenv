@@ -7,7 +7,6 @@ import styled from "styled-components";
 const Wrap = styled.div`
     display: flex;
     height: 100%;
-    border: solid 1px black;
 `;
 
 const App = () => {
