@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import CodeMirror from "@uiw/react-codemirror";
+import { createTheme } from "@uiw/codemirror-themes";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { javascript } from "@codemirror/lang-javascript";
 import api from "../../util/api";
@@ -22,14 +23,17 @@ commitPLpage();
 //---styled-------------------------------------------
 
 const Container_all = styled.div`
+    font-family: Arial, sans-serif;
     display: flex;
     width: 100vw;
     flex-direction: column;
     height: 90vh;
+    color: #fff;
+    background-color: #272727;
 `;
 const ProjectInfo = styled.div`
     height: 30px;
-    border: solid 1px black;
+    border: solid 1px #6c6c6c;
     padding: 10px;
     display: flex;
     justify-content: space-around;
@@ -41,21 +45,40 @@ const Container_work = styled.div`
 const WorkArea = styled.div`
     width: 70%;
     height: 100%;
-    border: solid 1px black;
+    border: solid 1px #6c6c6c;
     padding: 10px;
+`;
+const BarTitle = styled.div`
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 2px;
+`;
+
+const ProjectName = styled.div`
+    font-size: 30px;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px #333;
+    color: #83cd29;
+    transition: all 0.3s ease-in-out;
+    &:hover {
+        transform: scale(1.1);
+        text-shadow: 2px 2px 3px #333;
+    }
 `;
 
 const ConsoleArea = styled.div`
     width: 30%;
     height: 100%;
     padding: 10px;
-    border: solid 1px black;
+    border: solid 1px #6c6c6c;
 `;
 const ConsoleResult = styled.textarea`
-    width: 80%;
-    height: 80vh;
+    width: 95%;
+    font-size: 16px;
+    height: 73vh;
     padding: 10px;
-    border: solid 1px black;
+    background-color: #272727;
+    color: #fff;
 `;
 
 //---
@@ -70,7 +93,7 @@ const WriteCode = () => {
     const [shareBtn, setShareBtn] = useState("");
     const [icon, setIcon] = useState("");
     const [extensions, setExtensions] = useState();
-    const [result, setResult] = useState("請RUN");
+    const [result, setResult] = useState("");
 
     //fetch api---
 
@@ -149,7 +172,7 @@ const WriteCode = () => {
                 <div>
                     <img src={icon} alt='icon' style={{ width: "40px", height: "40px" }} />
                 </div>
-                <div>{projectName}</div>
+                <ProjectName>{projectName}</ProjectName>
                 <button onClick={handleRunCodeSubmit}>
                     執行按鈕，啓動時會顯示停止，會跑倒數1分鐘的的進度條，然後改回停止
                 </button>
@@ -166,17 +189,19 @@ const WriteCode = () => {
             </ProjectInfo>
             <Container_work>
                 <WorkArea>
-                    <div>目前使用語言：{progLang}</div>
+                    <BarTitle>{progLang}</BarTitle>
+                    <hr />
                     <CodeMirror
                         value={code}
-                        height='80vh'
+                        height='75vh'
                         theme={okaidia}
                         extensions={extensions}
                         onChange={handleChange}
                     />
                 </WorkArea>
                 <ConsoleArea>
-                    <div>Console</div>
+                    <BarTitle>Console</BarTitle>
+                    <hr />
                     <ConsoleResult value={result} readOnly />
                 </ConsoleArea>
             </Container_work>
