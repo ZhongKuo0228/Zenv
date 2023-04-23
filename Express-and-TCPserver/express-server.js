@@ -5,6 +5,7 @@ import cors from "cors";
 import { plCodeRouter } from "./routes/api-PLcode.js";
 import { expressRouter } from "./routes/api-webServices.js";
 import { userApiRouter } from "./routes/api-user.js";
+import { serviceItemsRouter } from "./routes/api-serviceItems.js";
 import dotenv from "dotenv";
 import { websStock } from "./models/webSocket.js";
 import { sendLogToWeb } from "./controllers/consumerLogSort.js";
@@ -19,7 +20,8 @@ const httpServer = createServer(app);
 
 app.use("/api/1.0/PLcode", userCheck, plCodeRouter);
 app.use("/api/1.0/webServices", userCheck, expressRouter);
-app.use("/api/1.0/user", userApiRouter);
+app.use("/api/1.0/user", userCheck, userApiRouter);
+app.use("/api/1.0/serviceItems", userCheck, serviceItemsRouter);
 
 //---listen-----------------------------------------
 dotenv.config();

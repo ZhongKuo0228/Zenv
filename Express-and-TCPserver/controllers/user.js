@@ -10,6 +10,8 @@ import {
     checkName,
 } from "../models/db-user.js";
 import { timestamp } from "../util/timestamp.js";
+import { getUserPLProjects } from "../models/db-PLcode.js";
+import { getUserWebProjects } from "../models/db-webServices.js";
 
 //---Web signUp------------------------------------------------
 export async function checkCreateInput(email, password, userName) {
@@ -136,6 +138,53 @@ export async function profileAPI(token) {
         delete data.iat;
         delete data.exp;
         return data;
+    } catch {
+        console.log("JWT 解析失敗");
+        const errorType = 6;
+        return errorType;
+    }
+}
+
+//---UserProject------------------------------------------------------
+export async function userProjects(jwt) {
+    try {
+        const user = await profileAPI(jwt);
+        const userId = user.id;
+        console.log("userId", userId);
+        const plProjects = await getUserPLProjects(userId);
+        const plProjectDetails = plProjects.map((project) => {
+            const createTime = new Date(project.create_time)
+                .toISOString()
+                .replace("T", " ")
+                .replace("Z", "")
+                .substring(0, 16);
+            return {
+                project_name: project.project_name,
+                state: project.permissions,
+                create_time: createTime,
+                items: project.items,
+                itemType: "prog_lang",
+            };
+        });
+
+        const webProjects = await getUserWebProjects(userId);
+        const webProjectDetails = webProjects.map((project) => {
+            const createTime = new Date(project.create_time)
+                .toISOString()
+                .replace("T", " ")
+                .replace("Z", "")
+                .substring(0, 16);
+            return {
+                project_name: project.project_name,
+                state: project.state,
+                create_time: createTime,
+                items: project.items,
+                itemType: "web",
+            };
+        });
+
+        const allProjects = plProjectDetails.concat(webProjectDetails);
+        return allProjects;
     } catch {
         console.log("JWT 解析失敗");
         const errorType = 6;
