@@ -241,7 +241,7 @@ const api = {
                 },
                 body: JSON.stringify({ data: projectName }),
             });
-            return response;
+            return response.json();
         } catch (error) {
             console.error(error);
         }

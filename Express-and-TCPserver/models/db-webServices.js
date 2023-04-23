@@ -44,6 +44,16 @@ export async function updateExpiredTime(userId, projectName) {
     return rows[0];
 }
 
+export async function updateExecTime(userId, projectName) {
+    const nowTime = timestamp();
+    const [rows] = await pool.query(
+        `UPDATE web_services SET start_execution  = ? WHERE user_id = ? AND project_name = ?`,
+        [nowTime, userId, projectName]
+    );
+    console.log("nowTime", rows);
+    return rows[0];
+}
+
 export async function getUserWebProjects(userId) {
     const [rows] = await pool.query(
         `SELECT ws.*, si.items

@@ -19,6 +19,7 @@ expressRouter.post("/checkInfo", async (req, res, next) => {
     const userId = req.user.userID;
     const projectName = req.body.data;
     const result = await checkProjectName(userId, projectName);
+    console.log("check", result);
     if (result) {
         res.status(200).json({ data: result });
     } else {
