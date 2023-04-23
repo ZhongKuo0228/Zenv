@@ -30,7 +30,7 @@ async function socketWrite(job) {
             return data;
         } else {
             // Return a rejected Promise when there are no connections
-            return Promise.reject(new Error("No available connections"));
+            throw new Error("No available connections");
         }
     } catch (error) {
         if (error.message === "Data receive timeout") {
@@ -86,7 +86,7 @@ export async function getFolderIndex(req) {
         task: "getFolderIndex",
         folderName: folderName,
     };
-    
+
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }

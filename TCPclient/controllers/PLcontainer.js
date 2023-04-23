@@ -2,8 +2,6 @@ import { writeFile, unlink } from "node:fs/promises";
 import path from "path";
 import { exec } from "child_process";
 
-
-
 function programLanguageSelect(programLanguage) {
     let ext;
     let image;
@@ -74,9 +72,13 @@ export async function stopPLContainer(executeId) {
 }
 
 export async function delTempFile(executeId, programLanguage) {
-    const prog_lang = programLanguageSelect(programLanguage);
-    const ext = prog_lang[0];
-    const filePath = path.join("./controllers/tempFile");
-    const fileName = `${executeId}.${ext}`;
-    await unlink(`${filePath}/${fileName}`);
+    try {
+        const prog_lang = programLanguageSelect(programLanguage);
+        const ext = prog_lang[0];
+        const filePath = path.join("./controllers/tempFile");
+        const fileName = `${executeId}.${ext}`;
+        await unlink(`${filePath}/${fileName}`);
+    } catch (e) {
+        console.error("刪除檔案錯誤", e);
+    }
 }

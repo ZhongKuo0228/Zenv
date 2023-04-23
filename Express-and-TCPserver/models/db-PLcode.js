@@ -53,7 +53,6 @@ export async function saveCode(req) {
     const projectID = req.body.data.projectID;
     const editorID = req.body.data.editorID;
     const code = req.body.data.code;
-    console.log("save", req.body.data.code);
     const time = timestamp();
     const [rows] = await pool.query(
         `UPDATE prog_lang_services SET edit_code = ? , save_time = ? ,editor = ? WHERE id = ?`,
