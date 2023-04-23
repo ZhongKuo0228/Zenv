@@ -60,12 +60,16 @@ async function getServiceItemID(items) {
     return rows[0].id;
 }
 
-async function checkProjectName(userId, projectName) {
-    const [rows] = await pool.query(`SELECT * FROM web_services WHERE user_id = ? AND project_name = ?`, [
-        userId,
-        projectName,
-    ]);
-    return rows;
+export async function checkProjectName(userId, projectName) {
+    try {
+        const [rows] = await pool.query(`SELECT * FROM web_services WHERE user_id = ? AND project_name = ?`, [
+            userId,
+            projectName,
+        ]);
+        return rows;
+    } catch {
+        return false;
+    }
 }
 export async function createWebProjects(req) {
     const userID = req.user.userID;

@@ -29,6 +29,45 @@ const api = {
         const response = await fetch(`${this.hostname}/reports/revenue`);
         return await response.json();
     },
+    //登入及註冊--------------------------------------------------------------------------------------
+    async userSignUp(username, email, password) {
+        const data = {
+            username: username,
+            email: email,
+            password: password,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/user/signup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
+    async userSignIn(email, password) {
+        const data = {
+            provider: "native",
+            email: email,
+            password: password,
+        };
+        try {
+            const response = await fetch(`${this.hostname}/user/signin`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching POST event data:", error);
+        }
+    },
     //Profile----------------------------------------------------------------------------------------
     async getUserProfile() {
         try {
@@ -192,6 +231,22 @@ const api = {
 
     //Express------------------------------------------------------------------------------------------
     //創建專案
+    async checkInfo(projectName) {
+        try {
+            const response = await fetch(`${this.hostname}/webServices/checkInfo`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: projectName }),
+            });
+            return response;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
     async resetFile(task, serverName) {
         try {
             const gitRepoUrl = "https://github.com/ZhongKuo0228/express-example.git";

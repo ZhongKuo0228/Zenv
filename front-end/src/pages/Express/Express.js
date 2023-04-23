@@ -11,10 +11,11 @@ import { FileContext } from "../../context/fileContext";
 import CodeMirror from "@uiw/react-codemirror";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { javascript } from "@codemirror/lang-javascript";
-// import TerminalComponent from "./Terminal";
+import { sql } from "@codemirror/lang-sql";
 import api from "../../util/api";
 import { timestampWithDaysOffset } from "../../util/timestamp";
 import webSocket from "socket.io-client";
+import images from "../../images/image";
 
 //---
 const Area = styled.div`
@@ -141,7 +142,18 @@ const Express = () => {
     const [folderData, setFolderData] = useState(null);
     const [code, setCode] = useState("");
     const [choiceFile, setChoiceFile] = useState("檔名");
-
+    //確認使用者是否有此專案----------------------------------------------------
+    const checkInfo = async () => {
+        const data = await api.checkInfo(projectName);
+        console.log("123", data);
+        if (data.data === "err") {
+            window.location.href = `/profile/${username}`;
+        }
+    };
+    useEffect(() => {
+        // 在頁面首次加載時自動執行 getProjectInfo 函數
+        checkInfo();
+    }, []);
     //讀取資料夾目錄------------------------------------------------------------
     const fetchData = async () => {
         const data = await api.getFolderIndex(serverName);
@@ -335,11 +347,16 @@ const Express = () => {
             setSqliteResult(result.data);
         }
     };
-    const handleSqliteChange = (event) => {
-        const value = event.target.value;
+    // const handleSqliteChange = (event) => {
+    //     const value = event.target.value;
+    //     setSqliteCommand(value);
+    //     localStorage.setItem("sqliteCommand", value);
+    // };
+
+    const handleSqliteChange = React.useCallback((value, viewUpdate, event) => {
         setSqliteCommand(value);
         localStorage.setItem("sqliteCommand", value);
-    };
+    }, []);
     useEffect(() => {
         const storedCode = localStorage.getItem("sqliteCommand");
         if (storedCode) {
@@ -356,11 +373,15 @@ const Express = () => {
         console.log("redis", result.data);
         setRedisResult(result.data);
     };
-    const handleRedisChange = (event) => {
-        const value = event.target.value;
+    // const handleRedisChange = (event) => {
+        //     setRedisCommand(value);
+    //     const value = event.target.value;
+    //     localStorage.setItem("redisCommand", value);
+    // };
+    const handleRedisChange = React.useCallback((value, viewUpdate, event) => {
         setRedisCommand(value);
         localStorage.setItem("redisCommand", value);
-    };
+    }, []);
     useEffect(() => {
         const storedCode = localStorage.getItem("redisCommand");
         if (storedCode) {
@@ -412,7 +433,7 @@ const Express = () => {
                 <button onClick={handleInitSubmit}>初始化 INIT</button>
             </ButtonArea1>
             <ButtonArea>
-                <div>icon</div>
+                <img src={images.iconExpressBar} alt='Logo' width='150px' />
                 <div>{projectName}</div>
                 <button onClick={handleRunSubmit}>運行 RUN</button>
                 <button onClick={handleStopSubmit}>暫停 STOP</button>
@@ -464,7 +485,7 @@ const Express = () => {
                                 <FileName value={fileName} onChange={choiceFileChange} readOnly />
                                 <CodeMirror
                                     value={code}
-                                    height='80vh'
+                                    height='70vh'
                                     theme={okaidia}
                                     extensions={[javascript({ jsx: true })]}
                                     onChange={handleCodeChange}
@@ -476,21 +497,12 @@ const Express = () => {
                                     <SqliteCommand>
                                         <div>Sqlite Commands</div>
                                         <form onSubmit={handleSqliteCommand}>
-                                            <CodeEditor
-                                                data-color-mode='dark'
+                                            <CodeMirror
                                                 value={sqliteCommand}
-                                                language='sql'
-                                                placeholder='Please enter code.'
+                                                height='50vh'
+                                                theme={okaidia}
+                                                extensions={sql()}
                                                 onChange={handleSqliteChange}
-                                                padding={15}
-                                                style={{
-                                                    fontSize: 12,
-                                                    backgroundColor: "#272727",
-                                                    fontFamily:
-                                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                                    height: "250px",
-                                                    border: "solid 1px black",
-                                                }}
                                             />
                                             <button type='submit'>送出指令</button>
                                         </form>
@@ -512,21 +524,12 @@ const Express = () => {
                                     <RedisCommand>
                                         <div>Redis Commands</div>
                                         <form onSubmit={handleRedisCommand}>
-                                            <CodeEditor
-                                                data-color-mode='dark'
+                                            <CodeMirror
                                                 value={redisCommand}
-                                                language='sql'
-                                                placeholder='Please enter code.'
+                                                height='50vh'
+                                                theme={okaidia}
+                                                extensions={sql()}
                                                 onChange={handleRedisChange}
-                                                padding={15}
-                                                style={{
-                                                    fontSize: 12,
-                                                    backgroundColor: "#BB3D00",
-                                                    fontFamily:
-                                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                                    height: "250px",
-                                                    border: "solid 1px black",
-                                                }}
                                             />
                                             <button type='submit'>送出指令</button>
                                         </form>

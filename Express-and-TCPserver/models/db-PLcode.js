@@ -27,19 +27,23 @@ async function checkProjectName(userId, projectName) {
 }
 
 export async function getPLInfo(req) {
-    const userName = req.body.data.userName;
-    const projectName = req.body.data.projectName;
-    const [rows] = await pool.query(
-        `SELECT pls.*, u.id AS user_id
+    try {
+        const userName = req.body.data.userName;
+        const projectName = req.body.data.projectName;
+        const [rows] = await pool.query(
+            `SELECT pls.*, u.id AS user_id
         FROM prog_lang_services pls
         JOIN users u ON pls.user_id = u.id
         WHERE u.user_name = ? AND pls.project_name = ?`,
-        [userName, projectName]
-    );
-    const serviceItem = await getServiceItems(rows[0].service_item);
-    rows[0].service_item = serviceItem;
+            [userName, projectName]
+        );
+        const serviceItem = await getServiceItems(rows[0].service_item);
+        rows[0].service_item = serviceItem;
 
-    return rows[0];
+        return rows[0];
+    } catch (e) {
+        return false;
+    }
 }
 
 export async function updateExecTime(req) {

@@ -17,6 +17,7 @@ import { getUserWebProjects } from "../models/db-webServices.js";
 export async function checkCreateInput(email, password, userName) {
     //檢查輸入的資料內容
     //檢查輸入的資料是否爲空值
+    console.log(email, password, userName);
     if (email.length == 0 || password.length == 0 || userName.length == 0) {
         console.log("輸入的資料不可爲空值");
         const errorType = 1;

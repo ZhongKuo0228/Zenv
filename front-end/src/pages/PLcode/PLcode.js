@@ -5,8 +5,12 @@ import CodeMirror from "@uiw/react-codemirror";
 import { createTheme } from "@uiw/codemirror-themes";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { javascript } from "@codemirror/lang-javascript";
+import { python } from "@codemirror/lang-python";
+import { java } from "@codemirror/lang-java";
+import { cpp } from "@codemirror/lang-cpp";
 import api from "../../util/api";
 import { timestamp, timeFormat } from "../../util/timestamp";
+import images from "../../images/image";
 //使用者頁面後自動存檔------------------------
 function commitPLpage() {
     //使用者關閉頁面後
@@ -100,23 +104,36 @@ const WriteCode = () => {
     const getProjectInfo = async () => {
         try {
             const data = await api.getPLInfo(username, projectName);
-            localStorage.setItem("editor", data.data.user_id);
-            const usePL = data.data.service_item;
-            localStorage.setItem("prog_lang", usePL);
-            setProgLang(usePL);
-            setExecTime(timeFormat(data.data.last_execution));
-            setSaveTime(timeFormat(data.data.save_time));
+            if (data.data === "err") {
+                window.location.href = `/profile/${username}`;
+            } else {
+                localStorage.setItem("editor", data.data.user_id);
+                const usePL = data.data.service_item;
+                localStorage.setItem("prog_lang", usePL);
+                setProgLang(usePL);
+                setExecTime(timeFormat(data.data.last_execution));
+                setSaveTime(timeFormat(data.data.save_time));
 
-            if (usePL === "JavaScript") {
-                setExtensions([javascript({ jsx: true })]);
-                setIcon(`${process.env.PUBLIC_URL}/images/icon_js.webp`);
-            }
-            const projectID = data.data.id;
-            localStorage.setItem("PLprojectID", projectID);
+                if (usePL === "JavaScript") {
+                    setExtensions([javascript({ jsx: true })]);
+                    setIcon(images.iconJs);
+                } else if (usePL === "Python") {
+                    setExtensions([python()]);
+                    setIcon(images.iconPython);
+                } else if (usePL === "Java") {
+                    setExtensions([java()]);
+                    setIcon(images.iconJava);
+                } else if (usePL === "C++") {
+                    setExtensions([cpp()]);
+                    setIcon(images.iconCpp);
+                }
+                const projectID = data.data.id;
+                localStorage.setItem("PLprojectID", projectID);
 
-            if (data.data.permissions === "private") {
-                setPermissions("private");
-                setShareBtn("分享專案");
+                if (data.data.permissions === "private") {
+                    setPermissions("private");
+                    setShareBtn("分享專案");
+                }
             }
         } catch (error) {
             console.error(error);
