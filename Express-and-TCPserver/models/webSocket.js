@@ -1,11 +1,13 @@
 import { Server } from "socket.io";
+import dotenv from "dotenv";
+dotenv.config();
 
 let io;
 
 export async function websStock(httpServer) {
     io = new Server(httpServer, {
         cors: {
-            origin: "http://localhost:3000",
+            origin: process.env.FrontEnd,
         },
     });
     io.on("connection", (socket) => {

@@ -3,6 +3,7 @@ const JWT = localStorage.getItem("jwt");
 const api = {
     // hostname: "http://localhost:3001/api/1.0",
     hostname: "https://www.rt019.tk/api/1.0",
+    tcpClientIp: "http://144.24.87.146/",
 
     //一些範例：
     async createProduct(data, jwtToken) {
