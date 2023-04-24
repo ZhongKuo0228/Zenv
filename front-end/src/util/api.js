@@ -1,10 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 const JWT = localStorage.getItem("jwt");
 const api = {
-    // hostname: "http://localhost:3001/api/1.0",
-    hostname: "https://www.rt019.tk/api/1.0",
-    stockIO: "https://www.rt019.tk/",
-    tcpClientIp: "http://144.24.87.146/",
+    hostname: "http://localhost:3001/api/1.0",
+    stockIO: "http://localhost:3001",
+    tcpClientIp: "http://localhost",
+    // hostname: "https://www.rt019.tk/api/1.0",
+    // stockIO: "https://www.rt019.tk/",
+    // tcpClientIp: "http://144.24.87.146/",
 
     //一些範例：
     async createProduct(data, jwtToken) {
@@ -250,6 +252,11 @@ const api = {
         }
     },
 
+    async fetchData(server) {
+        const data = await api.getFolderIndex(server);
+        return data;
+    },
+
     async resetFile(task, serverName) {
         try {
             const gitRepoUrl = "https://github.com/ZhongKuo0228/express-example.git";
@@ -271,6 +278,7 @@ const api = {
             console.error(error);
         }
     },
+
     //刷新封存期限
     async updateExpiredTime(userName, projectName) {
         const JWT = localStorage.getItem("jwt");

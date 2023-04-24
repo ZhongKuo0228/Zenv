@@ -8,6 +8,7 @@ import { useState, useEffect, useContext, useRef, CSSProperties } from "react";
 import Folder from "./FileTree/Folder";
 import Table from "./SqlTable/SqlTable";
 import CodeEditor from "@uiw/react-textarea-code-editor";
+import { FaSync, FaSave } from "react-icons/fa";
 import { FileContext } from "../../context/fileContext";
 import CodeMirror from "@uiw/react-codemirror";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
@@ -141,12 +142,108 @@ const WorkArea = styled.div`
     height: 90vh;
     flex-direction: row;
 `;
+//---檔案夾
+const FileManager = styled.div`
+    margin-bottom: 20px;
+`;
 
+const FileManagerHeader = styled.h3`
+    margin: 0;
+    text-align: center;
+    letter-spacing: 8px;
+`;
+
+const FileManagerDivider = styled.hr`
+    margin: 10px 0;
+`;
+
+const FileManagerDescription = styled.p`
+    margin: 0;
+`;
 const FolderIndex = styled.div`
     width: 20%;
     border: solid 1px black;
     padding: 10px;
 `;
+
+const ButtonFileContainer = styled.div`
+    margin-right: 10px;
+    margin-left: 90px;
+    display: flex;
+    gap: 20px;
+`;
+
+//功能分頁選單區
+const FeatureTabsContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const ButtonGroup = styled.div`
+    display: flex;
+    border-bottom: 1px solid #272727;
+`;
+
+const FeatureButton = styled.button`
+    background-color: ${({ selected }) => (selected ? "#272727" : "#ccc")};
+    color: ${({ selected }) => (selected ? "white" : "black")};
+    border: none;
+    border-left: 0.5px solid #e7e5df;
+    border-right: 0.5px solid #e7e5df;
+    width: 100px;
+    height: 45px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 10px 10px 0 0;
+    box-shadow: ${({ selected }) => (selected ? "0 4px 6px rgba(0, 0, 0, 0.1)" : "none")};
+    &:hover {
+        background-color: ${({ selected }) => (selected ? "#444444" : "#bbb")};
+    }
+`;
+
+const NpmForm = styled.form`
+    display: flex;
+    background-color: #ccc;
+    padding: 0.25rem 1rem;
+    border-radius: 10px 10px 0 0;
+    align-items: center;
+`;
+
+const NpmLabel = styled.span`
+    color: #272727;
+    font-family: monospace;
+    font-size: 1rem;
+    margin-left: 0.5rem;
+`;
+
+const NpmInput = styled.input`
+    background-color: #ccc;
+    border: 1px solid #2c2e30;
+    color: #272727;
+    padding: 0.5rem;
+    margin-left: 0.5rem;
+    font-family: monospace;
+    font-size: 1rem;
+    border-radius: 3px;
+`;
+
+const NpmSubmitButton = styled.button`
+    background-color: #092327;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-left: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 3px;
+    &:hover {
+        background-color: #16a085;
+    }
+`;
+
+//
 const MainArea = styled.div`
     width: 59%;
     border: solid 1px black;
@@ -155,7 +252,6 @@ const MainArea = styled.div`
 const EditArea = styled.div`
     width: 100%;
     border: solid 1px black;
-    padding: 10px;
 `;
 const FileName = styled.input`
     width: 95%;
@@ -170,29 +266,23 @@ const ResultArea = styled.div`
 `;
 
 const SqliteCommand = styled.div`
-    width: 90%;
-    height: 300px;
-    border: solid 1px black;
-    padding: 10px;
+    width: 100%;
+    height: 470px;
 `;
 const SqliteResult = styled.div`
-    width: 90%;
+    width: 100%;
     height: 100px;
     border: solid 1px black;
-    padding: 10px;
 `;
 
 const RedisCommand = styled.div`
-    width: 90%;
-    height: 300px;
-    border: solid 1px black;
-    padding: 10px;
+    width: 98%;
+    height: 470px;
 `;
 const RedisResult = styled.div`
-    width: 90%;
+    width: 100%;
     height: 100px;
     border: solid 1px black;
-    padding: 10px;
 `;
 const ExpressLog = styled.div`
     width: 90%;
@@ -221,6 +311,8 @@ const Express = () => {
     const [redisCommand, setRedisCommand] = useState("");
     const [redisResult, setRedisResult] = useState("redis執行結果");
     const [expressLog, setExpressLog] = useState([]);
+    const [selectedFeature, setSelectedFeature] = useState("");
+
     const logEndRef = useRef(null);
 
     const serverName = `${username}_${projectName}`;
@@ -229,6 +321,7 @@ const Express = () => {
     const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
         setFeature(data);
+        setSelectedFeature(data);
     };
     const features = ["NodeJs", "Sqlite", "Redis"];
 
@@ -280,20 +373,27 @@ const Express = () => {
         return `${minutes}分${seconds}秒`;
     };
     //讀取資料夾目錄------------------------------------------------------------
-    const fetchData = async () => {
-        const data = await api.getFolderIndex(serverName);
+    // const fetchData = async () => {
+    //     const data = await api.getFolderIndex(serverName);
+    //     setFolderData(data);
+    //     setShouldFetchData(false);
+    // };
+
+    async function getServerData() {
+        const data = await api.fetchData(serverName);
         setFolderData(data);
         setShouldFetchData(false);
-    };
+    }
+
     useEffect(() => {
         if (shouldFetchData) {
-            fetchData();
+            getServerData();
             setIsInit(true);
         }
     }, [shouldFetchData]);
 
     const handleIndexRefresh = () => {
-        fetchData();
+        getServerData();
     };
 
     //處理檔案被點擊後，將編輯區更新內容------------------------------------------------------------
@@ -333,6 +433,8 @@ const Express = () => {
         event.preventDefault();
         const task = "createServer";
         await api.resetFile(task, serverName);
+
+        getServerData();
     };
 
     const handleInitSubmit = async (event) => {
@@ -433,7 +535,7 @@ const Express = () => {
     };
     useEffect(() => {
         const port = localStorage.getItem("port");
-        fetchData();
+        getServerData();
         if (port) {
             setRunPort(`${api.tcpClientIp}:${port}`);
         } else {
@@ -560,6 +662,19 @@ const Express = () => {
         scrollToBottom();
     }, [expressLog]);
 
+    const handlePostRewrite = async () => {
+        const fileName = localStorage.getItem("nowChoiceFile");
+        const editCode = localStorage.getItem("editedFileData");
+        const task = "rewriteFile";
+        try {
+            await api.rewriteFile(task, serverName, fileName, editCode);
+            localStorage.removeItem("nowChoiceFile");
+            localStorage.removeItem("editedFileData");
+        } catch (error) {
+            console.error("Error fetching POST event data:", error);
+        }
+    };
+
     //---------------------------------------------------------------------------
     return (
         <Area>
@@ -630,42 +745,55 @@ const Express = () => {
             <WorkArea>
                 <>
                     <FolderIndex>
-                        資料夾
-                        <hr />
-                        (忽略規則： .git 、 node_modules 、package-lock.json);
-                        <hr />
-                        <button onClick={handleIndexRefresh}>Refresh</button>
+                        <FileManager>
+                            <FileManagerHeader>檔案總管</FileManagerHeader>
+                            <FileManagerDivider />
+                            <FileManagerDescription>忽略顯示檔案 :</FileManagerDescription>
+                            <FileManagerDescription>node_modules、package-lock.json</FileManagerDescription>
+                            <FileManagerDivider />
+                        </FileManager>
+                        <ButtonFileContainer>
+                            <button onClick={handleIndexRefresh}>
+                                <FaSync /> 更新檔案
+                            </button>
+                            <button onClick={handlePostRewrite}>
+                                <FaSave /> 存檔
+                            </button>
+                        </ButtonFileContainer>
                         <hr />
                         {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
                     </FolderIndex>
                     <MainArea>
-                        <div>
-                            {features.map((feature, index) => (
-                                <button
-                                    style={{ background: "#3630a3", color: "white" }}
-                                    onClick={(e) => handleFeature(feature)}
-                                    key={index}
-                                >
-                                    {feature}
-                                </button>
-                            ))}
-                            <form onSubmit={handleNpmSubmit}>
-                                npm
-                                <input
+                        <FeatureTabsContainer>
+                            <ButtonGroup>
+                                {features.map((feature, index) => (
+                                    <FeatureButton
+                                        onClick={() => handleFeature(feature)}
+                                        key={index}
+                                        selected={selectedFeature === feature}
+                                    >
+                                        {feature}
+                                    </FeatureButton>
+                                ))}
+                            </ButtonGroup>
+                            <NpmForm onSubmit={handleNpmSubmit}>
+                                <NpmLabel>npm</NpmLabel>
+                                <NpmInput
                                     type='text'
-                                    placeholder='npm指令'
+                                    placeholder='指令'
                                     value={npmCommand}
                                     onChange={(e) => setNpmCommand(e.target.value)}
                                 />
-                                <button type='submit'>送出</button>
-                            </form>
-                        </div>
+                                <NpmSubmitButton type='submit'>送出</NpmSubmitButton>
+                            </NpmForm>
+                        </FeatureTabsContainer>
                         {feature === "NodeJs" ? (
                             <EditArea>
                                 <FileName value={fileName} onChange={choiceFileChange} readOnly />
                                 <CodeMirror
                                     value={code}
-                                    height='70vh'
+                                    width='100%'
+                                    height='75vh'
                                     theme={okaidia}
                                     extensions={[javascript({ jsx: true })]}
                                     onChange={handleCodeChange}
