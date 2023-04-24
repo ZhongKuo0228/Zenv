@@ -9,13 +9,14 @@ let socket = null;
 let reconnectTimer = null;
 
 function connectToServer() {
+    if (reconnectTimer) {
+        clearInterval(reconnectTimer);
+        reconnectTimer = null;
+    }
+
     socket = net.createConnection({ port: 8000 }, () => {
         isConnected = true;
         console.log("連接 TCP server 成功");
-        if (reconnectTimer) {
-            clearInterval(reconnectTimer);
-            reconnectTimer = null;
-        }
     });
 
     socket.on("data", async (data) => {
@@ -42,9 +43,12 @@ function connectToServer() {
     socket.on("error", (err) => {
         isConnected = false;
         console.error("err：", "與 TCP server 連線失敗，5秒後重新連線");
-        reconnectTimer = setInterval(() => {
-            connectToServer();
-        }, 5000);
+        if (!reconnectTimer) {
+            // 新增這行檢查
+            reconnectTimer = setInterval(() => {
+                connectToServer();
+            }, 5000);
+        }
     });
     return isConnected;
 }
