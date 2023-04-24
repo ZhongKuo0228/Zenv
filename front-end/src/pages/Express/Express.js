@@ -538,7 +538,7 @@ const Express = () => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        const socket = webSocket(`${api.hostname}`);
+        const socket = webSocket(`${api.stockIO}`);
         socket.on("connect", () => {
             console.log("Successfully connected to server!");
         });
