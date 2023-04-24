@@ -84,7 +84,9 @@ export async function delTempFile(executeId, programLanguage) {
         const ext = prog_lang[0];
         const filePath = path.join("./controllers/tempFile");
         const fileName = `${executeId}.${ext}`;
-        await unlink(`${filePath}/${fileName}`);
+        const command = `rm ${filePath}/${fileName}`;
+        exec(command);
+        // await unlink(`${filePath}/${fileName}`);
     } catch (e) {
         console.error("刪除檔案錯誤", e);
     }
