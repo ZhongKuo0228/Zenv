@@ -427,7 +427,7 @@ const Express = () => {
         //使用者進入網頁後自動刷新過期時間------------------------
         await api.updateExpiredTime(username, projectName);
         setExpiredTime(timestampWithDaysOffset(7));
-        setRunPort(`http://localhost:${result.data}`);
+        setRunPort(`${api.tcpClientIp}:${result.data}`);
         // Set the remaining time to 30 minutes (1800 seconds)
         checkRemainingTime();
     };
@@ -435,7 +435,7 @@ const Express = () => {
         const port = localStorage.getItem("port");
         fetchData();
         if (port) {
-            setRunPort(`http://localhost:${port}`);
+            setRunPort(`${api.tcpClientIp}:${port}`);
         } else {
             setRunPort("伺服器未啓動");
             localStorage.removeItem("port");
@@ -456,7 +456,7 @@ const Express = () => {
     const handleWebPageOpen = () => {
         const port = localStorage.getItem("port");
         if (port) {
-            window.open(`http://localhost:${port}`);
+            window.open(`${api.tcpClientIp}:${port}`);
         } else {
             handleRunSubmit();
         }
@@ -538,7 +538,7 @@ const Express = () => {
     const socketRef = useRef(null);
 
     useEffect(() => {
-        const socket = webSocket("http://localhost:3001");
+        const socket = webSocket(`${api.hostname}`);
         socket.on("connect", () => {
             console.log("Successfully connected to server!");
         });
