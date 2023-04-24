@@ -1,0 +1,7 @@
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+# 後續Run image時，使用 -v$(pwd):來掛載package.json
+# docker run -it -v $(pwd):/usr/src/app node/npm "指令"
+
+ENTRYPOINT [ "npm" ]
