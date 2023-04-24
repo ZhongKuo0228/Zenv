@@ -2,6 +2,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import { css } from "@emotion/react";
+import { FaPlay, FaPause, FaChrome } from "react-icons/fa";
 import styled from "styled-components";
 import { useState, useEffect, useContext, useRef, CSSProperties } from "react";
 import Folder from "./FileTree/Folder";
@@ -11,10 +12,11 @@ import { FileContext } from "../../context/fileContext";
 import CodeMirror from "@uiw/react-codemirror";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { javascript } from "@codemirror/lang-javascript";
-// import TerminalComponent from "./Terminal";
+import { sql } from "@codemirror/lang-sql";
 import api from "../../util/api";
 import { timestampWithDaysOffset } from "../../util/timestamp";
 import webSocket from "socket.io-client";
+import images from "../../images/image";
 
 //---
 const Area = styled.div`
@@ -24,22 +26,113 @@ const Area = styled.div`
 
     flex-direction: column;
 `;
-//---
+//---初始化
 const ButtonArea1 = styled.div`
     width: 100%;
     height: 50px;
     border: solid 1px black;
-    justify-content: space-around;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px;
 `;
+
+const StyledButtonInit = styled.button`
+    background-color: black;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #444;
+    }
+`;
+
+const ButtonWrapper = styled.div`
+    display: flex;
+    align-items: center;
+    margin-left: 15px;
+
+    &:not(:last-child) {
+        margin-right: 15px;
+    }
+`;
+
+const StepNumber = styled.span`
+    color: black;
+    font-weight: bold;
+    margin-right: 5px;
+`;
+
+const Arrow = styled.span`
+    color: black;
+    font-weight: bold;
+    font-size: 40px;
+    margin: 0 10px;
+`;
+//--功能選單
 const ButtonArea = styled.div`
     width: 100%;
     height: 50px;
     border: solid 1px black;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px;
 `;
+
+const LargeText = styled.div`
+    font-size: 50px;
+    font-weight: bold;
+`;
+
+const ButtonContainer = styled.div`
+    display: flex;
+    align-items: center;
+
+    & > *:not(:last-child) {
+        margin-right: 10px;
+    }
+`;
+const StyledButton = styled.button`
+    background-color: ${(props) => (props.type === "run" ? "#2ecc71" : "#95a5a6")};
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    border-radius: 5px;
+
+    & > *:first-child {
+        margin-right: 5px;
+    }
+`;
+const WebPageButton = styled.button`
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    border-radius: 5px;
+
+    & > *:first-child {
+        margin-right: 5px;
+    }
+`;
+
+const SmallText = styled.div`
+    font-size: 12px;
+`;
+
 //---
 const WorkArea = styled.div`
     width: 100%;
@@ -116,10 +209,12 @@ const Express = () => {
     const { file } = useContext(FileContext);
     const { fileName } = useContext(FileContext);
     const [expiredTime, setExpiredTime] = useState("");
+    const [remainingTime, setRemainingTime] = useState(null);
     const [shouldFetchData, setShouldFetchData] = useState(true);
+    const [isInit, setIsInit] = useState(false);
     const [initLoading, setInitLoading] = useState(false);
     const [initProgress, setInitProgress] = useState(0);
-    const [runPort, setRunPort] = useState("伺服器未啓動");
+    const [runPort, setRunPort] = useState(false);
     const [npmCommand, setNpmCommand] = useState("");
     const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table'");
     const [sqliteResult, setSqliteResult] = useState("sqlite執行結果");
@@ -141,19 +236,59 @@ const Express = () => {
     const [folderData, setFolderData] = useState(null);
     const [code, setCode] = useState("");
     const [choiceFile, setChoiceFile] = useState("檔名");
+    //確認使用者是否有此專案----------------------------------------------------
+    const checkInfo = async () => {
+        const data = await api.checkInfo(projectName);
+        if (data.data === "err") {
+            window.location.href = `/profile/${username}`;
+        } else {
+            localStorage.setItem("execTime", data.data[0].start_execution);
+        }
+    };
+    useEffect(() => {
+        checkInfo();
+    }, []);
 
+    const checkRemainingTime = () => {
+        const storedTime = localStorage.getItem("execTime");
+        const port = localStorage.getItem("port");
+        if (storedTime && port) {
+            const currentTime = new Date();
+            const execTime = new Date(storedTime);
+            const timeDifference = currentTime - execTime;
+            const timeThreshold = 30 * 60 * 1000; // 30 minutes in milliseconds
+
+            if (timeDifference > timeThreshold) {
+                localStorage.removeItem("port");
+                setRemainingTime(null);
+            } else {
+                const remaining = timeThreshold - timeDifference;
+                setRemainingTime(remaining);
+                setTimeout(() => {
+                    checkRemainingTime();
+                }, 1000);
+            }
+        }
+    };
+    useEffect(() => {
+        checkRemainingTime();
+    }, []);
+    const formatRemainingTime = (time) => {
+        if (time === null) return "";
+        const minutes = Math.floor(time / (1000 * 60));
+        const seconds = Math.floor((time % (1000 * 60)) / 1000);
+        return `${minutes}分${seconds}秒`;
+    };
     //讀取資料夾目錄------------------------------------------------------------
     const fetchData = async () => {
         const data = await api.getFolderIndex(serverName);
         setFolderData(data);
         setShouldFetchData(false);
-        //使用者進入網頁後自動刷新過期時間------------------------
-        await api.updateExpiredTime(username, projectName);
-        setExpiredTime(timestampWithDaysOffset(7));
     };
     useEffect(() => {
         if (shouldFetchData) {
             fetchData();
+            setIsInit(true);
         }
     }, [shouldFetchData]);
 
@@ -204,6 +339,7 @@ const Express = () => {
         event.preventDefault();
         setInitLoading(true);
         setInitProgress(0);
+        setIsInit(true);
 
         // 模擬進度條
         const simulateProgress = () => {
@@ -288,7 +424,12 @@ const Express = () => {
             alert(`express running on port : ${result.data}`);
             localStorage.setItem("port", result.data);
         }
+        //使用者進入網頁後自動刷新過期時間------------------------
+        await api.updateExpiredTime(username, projectName);
+        setExpiredTime(timestampWithDaysOffset(7));
         setRunPort(`http://localhost:${result.data}`);
+        // Set the remaining time to 30 minutes (1800 seconds)
+        checkRemainingTime();
     };
     useEffect(() => {
         const port = localStorage.getItem("port");
@@ -309,7 +450,22 @@ const Express = () => {
             alert("伺服器已停止");
         }
         localStorage.removeItem("port");
-        setRunPort("伺服器未啓動");
+        setRemainingTime(null);
+        setRunPort(false);
+    };
+    const handleWebPageOpen = () => {
+        const port = localStorage.getItem("port");
+        if (port) {
+            window.open(`http://localhost:${port}`);
+        } else {
+            handleRunSubmit();
+        }
+    };
+    const handleInitOptionOpen = async (event) => {
+        setIsInit(false);
+    };
+    const handleInitOptionClose = async (event) => {
+        setIsInit(true);
     };
     const handleNpmSubmit = async (event) => {
         event.preventDefault();
@@ -335,11 +491,16 @@ const Express = () => {
             setSqliteResult(result.data);
         }
     };
-    const handleSqliteChange = (event) => {
-        const value = event.target.value;
+    // const handleSqliteChange = (event) => {
+    //     const value = event.target.value;
+    //     setSqliteCommand(value);
+    //     localStorage.setItem("sqliteCommand", value);
+    // };
+
+    const handleSqliteChange = React.useCallback((value, viewUpdate, event) => {
         setSqliteCommand(value);
         localStorage.setItem("sqliteCommand", value);
-    };
+    }, []);
     useEffect(() => {
         const storedCode = localStorage.getItem("sqliteCommand");
         if (storedCode) {
@@ -356,11 +517,15 @@ const Express = () => {
         console.log("redis", result.data);
         setRedisResult(result.data);
     };
-    const handleRedisChange = (event) => {
-        const value = event.target.value;
+    // const handleRedisChange = (event) => {
+    //     const value = event.target.value;
+    //     setRedisCommand(value);
+    //     localStorage.setItem("redisCommand", value);
+    // };
+    const handleRedisChange = React.useCallback((value, viewUpdate, event) => {
         setRedisCommand(value);
         localStorage.setItem("redisCommand", value);
-    };
+    }, []);
     useEffect(() => {
         const storedCode = localStorage.getItem("redisCommand");
         if (storedCode) {
@@ -407,25 +572,61 @@ const Express = () => {
                     <p style={progressTextStyle}>{`${initProgress}%`}</p>
                 </div>
             )}
-            <ButtonArea1>
-                <button onClick={handleCreateSubmit}>創立專案</button>
-                <button onClick={handleInitSubmit}>初始化 INIT</button>
-            </ButtonArea1>
-            <ButtonArea>
-                <div>icon</div>
-                <div>{projectName}</div>
-                <button onClick={handleRunSubmit}>運行 RUN</button>
-                <button onClick={handleStopSubmit}>暫停 STOP</button>
-                <div>上次執行時間</div>
-                <div>倒數30分鐘停止伺服器</div>
-                <div>
-                    開啓網頁按鈕
-                    <a href={`${runPort}`} target='_blank' onChange={handleRunSubmit}>
-                        {runPort}
-                    </a>
-                </div>
-                <div>伺服器資料{expiredTime}後進行封存</div>
-            </ButtonArea>
+            {!isInit ? (
+                <ButtonArea1>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <img src={images.iconExpressBar} alt='Logo' width='150px' />
+                        <LargeText>{projectName}</LargeText>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <ButtonWrapper>
+                            <StepNumber>1</StepNumber>
+                            <StyledButtonInit onClick={handleCreateSubmit}>創立專案</StyledButtonInit>
+                        </ButtonWrapper>
+                        <Arrow>➡</Arrow>
+                        <ButtonWrapper>
+                            <StepNumber>2</StepNumber>
+                            <StyledButtonInit onClick={handleInitSubmit}>初始化 INIT</StyledButtonInit>
+                        </ButtonWrapper>
+                    </div>
+                    <StyledButtonInit onClick={handleInitOptionClose}>關閉初始化選單</StyledButtonInit>
+                </ButtonArea1>
+            ) : (
+                <ButtonArea>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <img src={images.iconExpressBar} alt='Logo' width='150px' />
+                        <LargeText>{projectName}</LargeText>
+                    </div>
+                    <ButtonContainer>
+                        {!runPort ? (
+                            <StyledButton type='run' onClick={handleRunSubmit}>
+                                <FaPlay />
+                                運行 RUN
+                            </StyledButton>
+                        ) : (
+                            <StyledButton type='stop' onClick={handleStopSubmit}>
+                                <FaPause />
+                                暫停 STOP
+                            </StyledButton>
+                        )}
+                        {runPort && (
+                            <WebPageButton onClick={handleWebPageOpen}>
+                                <FaChrome />
+                                開啓網頁
+                            </WebPageButton>
+                        )}
+                    </ButtonContainer>
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                        <div style={{ display: "flex", flexDirection: "column" }}>
+                            {remainingTime && remainingTime > 0 && (
+                                <SmallText>倒數{formatRemainingTime(remainingTime)}停止伺服器</SmallText>
+                            )}
+                            <SmallText>伺服器資料{expiredTime}後進行封存</SmallText>
+                        </div>
+                        <StyledButtonInit onClick={handleInitOptionOpen}>開啓初始化選單</StyledButtonInit>
+                    </div>
+                </ButtonArea>
+            )}
             <WorkArea>
                 <>
                     <FolderIndex>
@@ -464,7 +665,7 @@ const Express = () => {
                                 <FileName value={fileName} onChange={choiceFileChange} readOnly />
                                 <CodeMirror
                                     value={code}
-                                    height='80vh'
+                                    height='70vh'
                                     theme={okaidia}
                                     extensions={[javascript({ jsx: true })]}
                                     onChange={handleCodeChange}
@@ -476,21 +677,12 @@ const Express = () => {
                                     <SqliteCommand>
                                         <div>Sqlite Commands</div>
                                         <form onSubmit={handleSqliteCommand}>
-                                            <CodeEditor
-                                                data-color-mode='dark'
+                                            <CodeMirror
                                                 value={sqliteCommand}
-                                                language='sql'
-                                                placeholder='Please enter code.'
+                                                height='50vh'
+                                                theme={okaidia}
+                                                extensions={sql()}
                                                 onChange={handleSqliteChange}
-                                                padding={15}
-                                                style={{
-                                                    fontSize: 12,
-                                                    backgroundColor: "#272727",
-                                                    fontFamily:
-                                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                                    height: "250px",
-                                                    border: "solid 1px black",
-                                                }}
                                             />
                                             <button type='submit'>送出指令</button>
                                         </form>
@@ -512,21 +704,12 @@ const Express = () => {
                                     <RedisCommand>
                                         <div>Redis Commands</div>
                                         <form onSubmit={handleRedisCommand}>
-                                            <CodeEditor
-                                                data-color-mode='dark'
+                                            <CodeMirror
                                                 value={redisCommand}
-                                                language='sql'
-                                                placeholder='Please enter code.'
+                                                height='50vh'
+                                                theme={okaidia}
+                                                extensions={sql()}
                                                 onChange={handleRedisChange}
-                                                padding={15}
-                                                style={{
-                                                    fontSize: 12,
-                                                    backgroundColor: "#BB3D00",
-                                                    fontFamily:
-                                                        "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
-                                                    height: "250px",
-                                                    border: "solid 1px black",
-                                                }}
                                             />
                                             <button type='submit'>送出指令</button>
                                         </form>

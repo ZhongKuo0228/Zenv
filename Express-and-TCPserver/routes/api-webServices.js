@@ -11,9 +11,22 @@ import {
 } from "../controllers/tcpJob.js"; //TCP連線衝突問題尚未解決，先都放在runPLcode執行
 import { logFormat } from "../models/logAgent/reviceLogAgent.js";
 import { updateExpired } from "../controllers/webServices.js";
+import { checkProjectName } from "../models/db-webServices.js";
 import { sendToQueue } from "../models/queue.js";
 const expressRouter = express.Router();
 //---router----------------------------------------------
+expressRouter.post("/checkInfo", async (req, res, next) => {
+    const userId = req.user.userID;
+    const projectName = req.body.data;
+    const result = await checkProjectName(userId, projectName);
+    console.log("check", result);
+    if (result) {
+        res.status(200).json({ data: result });
+    } else {
+        res.status(401).json({ data: "err" });
+    }
+});
+
 expressRouter.post("/resetFile", async (req, res, next) => {
     const result = await createExpressProject(req);
     res.status(200).json({ data: result });

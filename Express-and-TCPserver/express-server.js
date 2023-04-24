@@ -20,7 +20,7 @@ const httpServer = createServer(app);
 
 app.use("/api/1.0/PLcode", userCheck, plCodeRouter);
 app.use("/api/1.0/webServices", userCheck, expressRouter);
-app.use("/api/1.0/user", userCheck, userApiRouter);
+app.use("/api/1.0/user", userApiRouter);
 app.use("/api/1.0/serviceItems", userCheck, serviceItemsRouter);
 
 //---listen-----------------------------------------

@@ -5,12 +5,14 @@ import { getPLInfo, updateExecTime, saveCode } from "../models/db-PLcode.js";
 const plCodeRouter = express.Router();
 //---router----------------------------------------------
 
-
 plCodeRouter.post("/getInfo", async (req, res, next) => {
     // console.log(req.body);
     const result = await getPLInfo(req);
-    console.log("getPLInfo", result);
-    res.status(200).json({ data: result });
+    if (result) {
+        res.status(200).json({ data: result });
+    } else {
+        res.status(401).json({ data: "err" });
+    }
 });
 
 plCodeRouter.post("/run", async (req, res, next) => {

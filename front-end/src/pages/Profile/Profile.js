@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./modal.module.css";
 import api from "../../util/api";
 import styled from "styled-components";
+import images from "../../images/image";
 
 const Container_all = styled.div`
+    padding-top: 30px;
     font-family: Arial, sans-serif;
     display: flex;
     width: 100%;
-    height: 90vh;
     justify-content: center;
     color: #fff;
     background-color: #272727;
@@ -17,7 +19,6 @@ const UserData = styled.div`
     display: flex;
     width: 40%;
     flex-direction: column;
-    height: 100%;
 `;
 //---
 const UserProfile = styled.div`
@@ -85,7 +86,7 @@ const UserName = styled.div`
 const UserProject = styled.div`
     display: flex;
     flex-direction: column;
-    height: 60%;
+    height: 500px;
 `;
 const UserProjectTitle = styled.div`
     font-size: 20px;
@@ -291,9 +292,11 @@ const Profile = () => {
     const [userProjects, setUserProjects] = useState([]);
     const [selectedLanguage, setSelectedLanguage] = useState(null);
     const [selectedItemsType, setSelectedItemsType] = useState(null);
+    const [editItem, setEditItem] = useState(null);
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         async function fetchUserProfile() {
@@ -367,8 +370,10 @@ const Profile = () => {
             if (result) {
                 if (selectedItemsType === "prog_lang") {
                     window.location.href = `/PLpage/${userName}/${projectName}`;
+                    // navigate(`/PLpage/${userName}/${projectName}`);
                 } else {
                     window.location.href = `/webServices/${userName}/${projectName}`;
+                    // navigate(`/webServices/${userName}/${projectName}`);
                 }
             } else {
                 //跳出錯誤，提示專案名稱重複
@@ -381,7 +386,9 @@ const Profile = () => {
         try {
             if (selectedItemsType === "prog_lang") {
                 window.location.href = `/PLpage/${userName}/${projectName}`;
+                // navigate(`/PLpage/${userName}/${projectName}`);
             } else {
+                // navigate(`/webServices/${userName}/${projectName}`);
                 window.location.href = `/webServices/${userName}/${projectName}`;
             }
         } catch (error) {
@@ -389,10 +396,17 @@ const Profile = () => {
         }
     };
     useEffect(() => {
-        if (projectName && selectedItemsType) {
-            handleEditProject();
+        if (editItem === "project") {
+            if (projectName && selectedItemsType) {
+                handleEditProject();
+                setEditItem(null);
+            }
+        } else if (editItem === "create") {
+            handleShow();
+            setEditItem(null);
         }
-    }, [projectName, selectedItemsType]);
+    }, [editItem]);
+
     const modalStyle = show ? { display: "block" } : { display: "none" };
     return (
         <>
@@ -401,7 +415,7 @@ const Profile = () => {
                     <UserProfile>
                         <UserPhoto>
                             <img
-                                src={process.env.PUBLIC_URL + "/images/user-icon.jpg"}
+                                src={images.iconUser}
                                 alt='icon'
                                 style={{
                                     width: "150px",
@@ -419,12 +433,23 @@ const Profile = () => {
                             <ToolBar
                                 key={project.project_name}
                                 onClick={() => {
+                                    setEditItem("project");
                                     setProjectName(project.project_name);
                                     setSelectedItemsType(project.itemType);
                                 }}
                             >
                                 <Icon
-                                    src={process.env.PUBLIC_URL + `/images/icon_${project.items.toLowerCase()}.webp`}
+                                    src={
+                                        project.items === "JavaScript"
+                                            ? images.iconJs
+                                            : project.items === "Python"
+                                            ? images.iconPython
+                                            : project.items === "Java"
+                                            ? images.iconJava
+                                            : project.items === "C++"
+                                            ? images.iconCpp
+                                            : images.iconExpress
+                                    }
                                     alt='icon'
                                 />
                                 <ProjectInfo>
@@ -449,12 +474,25 @@ const Profile = () => {
                             <LanguageBar
                                 key={lang.language}
                                 onClick={() => {
+                                    setEditItem("create");
                                     setSelectedLanguage(lang.language);
                                     setSelectedItemsType(lang.service_type);
-                                    handleShow();
                                 }}
                             >
-                                <Icon src={lang.icon} alt='icon' />
+                                <Icon
+                                    src={
+                                        lang.language === "JavaScript"
+                                            ? images.iconJs
+                                            : lang.language === "Python"
+                                            ? images.iconPython
+                                            : lang.language === "Java"
+                                            ? images.iconJava
+                                            : lang.language === "C++"
+                                            ? images.iconCpp
+                                            : images.iconExpress
+                                    }
+                                    alt='icon'
+                                />
                                 <div>
                                     <Language>{lang.language}</Language>
                                     <Description>{lang.description}</Description>
@@ -464,17 +502,17 @@ const Profile = () => {
                         ))}
                     </PLItems>
                     <WebItems>
-                        <WebItemTitle>架設專屬伺服器（WebFramework）</WebItemTitle>
+                        <WebItemTitle>架設專屬伺服器 WebFramework</WebItemTitle>
                         {frameworkData.map((fw) => (
                             <FrameworkBar
                                 key={fw.framework}
                                 onClick={() => {
+                                    setEditItem("create");
                                     setSelectedLanguage(fw.framework);
                                     setSelectedItemsType(fw.service_type);
-                                    handleShow();
                                 }}
                             >
-                                <Icon src={fw.icon} alt='icon' />
+                                <Icon src={images.iconExpress} alt='icon' />
                                 <div>
                                     <FrameworkName>{fw.framework}</FrameworkName>
                                     <Description>{fw.description}</Description>
@@ -499,7 +537,7 @@ const Profile = () => {
                         &times;
                     </span>
                     <h2>新建的 {selectedLanguage} 專案名稱</h2>
-                    <input type='text' placeholder='請輸入專案名稱' />
+                    <input type='text' placeholder='請輸入專案名稱（僅限英文及數字）' pattern='[A-Za-z0-9]+' required />
 
                     <div>
                         <button onClick={handleClose}>取消</button>

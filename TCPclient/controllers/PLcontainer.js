@@ -9,11 +9,14 @@ function programLanguageSelect(programLanguage) {
         ext = "js";
         image = "node:18-alpine node";
     } else if (programLanguage == "Python") {
-        //TODO: 加入對應的image和執行指令
-    } else if (programLanguage == "cpp") {
-        //TODO: 加入對應的image和執行指令
-    } else if (programLanguage == "java") {
-        //TODO: 加入對應的image和執行指令
+        ext = "py";
+        image = "python:3.11-alpine3.17 python3";
+    } else if (programLanguage == "C++") {
+        ext = "cpp";
+        image = "gcc:12 sh -c";
+    } else if (programLanguage == "Java") {
+        ext = "java";
+        image = " openjdk:21-ea-15-slim-buster java";
     } else {
         console.log("非預設程式語言");
     }
@@ -22,9 +25,8 @@ function programLanguageSelect(programLanguage) {
 
 export async function createPLContainer(executeId, programLanguage, code) {
     const prog_lang = programLanguageSelect(programLanguage);
+    console.log(programLanguage);
     const ext = prog_lang[0];
-
-    //臨時檔案建立
     const filePath = path.join("./controllers/tempFile");
     const fileName = `${executeId}.${ext}`;
     await writeFile(`${filePath}/${fileName}`, code);
@@ -35,9 +37,14 @@ export async function createPLContainer(executeId, programLanguage, code) {
     const containerName = executeId;
     const vPath = path.join(process.cwd(), "./controllers/tempFile");
     const imagesAndRun = prog_lang[1];
-
-    const command = `${container} ${action} ${containerName} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
-    return command;
+    //臨時檔案建立
+    if (programLanguage == "C++") {
+        const command = `${container} ${action} ${containerName} -v ${vPath}:/app ${imagesAndRun} "g++ /app/${fileName} -o /app/cpp && /app/cpp"`; //使用exec所以-it要拿掉
+        return command;
+    } else {
+        const command = `${container} ${action} ${containerName} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
+        return command;
+    }
 }
 
 export async function readResult(executeId) {

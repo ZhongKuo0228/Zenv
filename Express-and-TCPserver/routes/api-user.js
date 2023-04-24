@@ -10,108 +10,118 @@ import {
     checkCreateName,
     userProjects,
 } from "../controllers/user.js";
+import { userCheck } from "../middleware/userCheck.js";
 //----------------------</Router>----------------------------
 
 const userApiRouter = express.Router();
 userApiRouter.use(express.json());
 
 userApiRouter.post("/signup", async (req, res) => {
-    const email = req.body.email;
-    const password = req.body.password;
-    const userName = req.body.name;
-    const checkInput = await checkCreateInput(email, password, userName);
-    if (checkInput == 1) {
-        const errorMessage = "Error:400,輸入的資料不可爲空值";
-        const err = { errorMessage: errorMessage };
-        res.send(err);
-        res.statusCode = 400;
-        return;
-    } else if (checkInput == 2) {
-        const errorMessage = "Error:400,email格式不符";
-        const err = { errorMessage: errorMessage };
-        res.send(err);
-        res.statusCode = 400;
-        return;
-    } else if (checkInput == 3) {
-        const errorMessage = "Error:400,輸入密碼長度不能小於8碼";
-        const err = { errorMessage: errorMessage };
-        res.send(err);
-        res.statusCode = 400;
-        return;
-    }
-
-    //檢查email是否有被註冊過
-    const checkEmailResult = await checkCreateEmail(email);
-    if (checkEmailResult == "nativeExisted") {
-        const errorMessage = "Error:403,此email在已native被註冊";
-        const err = { errorMessage: errorMessage };
-        res.send(err);
-        res.statusCode = 403;
-        return;
-    }
-
-    const checkNameResult = await checkCreateName(userName);
-    if (checkNameResult == "nativeExisted") {
-        const errorMessage = "Error:403,此使用者名稱已被使用";
-        const err = { errorMessage: errorMessage };
-        res.send(err);
-        res.statusCode = 403;
-        return;
-    }
-    //確認資料無誤，寫入資料
-    await createMember(email, password, userName);
-    //進入註冊完成後直接登入
-    await checkEmailAndPassword(email, password);
-    //回傳登入訊息
-    const sendUserData = await resUserAPI(email);
-    const result = { data: sendUserData };
-    return res.send(result);
-});
-
-userApiRouter.post("/signin", async (req, res, next) => {
-    const provider = req.body.provider;
-    if (provider == "native") {
-        const email = req.body.email;
-        const password = req.body.password;
-        //檢查輸入的資料內容
-        //檢查輸入的資料是否爲空值
-        const signinInput = await checkSigninInput(email, password);
-        if (signinInput == false) {
+    try {
+        const email = req.body.data.email;
+        const password = req.body.data.password;
+        const userName = req.body.data.username;
+        const checkInput = await checkCreateInput(email, password, userName);
+        if (checkInput == 1) {
             const errorMessage = "Error:400,輸入的資料不可爲空值";
             const err = { errorMessage: errorMessage };
             res.send(err);
             res.statusCode = 400;
             return;
-        } else {
-            const signinResult = await checkEmailAndPassword(email, password);
-            if (signinResult == 4) {
-                const errorMessage = "Error:403,登入失敗，輸入email查詢不到";
-                const err = { errorMessage: errorMessage };
-                res.send(err);
-                res.statusCode = 403;
-                return;
-            } else if (signinResult == 5) {
-                const errorMessage = "Error:403,登入失敗，輸入密碼錯誤";
-                const err = { errorMessage: errorMessage };
-                res.send(err);
-                res.statusCode = 403;
-                return;
-            } else {
-                //回傳登入訊息
-                const sendUserData = await resUserAPI(email);
-                const result = { data: sendUserData };
-                return res.send(result);
-            }
+        } else if (checkInput == 2) {
+            const errorMessage = "Error:400,email格式不符";
+            const err = { errorMessage: errorMessage };
+            res.send(err);
+            res.statusCode = 400;
+            return;
+        } else if (checkInput == 3) {
+            const errorMessage = "Error:400,輸入密碼長度不能小於8碼";
+            const err = { errorMessage: errorMessage };
+            res.send(err);
+            res.statusCode = 400;
+            return;
         }
-    } else {
+
+        //檢查email是否有被註冊過
+        const checkEmailResult = await checkCreateEmail(email);
+        if (checkEmailResult == "nativeExisted") {
+            const errorMessage = "Error:403,此email在已native被註冊";
+            const err = { errorMessage: errorMessage };
+            res.send(err);
+            res.statusCode = 403;
+            return;
+        }
+
+        const checkNameResult = await checkCreateName(userName);
+        if (checkNameResult == "nativeExisted") {
+            const errorMessage = "Error:403,此使用者名稱已被使用";
+            const err = { errorMessage: errorMessage };
+            res.send(err);
+            res.statusCode = 403;
+            return;
+        }
+        //確認資料無誤，寫入資料
+        await createMember(email, password, userName);
+        //進入註冊完成後直接登入
+        await checkEmailAndPassword(email, password);
+        //回傳登入訊息
+        const sendUserData = await resUserAPI(email);
+        const result = { data: sendUserData };
+        return res.send(result);
+    } catch (err) {
+        console.log("err", err);
         res.send("Error:500,服務器錯誤回應");
         res.statusCode = 500;
-
         return;
     }
 });
 
-userApiRouter.get("/profile", async (req, res, next) => {
+userApiRouter.post("/signin", async (req, res, next) => {
+    try {
+        const provider = req.body.data.provider;
+        if (provider == "native") {
+            const email = req.body.data.email;
+            const password = req.body.data.password;
+            //檢查輸入的資料內容
+            //檢查輸入的資料是否爲空值
+            const signinInput = await checkSigninInput(email, password);
+            if (signinInput == false) {
+                const errorMessage = "Error:400,輸入的資料不可爲空值";
+                const err = { errorMessage: errorMessage };
+                res.send(err);
+                res.statusCode = 400;
+                return;
+            } else {
+                const signinResult = await checkEmailAndPassword(email, password);
+                if (signinResult == 4) {
+                    const errorMessage = "Error:403,登入失敗，輸入email查詢不到";
+                    const err = { errorMessage: errorMessage };
+                    res.send(err);
+                    res.statusCode = 403;
+                    return;
+                } else if (signinResult == 5) {
+                    const errorMessage = "Error:403,登入失敗，輸入密碼錯誤";
+                    const err = { errorMessage: errorMessage };
+                    res.send(err);
+                    res.statusCode = 403;
+                    return;
+                } else {
+                    //回傳登入訊息
+                    const sendUserData = await resUserAPI(email);
+                    const result = { data: sendUserData };
+                    return res.send(result);
+                }
+            }
+        }
+    } catch (err) {
+        console.log("err", err);
+        res.send("Error:500,服務器錯誤回應");
+        res.statusCode = 500;
+        return;
+    }
+});
+
+userApiRouter.get("/profile", userCheck, async (req, res, next) => {
     const getToke = req.headers.authorization;
     //獲取 Authorization 標頭，並確認其是否為 Bearer Token
     if (!getToke || !getToke.startsWith("Bearer ")) {
@@ -136,7 +146,7 @@ userApiRouter.get("/profile", async (req, res, next) => {
     }
 });
 
-userApiRouter.get("/userProjects", async (req, res, next) => {
+userApiRouter.get("/userProjects", userCheck, async (req, res, next) => {
     const getToke = req.headers.authorization;
     //獲取 Authorization 標頭，並確認其是否為 Bearer Token
     if (!getToke || !getToke.startsWith("Bearer ")) {
