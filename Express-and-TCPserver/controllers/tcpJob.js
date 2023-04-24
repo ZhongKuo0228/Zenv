@@ -102,6 +102,11 @@ export async function readFile(req) {
 
 export async function rewriteFile(req) {
     const project = req.body.data;
+    let job = {
+        task: project.task,
+        fileName: project.fileName,
+        editCode: project.editCode,
+    };
     console.log("r", project);
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);

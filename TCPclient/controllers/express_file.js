@@ -105,6 +105,8 @@ export async function toReadFile(job) {
 
         const file = await readFile(filePath);
 
+        console.log("job", job);
+
         return file.toString();
     } catch (e) {
         console.log("讀取檔案發生問題 : ", e);
@@ -114,6 +116,7 @@ export async function toReadFile(job) {
 
 //讀取資料內容
 export async function rewriteFile(job) {
+    console.log("rewriteFile", job);
     try {
         const folderPath = path.join(moduleDir, "../express_project/");
         const fileName = job.fileName;
