@@ -1,0 +1,9 @@
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+# 執行掛載的app.js，並開設3000port讓外部訪問
+# docker run -it -v $(pwd):/usr/src/app node/node-express
+EXPOSE 3000
+
+CMD [ "node", "app.js"]
