@@ -38,7 +38,7 @@ export async function logFormat(batchData) {
         }
         return result;
     } catch (err) {
-        console.err("logFormat錯誤", err.message);
+        console.log("logFormat錯誤", err.message);
     }
 }
 
