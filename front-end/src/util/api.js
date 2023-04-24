@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from "uuid";
 const JWT = localStorage.getItem("jwt");
 const api = {
     hostname: "http://localhost:3001/api/1.0",
+    // hostname: "https://www.rt019.tk/api/1.0",
 
     //一些範例：
     async createProduct(data, jwtToken) {

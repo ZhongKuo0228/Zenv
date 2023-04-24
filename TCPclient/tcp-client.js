@@ -42,6 +42,9 @@ function connectToServer() {
     socket.on("error", (err) => {
         isConnected = false;
         console.error("err：", "與 TCP server 連線失敗，5秒後重新連線");
+        reconnectTimer = setInterval(() => {
+            connectToServer();
+        }, 5000);
     });
     return isConnected;
 }
