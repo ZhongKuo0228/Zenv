@@ -8,7 +8,7 @@ import styled from "styled-components";
 
 const Wrap = styled.div`
     display: flex;
-    height: 100%;
+    flex-direction: column;
 `;
 
 const HeaderContainer = styled.header`
@@ -91,19 +91,19 @@ const App = () => {
     };
     return (
         <>
-            <HeaderContainer>
-                <Title>
-                    <Logo>
-                        <LogoImage src={images.iconLogo} alt='Logo' />
-                    </Logo>
-                    Zenv
-                </Title>
-                <div>
-                    <Button onClick={handleProfileClick}>個人頁面</Button>
-                    <Button onClick={handleLogOut}>登出</Button>
-                </div>
-            </HeaderContainer>
             <Wrap>
+                <HeaderContainer>
+                    <Title>
+                        <Logo>
+                            <LogoImage src={images.iconLogo} alt='Logo' />
+                        </Logo>
+                        Zenv
+                    </Title>
+                    <div>
+                        <Button onClick={handleProfileClick}>個人頁面</Button>
+                        <Button onClick={handleLogOut}>登出</Button>
+                    </div>
+                </HeaderContainer>
                 <FileContextProvider>
                     <Outlet />
                 </FileContextProvider>

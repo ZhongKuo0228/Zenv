@@ -5,6 +5,8 @@ import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promi
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH } from "./express_container.js";
+import { error } from "console";
+import { stderr, stdout } from "process";
 
 //從github拉資料下來
 function downloadRepo(path, gitUrl) {
@@ -160,9 +162,16 @@ export async function operDel(job) {
         const fileName = job.fileName;
         const filePath = `${folderPath}${fileName}`;
         const delCommand = `rm -rf "${filePath}"`;
-        exec(delCommand);
-        let result = `刪除檔案完成 : ${fileName}`;
-        return result;
+        return await new Promise((resolve, reject) => {
+            exec(delCommand, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+
+                let result = `刪除檔案完成 : ${fileName}`;
+                resolve(result);
+            });
+        });
     } catch (e) {
         console.log("新增資料夾、檔案發生問題 : ", e);
         return e;
@@ -175,10 +184,16 @@ export async function operRename(job) {
         const fileName = job.fileName[0];
         const newFileName = job.fileName[1];
         const renameCommand = `mv ${folderPath}${fileName} ${folderPath}${newFileName}`;
-        exec(renameCommand);
-        let result = `重新命名檔案完成 : ${folderPath}${newFileName}`;
-        console.log(`${folderPath}${fileName}`, `${folderPath}${newFileName}`);
-        return result;
+        return await new Promise((resolve, reject) => {
+            exec(renameCommand, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+                let result = `重新命名檔案完成 : ${folderPath}${newFileName}`;
+                console.log(`${folderPath}${fileName}`, `${folderPath}${newFileName}`);
+                resolve(result);
+            });
+        });
     } catch (e) {
         console.log("重新命名檔案發生問題 : ", e);
         return e;

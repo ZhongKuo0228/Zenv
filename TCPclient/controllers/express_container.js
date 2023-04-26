@@ -11,7 +11,7 @@ const timers = {}; //放置定時器
 async function npmCommand(serverName, vPath, doJob) {
     return new Promise(async (resolve, reject) => {
         const container = "docker";
-        const action = "run --name";
+        const action = "run --rm --name ";
         const containerName = serverName;
         const images = "node/npm";
         const command = `${container} ${action} ${containerName} -v ${vPath}:/usr/src/app ${images} ${doJob}`; //使用exec所以-it要拿掉
@@ -263,13 +263,8 @@ export async function jsOperNpm(job) {
         const doJob = job.doJob;
         console.log("doJob", doJob);
 
-        async function executeCommands() {
-            //先安裝一次npm install、並刪除臨時產生的container
-            await npmCommand(serverName, filePath, doJob);
-            await stopPLContainer(serverName);
-            await rmPLContainer(serverName);
-        }
-        await executeCommands();
+        //先安裝一次npm install、並刪除臨時產生的container
+        await npmCommand(serverName, filePath, doJob);
 
         const result = `npm 指令完成 : ${doJob}`;
         return result;

@@ -23,7 +23,8 @@ const folderStyle = {
 
 const folderHoverStyle = {
     ...folderStyle,
-    backgroundColor: "#FFFFCE",
+    backgroundColor: "#ccc",
+    color: "#272727",
 };
 
 const buttonContainerStyle = {
@@ -50,6 +51,14 @@ const Folder = ({ folder, path = "" }) => {
     const [newSubfolderName, setNewSubfolderName] = useState("");
     const [isAddingFile, setIsAddingFile] = useState(false);
     const [newSubfileName, setNewSubfileName] = useState("");
+    const fileContext = useContext(FileContext);
+    const { setFolderData, folderData } = fileContext;
+
+    async function getServerData() {
+        const data = await api.fetchData(serverName);
+        console.log("file", data);
+        setFolderData(data);
+    }
 
     const serverName = `${username}_${projectName}`;
 
@@ -113,7 +122,7 @@ const Folder = ({ folder, path = "" }) => {
 
     //資料夾的文件操作
 
-    const handleDeleteFolder = (event) => {
+    const handleDeleteFolder = async (event) => {
         event.stopPropagation();
         // 顯示提示
         const confirmed = window.confirm(`確認是否要刪除？ : ${path}/${folder.name}`);
@@ -124,7 +133,10 @@ const Folder = ({ folder, path = "" }) => {
             const type = "folder";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfileName}`;
             console.log(task, type, fileName);
-            api.fileOper(task, type, fileName);
+            const result = await api.fileOper(task, type, fileName);
+            if (result) {
+                await getServerData();
+            }
         }
     };
 
@@ -144,7 +156,7 @@ const Folder = ({ folder, path = "" }) => {
         setIsAddingFile(false);
         // 處理將修改後的檔名保存到後端的邏輯
     };
-    const handleNameKeyDown = (event) => {
+    const handleNameKeyDown = async (event) => {
         if (event.key === "Enter") {
             event.preventDefault();
             setIsRenaming(false);
@@ -154,7 +166,10 @@ const Folder = ({ folder, path = "" }) => {
             const oldName = `${serverName}/${path}/${folder.name}`;
             const newName = `${serverName}/${path}/${newFolderName}`;
             const fileName = [oldName, newName];
-            api.fileOper(task, type, fileName);
+            const result = await api.fileOper(task, type, fileName);
+            if (result) {
+                await getServerData();
+            }
             setClonedFolder({ ...clonedFolder, newName: newFolderName });
         }
     };
@@ -168,7 +183,7 @@ const Folder = ({ folder, path = "" }) => {
         setNewSubfolderName(event.target.value);
     };
 
-    const handleSubfolderNameKeyDown = (event) => {
+    const handleSubfolderNameKeyDown = async (event) => {
         if (event.key === "Enter") {
             event.preventDefault();
             setIsAddingFolder(false);
@@ -176,7 +191,10 @@ const Folder = ({ folder, path = "" }) => {
             const task = "operAdd";
             const type = "folder";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfolderName}`;
-            api.fileOper(task, type, fileName);
+            const result = await api.fileOper(task, type, fileName);
+            if (result) {
+                await getServerData();
+            }
             setNewSubfolderName("");
         }
     };
@@ -190,7 +208,7 @@ const Folder = ({ folder, path = "" }) => {
         setNewSubfileName(event.target.value);
     };
 
-    const handleSubfileNameKeyDown = (event) => {
+    const handleSubfileNameKeyDown = async (event) => {
         if (event.key === "Enter") {
             event.preventDefault();
             setIsAddingFile(false);
@@ -198,7 +216,10 @@ const Folder = ({ folder, path = "" }) => {
             const task = "operAdd";
             const type = "file";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfileName}`;
-            api.fileOper(task, type, fileName);
+            const result = await api.fileOper(task, type, fileName);
+            if (result) {
+                await getServerData();
+            }
             setNewSubfileName("");
         }
     };

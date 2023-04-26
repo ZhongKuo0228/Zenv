@@ -208,13 +208,15 @@ const WriteCode = () => {
                 <WorkArea>
                     <BarTitle>{progLang}</BarTitle>
                     <hr />
-                    <CodeMirror
-                        value={code}
-                        height='75vh'
-                        theme={okaidia}
-                        extensions={extensions}
-                        onChange={handleChange}
-                    />
+                    <div style={{ fontSize: "1.2em" }}>
+                        <CodeMirror
+                            value={code}
+                            height='75vh'
+                            theme={okaidia}
+                            extensions={extensions}
+                            onChange={handleChange}
+                        />
+                    </div>
                 </WorkArea>
                 <ConsoleArea>
                     <BarTitle>Console</BarTitle>

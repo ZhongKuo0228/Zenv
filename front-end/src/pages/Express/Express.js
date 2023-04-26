@@ -4,7 +4,7 @@ import { ClipLoader } from "react-spinners";
 import { css } from "@emotion/react";
 import { FaPlay, FaPause, FaChrome } from "react-icons/fa";
 import styled from "styled-components";
-import { useState, useEffect, useContext, useRef, CSSProperties } from "react";
+import { useState, useEffect, useContext, useRef, CSSProperties, useCallback } from "react";
 import Folder from "./FileTree/Folder";
 import Table from "./SqlTable/SqlTable";
 import CodeEditor from "@uiw/react-textarea-code-editor";
@@ -14,33 +14,43 @@ import CodeMirror from "@uiw/react-codemirror";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
 import { javascript } from "@codemirror/lang-javascript";
 import { sql } from "@codemirror/lang-sql";
+import Loading from "react-loading";
 import api from "../../util/api";
 import { timestampWithDaysOffset } from "../../util/timestamp";
 import webSocket from "socket.io-client";
 import images from "../../images/image";
 
 //---
+const HeaderHeight = "50px";
+
+const CenteredLoading = styled.div`
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 9999;
+`;
+
 const Area = styled.div`
     width: 100%;
-    border: solid 1px black;
     display: flex;
-
+    background-color: #272727;
+    color: #fff;
     flex-direction: column;
+    height: calc(100vh - ${HeaderHeight});
 `;
 //---初始化
 const ButtonArea1 = styled.div`
-    width: 100%;
-    height: 50px;
-    border: solid 1px black;
+    border-top: solid 1px #ccc;
+    border-bottom: solid 1px #ccc;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
 `;
 
 const StyledButtonInit = styled.button`
-    background-color: black;
-    color: white;
+    background-color: #fff;
+    color: black;
     border: none;
     border-radius: 5px;
     padding: 10px 15px;
@@ -76,18 +86,17 @@ const Arrow = styled.span`
 `;
 //--功能選單
 const ButtonArea = styled.div`
-    width: 100%;
-    height: 50px;
-    border: solid 1px black;
+    border-top: solid 1px #ccc;
+    border-bottom: solid 1px #ccc;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px;
 `;
 
 const LargeText = styled.div`
-    font-size: 50px;
+    font-size: 40px;
     font-weight: bold;
+    margin-left: 50px;
 `;
 
 const ButtonContainer = styled.div`
@@ -137,9 +146,7 @@ const SmallText = styled.div`
 //---
 const WorkArea = styled.div`
     width: 100%;
-    border: solid 1px black;
     display: flex;
-    height: 90vh;
     flex-direction: row;
 `;
 //---檔案夾
@@ -162,7 +169,7 @@ const FileManagerDescription = styled.p`
 `;
 const FolderIndex = styled.div`
     width: 20%;
-    border: solid 1px black;
+    border-right: solid 1px #ccc;
     padding: 10px;
 `;
 
@@ -177,127 +184,158 @@ const ButtonFileContainer = styled.div`
 const FeatureTabsContainer = styled.div`
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-end;
 `;
 
 const ButtonGroup = styled.div`
     display: flex;
-    border-bottom: 1px solid #272727;
 `;
 
 const FeatureButton = styled.button`
-    background-color: ${({ selected }) => (selected ? "#272727" : "#ccc")};
-    color: ${({ selected }) => (selected ? "white" : "black")};
+    background-color: ${({ selected }) => (selected ? "#ccc" : "#272727")};
+    color: ${({ selected }) => (selected ? "#272727" : "#ccc")};
     border: none;
-    border-left: 0.5px solid #e7e5df;
-    border-right: 0.5px solid #e7e5df;
-    width: 100px;
-    height: 45px;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
+    border: 0.5px solid #e7e5df;
+    border-bottom: 0.5px solid transparent;
+    width: 120px;
+    padding: 10px 0;
+    font-size: ${({ selected }) => (selected ? "1.3em" : "1em")};
+    font-weight: ${({ selected }) => (selected ? "bold" : "")};
     cursor: pointer;
     border-radius: 10px 10px 0 0;
-    box-shadow: ${({ selected }) => (selected ? "0 4px 6px rgba(0, 0, 0, 0.1)" : "none")};
     &:hover {
-        background-color: ${({ selected }) => (selected ? "#444444" : "#bbb")};
+        background-color: ${({ selected }) => (selected ? "#ccc" : "#3C3C3C")};
+        color: ${({ selected }) => (selected ? "#272727" : "#fff")};
     }
 `;
 
 const NpmForm = styled.form`
+    border-left: 1px solid #fff;
     display: flex;
-    background-color: #ccc;
     padding: 0.25rem 1rem;
-    border-radius: 10px 10px 0 0;
     align-items: center;
 `;
 
 const NpmLabel = styled.span`
-    color: #272727;
-    font-family: monospace;
+    color: #fff;
     font-size: 1rem;
     margin-left: 0.5rem;
 `;
 
 const NpmInput = styled.input`
+    width: 250px;
     background-color: #ccc;
-    border: 1px solid #2c2e30;
     color: #272727;
     padding: 0.5rem;
     margin-left: 0.5rem;
-    font-family: monospace;
     font-size: 1rem;
-    border-radius: 3px;
-`;
-
-const NpmSubmitButton = styled.button`
-    background-color: #092327;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    margin-left: 0.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    border-radius: 3px;
-    &:hover {
-        background-color: #16a085;
-    }
 `;
 
 //
 const MainArea = styled.div`
     width: 59%;
-    border: solid 1px black;
-    padding: 10px;
 `;
 const EditArea = styled.div`
     width: 100%;
-    border: solid 1px black;
+    border-top: 4px solid #ccc;
 `;
-const FileName = styled.input`
-    width: 95%;
-    height: 30px;
-    border: solid 1px black;
-    padding: 10px;
+const FileName = styled.div`
+    width: 97.5%;
+    border: 0px;
+    background-color: #272727;
+    color: #fff;
+    padding: 5px 0 0 10px;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
 `;
 const ResultArea = styled.div`
+    border-left: solid 1px #ccc;
     width: 20%;
-    border: solid 1px black;
     padding: 10px;
 `;
-
+const ConsoleTitle = styled.div`
+    letter-spacing: 3px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+`;
+const SubmitButton = styled.button`
+    background-color: #ccc;
+    color: #000;
+    border-radius: 5px;
+    cursor: pointer;
+    &:hover {
+        background-color: #000;
+        color: #ccc;
+    }
+`;
+const FeatureName = styled.div`
+    width: 97.5%;
+    border: 0px;
+    background-color: #272727;
+    color: #fff;
+    padding: 5px 0 0 10px;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+`;
+const DBcommandLoading = styled.div`
+    z-index: 9999;
+`;
 const SqliteCommand = styled.div`
     width: 100%;
-    height: 470px;
+`;
+const DBresultTitle = styled.div`
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-align: center;
+    height: 3vh;
 `;
 const SqliteResult = styled.div`
-    width: 100%;
-    height: 100px;
-    border: solid 1px black;
+    font-size: 18px;
+    color: #ffffaa;
+    padding: 10px;
+    height: 30vh;
+    overflow-y: auto;
+    white-space: nowrap;
+    background-color: #333;
 `;
 
 const RedisCommand = styled.div`
-    width: 98%;
-    height: 470px;
+    width: 100%;
 `;
 const RedisResult = styled.div`
-    width: 100%;
-    height: 100px;
-    border: solid 1px black;
+    font-size: 18px;
+    color: #ffffaa;
+    padding: 10px;
+    height: 30vh;
+    overflow-y: auto;
+    white-space: nowrap;
+    background-color: #333;
 `;
 const ExpressLog = styled.div`
     width: 90%;
-    border: solid 1px black;
+    border: solid 1px #ccc;
     padding: 10px;
-    height: 600px;
-    overflow-y: scroll;
+    height: 70vh;
+    overflow-y: auto;
     white-space: nowrap;
 `;
 
 //---
 const Express = () => {
+
+    const fileContext = useContext(FileContext);
+    const { file, fileName, folderData, setFolderData } = fileContext
+
     const { username, projectName } = useParams();
-    const { file } = useContext(FileContext);
-    const { fileName } = useContext(FileContext);
+    // const { file } = useContext(FileContext);
+    // const { fileName } = useContext(FileContext);
+    // const { folderData } = useContext(FileContext);
+    const [isActionLoading, setIsActionLoading] = useState(false);
     const [expiredTime, setExpiredTime] = useState("");
     const [remainingTime, setRemainingTime] = useState(null);
     const [shouldFetchData, setShouldFetchData] = useState(true);
@@ -311,7 +349,7 @@ const Express = () => {
     const [redisCommand, setRedisCommand] = useState("");
     const [redisResult, setRedisResult] = useState("redis執行結果");
     const [expressLog, setExpressLog] = useState([]);
-    const [selectedFeature, setSelectedFeature] = useState("");
+    const [selectedFeature, setSelectedFeature] = useState("NodeJs");
 
     const logEndRef = useRef(null);
 
@@ -326,7 +364,7 @@ const Express = () => {
     const features = ["NodeJs", "Sqlite", "Redis"];
 
     //---資料夾樹狀結構
-    const [folderData, setFolderData] = useState(null);
+    // const [folderData, setFolderData] = useState(null);
     const [code, setCode] = useState("");
     const [choiceFile, setChoiceFile] = useState("檔名");
     //確認使用者是否有此專案----------------------------------------------------
@@ -381,6 +419,7 @@ const Express = () => {
 
     async function getServerData() {
         const data = await api.fetchData(serverName);
+        console.log("####", data);
         setFolderData(data);
         setShouldFetchData(false);
     }
@@ -417,6 +456,7 @@ const Express = () => {
     }, [file]);
 
     //處理檔名顯示------------------------------------------------------------
+
     const choiceFileChange = (event) => {
         const value = event.target.value;
         setChoiceFile(value);
@@ -424,7 +464,8 @@ const Express = () => {
     useEffect(() => {
         //從localstorage取得現在點擊檔案名稱
         const ChoiceFile = localStorage.getItem("nowChoiceFile");
-        setChoiceFile(ChoiceFile);
+        const pathFormat = ChoiceFile.replace(/\//g, " ❯ ");
+        setChoiceFile(pathFormat);
         //動態觀察
     }, [fileName]);
 
@@ -569,15 +610,44 @@ const Express = () => {
     const handleInitOptionClose = async (event) => {
         setIsInit(true);
     };
-    const handleNpmSubmit = async (event) => {
-        event.preventDefault();
-        const task = "jsOperNpm";
-        const result = await api.jsOper(task, serverName, npmCommand);
-        if (result) {
-            alert(`npm 指令 ${npmCommand} 完成`);
-        }
-    };
+    const handleNpmSubmit = useCallback(
+        async (event) => {
+            if (event) {
+                event.preventDefault();
+            }
 
+            if (!npmCommand.startsWith("npm")) {
+                alert("請輸入 npm 指令");
+                return;
+            }
+
+            const command = npmCommand.slice(4).trim();
+            if (!command) {
+                alert("請輸入 npm 指令");
+                return;
+            }
+
+            const task = "jsOperNpm";
+            setIsActionLoading(true);
+            const result = await api.jsOper(task, serverName, command);
+            setIsActionLoading(false);
+            if (result.data.code) {
+                alert(`npm 指令 ${command} 輸入錯誤 或找不到此名稱套件`);
+            } else {
+                alert(`npm 指令 ${command} 完成`);
+            }
+        },
+        [npmCommand, serverName]
+    );
+    const handleNpmSubmitKeyDown = useCallback(
+        (event) => {
+            if (event && event.key === "Enter") {
+                event.preventDefault();
+                handleNpmSubmit();
+            }
+        },
+        [handleNpmSubmit]
+    );
     //sqlite指令操作
     const handleSqliteCommand = async (event) => {
         event.preventDefault();
@@ -593,16 +663,12 @@ const Express = () => {
             setSqliteResult(result.data);
         }
     };
-    // const handleSqliteChange = (event) => {
-    //     const value = event.target.value;
-    //     setSqliteCommand(value);
-    //     localStorage.setItem("sqliteCommand", value);
-    // };
 
     const handleSqliteChange = React.useCallback((value, viewUpdate, event) => {
         setSqliteCommand(value);
         localStorage.setItem("sqliteCommand", value);
     }, []);
+
     useEffect(() => {
         const storedCode = localStorage.getItem("sqliteCommand");
         if (storedCode) {
@@ -619,11 +685,6 @@ const Express = () => {
         console.log("redis", result.data);
         setRedisResult(result.data);
     };
-    // const handleRedisChange = (event) => {
-    //     const value = event.target.value;
-    //     setRedisCommand(value);
-    //     localStorage.setItem("redisCommand", value);
-    // };
     const handleRedisChange = React.useCallback((value, viewUpdate, event) => {
         setRedisCommand(value);
         localStorage.setItem("redisCommand", value);
@@ -654,7 +715,7 @@ const Express = () => {
             socketRef.current.disconnect();
         };
     }, []);
-
+    //---
     const scrollToBottom = () => {
         logEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -677,190 +738,216 @@ const Express = () => {
 
     //---------------------------------------------------------------------------
     return (
-        <Area>
-            {initLoading && (
-                <div style={spinnerStyle}>
-                    <ClipLoader size={150} color='#fff' />
-                    <div style={progressBarStyle}>
-                        <div style={progressStyle} />
-                    </div>
-                    <p style={progressTextStyle}>{`${initProgress}%`}</p>
-                </div>
-            )}
-            {!isInit ? (
-                <ButtonArea1>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                        <img src={images.iconExpressBar} alt='Logo' width='150px' />
-                        <LargeText>{projectName}</LargeText>
-                    </div>
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <ButtonWrapper>
-                            <StepNumber>1</StepNumber>
-                            <StyledButtonInit onClick={handleCreateSubmit}>創立專案</StyledButtonInit>
-                        </ButtonWrapper>
-                        <Arrow>➡</Arrow>
-                        <ButtonWrapper>
-                            <StepNumber>2</StepNumber>
-                            <StyledButtonInit onClick={handleInitSubmit}>初始化 INIT</StyledButtonInit>
-                        </ButtonWrapper>
-                    </div>
-                    <StyledButtonInit onClick={handleInitOptionClose}>關閉初始化選單</StyledButtonInit>
-                </ButtonArea1>
-            ) : (
-                <ButtonArea>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                        <img src={images.iconExpressBar} alt='Logo' width='150px' />
-                        <LargeText>{projectName}</LargeText>
-                    </div>
-                    <ButtonContainer>
-                        {!runPort ? (
-                            <StyledButton type='run' onClick={handleRunSubmit}>
-                                <FaPlay />
-                                運行 RUN
-                            </StyledButton>
-                        ) : (
-                            <StyledButton type='stop' onClick={handleStopSubmit}>
-                                <FaPause />
-                                暫停 STOP
-                            </StyledButton>
-                        )}
-                        {runPort && (
-                            <WebPageButton onClick={handleWebPageOpen}>
-                                <FaChrome />
-                                開啓網頁
-                            </WebPageButton>
-                        )}
-                    </ButtonContainer>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                        <div style={{ display: "flex", flexDirection: "column" }}>
-                            {remainingTime && remainingTime > 0 && (
-                                <SmallText>倒數{formatRemainingTime(remainingTime)}停止伺服器</SmallText>
-                            )}
-                            <SmallText>伺服器資料{expiredTime}後進行封存</SmallText>
+        <>
+            <div>
+                {isActionLoading && (
+                    <CenteredLoading>
+                        <Loading type='spin' color='#00BFFF' height={100} width={100} />
+                    </CenteredLoading>
+                )}
+            </div>
+            <Area>
+                {initLoading && (
+                    <div style={spinnerStyle}>
+                        <ClipLoader size={150} color='#fff' />
+                        <div style={progressBarStyle}>
+                            <div style={progressStyle} />
                         </div>
-                        <StyledButtonInit onClick={handleInitOptionOpen}>開啓初始化選單</StyledButtonInit>
+                        <p style={progressTextStyle}>{`${initProgress}%`}</p>
                     </div>
-                </ButtonArea>
-            )}
-            <WorkArea>
-                <>
-                    <FolderIndex>
-                        <FileManager>
-                            <FileManagerHeader>檔案總管</FileManagerHeader>
-                            <FileManagerDivider />
-                            <FileManagerDescription>忽略顯示檔案 :</FileManagerDescription>
-                            <FileManagerDescription>node_modules、package-lock.json</FileManagerDescription>
-                            <FileManagerDivider />
-                        </FileManager>
-                        <ButtonFileContainer>
-                            <button onClick={handleIndexRefresh}>
-                                <FaSync /> 更新檔案
-                            </button>
-                            <button onClick={handlePostRewrite}>
-                                <FaSave /> 存檔
-                            </button>
-                        </ButtonFileContainer>
-                        <hr />
-                        {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
-                    </FolderIndex>
-                    <MainArea>
-                        <FeatureTabsContainer>
-                            <ButtonGroup>
-                                {features.map((feature, index) => (
-                                    <FeatureButton
-                                        onClick={() => handleFeature(feature)}
-                                        key={index}
-                                        selected={selectedFeature === feature}
-                                    >
-                                        {feature}
-                                    </FeatureButton>
+                )}
+                {!isInit ? (
+                    <ButtonArea1>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <img src={images.iconExpressBar} alt='Logo' width='50px' />
+                            <LargeText>{projectName}</LargeText>
+                        </div>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <ButtonWrapper>
+                                <StepNumber>1</StepNumber>
+                                <StyledButtonInit onClick={handleCreateSubmit}>創立專案</StyledButtonInit>
+                            </ButtonWrapper>
+                            <Arrow>➡</Arrow>
+                            <ButtonWrapper>
+                                <StepNumber>2</StepNumber>
+                                <StyledButtonInit onClick={handleInitSubmit}>初始化 INIT</StyledButtonInit>
+                            </ButtonWrapper>
+                        </div>
+                        <StyledButtonInit onClick={handleInitOptionClose}>關閉初始化選單</StyledButtonInit>
+                    </ButtonArea1>
+                ) : (
+                    <ButtonArea>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <img src={images.iconExpressBar} alt='Logo' width='50px' margin-left='50px' />
+                            <LargeText>{projectName}</LargeText>
+                        </div>
+                        <ButtonContainer>
+                            {!runPort ? (
+                                <StyledButton type='run' onClick={handleRunSubmit}>
+                                    <FaPlay />
+                                    運行 RUN
+                                </StyledButton>
+                            ) : (
+                                <StyledButton type='stop' onClick={handleStopSubmit}>
+                                    <FaPause />
+                                    暫停 STOP
+                                </StyledButton>
+                            )}
+                            {runPort && (
+                                <WebPageButton onClick={handleWebPageOpen}>
+                                    <FaChrome />
+                                    開啓網頁
+                                </WebPageButton>
+                            )}
+                        </ButtonContainer>
+                        <div style={{ display: "flex", alignItems: "center" }}>
+                            <div style={{ display: "flex", flexDirection: "column" }}>
+                                {remainingTime && remainingTime > 0 && (
+                                    <SmallText>倒數{formatRemainingTime(remainingTime)}停止伺服器</SmallText>
+                                )}
+                                <SmallText>伺服器資料{expiredTime}後進行封存</SmallText>
+                            </div>
+                            <StyledButtonInit onClick={handleInitOptionOpen}>開啓初始化選單</StyledButtonInit>
+                        </div>
+                    </ButtonArea>
+                )}
+                <WorkArea>
+                    <>
+                        <FolderIndex>
+                            <FileManager>
+                                <FileManagerHeader>檔案總管</FileManagerHeader>
+                                <FileManagerDivider />
+                                <FileManagerDescription>忽略顯示檔案 :</FileManagerDescription>
+                                <FileManagerDescription>node_modules、package-lock.json</FileManagerDescription>
+                                <FileManagerDivider />
+                            </FileManager>
+                            <ButtonFileContainer>
+                                <button onClick={handleIndexRefresh}>
+                                    <FaSync /> 更新檔案
+                                </button>
+                                <button onClick={handlePostRewrite}>
+                                    <FaSave /> 存檔
+                                </button>
+                            </ButtonFileContainer>
+                            <hr />
+                            {folderData && <Folder folder={folderData} />} {/* 如果資料存在，則渲染 Folder 元件 */}
+                        </FolderIndex>
+                        <MainArea>
+                            <FeatureTabsContainer>
+                                <ButtonGroup>
+                                    {features.map((feature, index) => (
+                                        <FeatureButton
+                                            onClick={() => handleFeature(feature)}
+                                            key={index}
+                                            selected={selectedFeature === feature}
+                                        >
+                                            {feature}
+                                        </FeatureButton>
+                                    ))}
+                                </ButtonGroup>
+                                <NpmForm onSubmit={handleNpmSubmit}>
+                                    <NpmLabel>npm指令</NpmLabel>
+                                    <NpmInput
+                                        type='text'
+                                        placeholder='npm install ... (按下ENTER送出)'
+                                        value={npmCommand}
+                                        onChange={(e) => setNpmCommand(e.target.value)}
+                                        onKeyDown={handleNpmSubmitKeyDown}
+                                    />
+                                </NpmForm>
+                            </FeatureTabsContainer>
+                            {feature === "NodeJs" ? (
+                                <EditArea>
+                                    <FileName onChange={choiceFileChange}>{choiceFile}</FileName>
+                                    <hr />
+                                    <div style={{ fontSize: "1.2em" }}>
+                                        <CodeMirror
+                                            value={code}
+                                            width='100%'
+                                            height='70vh'
+                                            theme={okaidia}
+                                            extensions={[javascript({ jsx: true })]}
+                                            onChange={handleCodeChange}
+                                        />
+                                    </div>
+                                </EditArea>
+                            ) : feature === "Sqlite" ? (
+                                <>
+                                    <EditArea>
+                                        <SqliteCommand>
+                                            <form onSubmit={handleSqliteCommand}>
+                                                <FeatureName>
+                                                    Sqlite Commands<SubmitButton type='submit'>送出指令</SubmitButton>
+                                                </FeatureName>
+                                                <hr />
+                                                <div style={{ fontSize: "1.2em" }}>
+                                                    <CodeMirror
+                                                        value={sqliteCommand}
+                                                        height='30vh'
+                                                        theme={okaidia}
+                                                        extensions={sql()}
+                                                        onChange={handleSqliteChange}
+                                                    />
+                                                </div>
+                                            </form>
+                                        </SqliteCommand>
+                                        <hr />
+                                        <DBresultTitle>Sqlite 執行結果</DBresultTitle>
+                                        <hr />
+                                        <SqliteResult>
+                                            {typeof sqliteResult === "string" ? (
+                                                <div>{sqliteResult}</div>
+                                            ) : (
+                                                <SqliteResult>
+                                                    {sqliteResult && <Table data={sqliteResult} />}
+                                                </SqliteResult>
+                                            )}
+                                        </SqliteResult>
+                                    </EditArea>
+                                </>
+                            ) : (
+                                <>
+                                    {" "}
+                                    <EditArea>
+                                        <RedisCommand>
+                                            <form onSubmit={handleRedisCommand}>
+                                                <FeatureName>
+                                                    Redis Commands<SubmitButton type='submit'>送出指令</SubmitButton>
+                                                </FeatureName>
+                                                <hr />
+                                                <div style={{ fontSize: "1.2em" }}>
+                                                    <CodeMirror
+                                                        value={redisCommand}
+                                                        height='30vh'
+                                                        theme={okaidia}
+                                                        extensions={sql()}
+                                                        onChange={handleRedisChange}
+                                                    />
+                                                </div>
+                                            </form>
+                                        </RedisCommand>
+                                        <hr />
+                                        <DBresultTitle>Redis 執行結果</DBresultTitle>
+                                        <hr />
+                                        <RedisResult>{redisResult}</RedisResult>
+                                    </EditArea>
+                                </>
+                            )}
+                        </MainArea>
+                        <ResultArea>
+                            <ConsoleTitle>Console</ConsoleTitle>
+                            <hr />
+                            <ExpressLog>
+                                {expressLog.map((log, index) => (
+                                    <div key={index}>{log}</div>
                                 ))}
-                            </ButtonGroup>
-                            <NpmForm onSubmit={handleNpmSubmit}>
-                                <NpmLabel>npm</NpmLabel>
-                                <NpmInput
-                                    type='text'
-                                    placeholder='指令'
-                                    value={npmCommand}
-                                    onChange={(e) => setNpmCommand(e.target.value)}
-                                />
-                                <NpmSubmitButton type='submit'>送出</NpmSubmitButton>
-                            </NpmForm>
-                        </FeatureTabsContainer>
-                        {feature === "NodeJs" ? (
-                            <EditArea>
-                                <FileName value={fileName} onChange={choiceFileChange} readOnly />
-                                <CodeMirror
-                                    value={code}
-                                    width='100%'
-                                    height='75vh'
-                                    theme={okaidia}
-                                    extensions={[javascript({ jsx: true })]}
-                                    onChange={handleCodeChange}
-                                />
-                            </EditArea>
-                        ) : feature === "Sqlite" ? (
-                            <>
-                                <EditArea>
-                                    <SqliteCommand>
-                                        <div>Sqlite Commands</div>
-                                        <form onSubmit={handleSqliteCommand}>
-                                            <CodeMirror
-                                                value={sqliteCommand}
-                                                height='50vh'
-                                                theme={okaidia}
-                                                extensions={sql()}
-                                                onChange={handleSqliteChange}
-                                            />
-                                            <button type='submit'>送出指令</button>
-                                        </form>
-                                    </SqliteCommand>
-                                    <div>Sqlite Result（標題）</div>
-                                    <SqliteResult>
-                                        {typeof sqliteResult === "string" ? (
-                                            <div>{sqliteResult}</div>
-                                        ) : (
-                                            <SqliteResult>{sqliteResult && <Table data={sqliteResult} />}</SqliteResult>
-                                        )}
-                                    </SqliteResult>
-                                </EditArea>
-                            </>
-                        ) : (
-                            <>
-                                {" "}
-                                <EditArea>
-                                    <RedisCommand>
-                                        <div>Redis Commands</div>
-                                        <form onSubmit={handleRedisCommand}>
-                                            <CodeMirror
-                                                value={redisCommand}
-                                                height='50vh'
-                                                theme={okaidia}
-                                                extensions={sql()}
-                                                onChange={handleRedisChange}
-                                            />
-                                            <button type='submit'>送出指令</button>
-                                        </form>
-                                    </RedisCommand>
-                                    <div>Redis Result（標題）</div>
-                                    <RedisResult>{redisResult}</RedisResult>
-                                </EditArea>
-                            </>
-                        )}
-                    </MainArea>
-                    <ResultArea>
-                        <div>Console</div>
-                        <hr />
-                        <ExpressLog>
-                            {expressLog.map((log, index) => (
-                                <div key={index}>{log}</div>
-                            ))}
-                            <div ref={logEndRef} />
-                        </ExpressLog>
-                    </ResultArea>
-                </>
-            </WorkArea>
-        </Area>
+                                <div ref={logEndRef} />
+                            </ExpressLog>
+                        </ResultArea>
+                    </>
+                </WorkArea>
+            </Area>
+        </>
     );
 };
 
