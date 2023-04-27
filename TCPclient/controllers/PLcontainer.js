@@ -33,7 +33,7 @@ export async function createPLContainer(executeId, programLanguage, code) {
 
     //控制容器指令
     const container = "docker";
-    const action = "run --name --rm";
+    const action = "run --rm --name ";
     const containerName = executeId;
     const vPath = path.join(process.cwd(), "./controllers/tempFile");
     const imagesAndRun = prog_lang[1];

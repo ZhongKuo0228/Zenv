@@ -55,7 +55,21 @@ async function composeStop(vPath, service) {
         });
     });
 }
-
+async function composeDown(vPath, service) {
+    return new Promise(async (resolve, reject) => {
+        const container = "docker compose";
+        const action = "down";
+        const time = "-t 1";
+        const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time}`; //使用exec所以-it要拿掉
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
 async function composeRun(vPath, service) {
     return new Promise(async (resolve, reject) => {
         const container = "docker compose";
@@ -273,5 +287,42 @@ export async function jsOperNpm(job) {
     } catch (e) {
         console.log("執行 npm 指令發生問題 : ", e);
         return e;
+    }
+}
+
+export async function stopProject(serverName) {
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const ymlPath = `${folderPath}${serverName}`;
+    try {
+        await composeStop(ymlPath, `${serverName}`);
+        const result = `伺服器停止 : ${serverName}`;
+        // await stopLogSH(serverName, ymlPath);
+
+        //清除定時器
+        clearTimeout(timers[serverName]);
+        delete timers[serverName];
+
+        return result;
+    } catch (err) {
+        console.log(`停止 ${serverName} 發生問題: `, err.message);
+        return err.message;
+    }
+}
+export async function downProject(serverName) {
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const ymlPath = `${folderPath}${serverName}`;
+    try {
+        await composeDown(ymlPath, `${serverName}`);
+        const result = `伺服器關閉 : ${serverName}`;
+        // await stopLogSH(serverName, ymlPath);
+
+        //清除定時器
+        clearTimeout(timers[serverName]);
+        delete timers[serverName];
+
+        return result;
+    } catch (err) {
+        console.log(`停止 ${serverName} 發生問題: `, err.message);
+        return err.message;
     }
 }

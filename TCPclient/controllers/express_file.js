@@ -4,7 +4,7 @@ const promisify = util.promisify;
 import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH } from "./express_container.js";
+import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH, downProject } from "./express_container.js";
 import { error } from "console";
 import { stderr, stdout } from "process";
 
@@ -24,6 +24,15 @@ async function downloadRepo(path, gitUrl) {
             });
         });
     });
+}
+
+export async function delProjectFiles(filePath) {
+    try {
+        const command = `rm -rf ${filePath}`;
+        exec(command);
+    } catch (e) {
+        console.error("刪除檔案錯誤", e);
+    }
 }
 
 //忽略檔案名稱
@@ -209,6 +218,27 @@ export async function operRename(job) {
         });
     } catch (e) {
         console.log("重新命名檔案發生問題 : ", e);
+        return e;
+    }
+}
+export async function delProject(job) {
+    try {
+        console.job;
+        const serverName = job.serverName;
+        //刪除運行中的容器
+        await downProject(job.serverName);
+        //刪除專案資料夾
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const projectPath = `${folderPath}${serverName}`;
+        await delProjectFiles(projectPath);
+        //刪除專案log檔
+        const logPath = path.join(moduleDir, "../express_project/server_logs");
+        const logFile = `${logPath}/${serverName}.log`;
+        await delProjectFiles(logFile);
+
+        return "專案刪除完畢";
+    } catch (e) {
+        console.log("專案刪除時發生錯誤 : ", e);
         return e;
     }
 }

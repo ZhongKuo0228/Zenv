@@ -22,6 +22,7 @@ const HeaderContainer = styled.header`
 `;
 
 const Title = styled.h1`
+    cursor: pointer;
     display: flex;
     align-items: center;
     font-size: 1.5rem;
@@ -83,16 +84,6 @@ const App = () => {
     }, []);
 
     const handleProfileClick = () => {
-        // 保留的key
-        const reservedKeys = ["jwt"];
-
-        // 遍歷所有的key
-        for (const key in localStorage) {
-            // 如果key不是保留的key，刪除它
-            if (!reservedKeys.includes(key)) {
-                localStorage.removeItem(key);
-            }
-        }
         window.location.href = `/profile/${username}`;
     };
     const handleLogOut = () => {
@@ -103,7 +94,7 @@ const App = () => {
         <>
             <Wrap>
                 <HeaderContainer>
-                    <Title>
+                    <Title onClick={handleProfileClick}>
                         <Logo>
                             <LogoImage src={images.iconLogo} alt='Logo' />
                         </Logo>

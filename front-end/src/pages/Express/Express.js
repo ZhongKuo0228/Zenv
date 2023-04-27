@@ -19,7 +19,27 @@ import api from "../../util/api";
 import { timestampWithDaysOffset } from "../../util/timestamp";
 import webSocket from "socket.io-client";
 import images from "../../images/image";
-
+// function cleanLocalStorage() {
+//     //使用者關閉頁面後
+//     window.addEventListener("beforeunload", async function (event) {
+//         try {
+//             // 保留的key
+//             const reservedKeys = ["jwt"];
+//             // 遍歷所有的key
+//             for (const key in localStorage) {
+//                 // 如果key不是保留的key，刪除它
+//                 if (!reservedKeys.includes(key)) {
+//                     localStorage.removeItem(key);
+//                 }
+//             }
+//         } catch (error) {
+//             console.error(error);
+//         }
+//         event.preventDefault(); // 阻止默認行為，讓瀏覽器不跳出提示
+//         event.returnValue = ""; // 回傳空字串，讓瀏覽器不跳出提示
+//     });
+// }
+// cleanLocalStorage();
 //---
 const HeaderHeight = "50px";
 

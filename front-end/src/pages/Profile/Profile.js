@@ -171,9 +171,12 @@ const DeleteButton = styled.button`
     border-radius: 4px;
     padding: 8px 12px;
     cursor: pointer;
-
+    width: 100px;
+    height: 50px;
+    font-size: 16px;
     &:hover {
-        background-color: #555;
+        background-color: #fff;
+        color: #272727;
     }
 `;
 
@@ -253,7 +256,7 @@ const WebItemTitle = styled.div`
 
 const FrameworkBar = styled.div`
     display: flex;
-    align-items: center;
+    flex-direction: column;
     margin-left: auto;
     margin-right: auto;
     height: 150px;
@@ -269,6 +272,11 @@ const FrameworkBar = styled.div`
     &:hover {
         transform: scale(1.05);
     }
+`;
+
+const WebProjectTitle = styled.div`
+    margin-top: 20px;
+    display: flex;
 `;
 
 const FrameworkName = styled.div`
@@ -299,11 +307,20 @@ const Profile = () => {
     const [selectedLanguage, setSelectedLanguage] = useState(null);
     const [selectedItemsType, setSelectedItemsType] = useState(null);
     const [editItem, setEditItem] = useState(null);
+    const [delItem, setDelItem] = useState(null);
     const [show, setShow] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const navigate = useNavigate();
-
+    //---
+    async function fetchUserProjects() {
+        try {
+            const data = await api.getUserProjects();
+            setUserProjects(data);
+        } catch (error) {
+            console.error(error);
+        }
+    }
     useEffect(() => {
         async function fetchUserProfile() {
             try {
@@ -314,17 +331,18 @@ const Profile = () => {
             }
         }
         fetchUserProfile();
+        // 保留的key
+        const reservedKeys = ["jwt"];
+        // 遍歷所有的key
+        for (const key in localStorage) {
+            // 如果key不是保留的key，刪除它
+            if (!reservedKeys.includes(key)) {
+                localStorage.removeItem(key);
+            }
+        }
     }, []);
 
     useEffect(() => {
-        async function fetchUserProjects() {
-            try {
-                const data = await api.getUserProjects();
-                setUserProjects(data);
-            } catch (error) {
-                console.error(error);
-            }
-        }
         fetchUserProjects();
     }, []);
     useEffect(() => {
@@ -387,6 +405,7 @@ const Profile = () => {
         } catch (error) {
             console.error(error);
         }
+        fetchUserProjects();
     };
     const handleEditProject = async () => {
         try {
@@ -412,6 +431,27 @@ const Profile = () => {
             setEditItem(null);
         }
     }, [editItem]);
+
+    const handleDelProject = async () => {
+        // 獲取專案名稱
+        const confirmed = window.confirm(`確認是否要刪除？ : ${projectName}`);
+        console.log(projectName, selectedLanguage, selectedItemsType);
+        if (confirmed) {
+            try {
+                const result = await api.delPLProject(projectName, selectedLanguage, selectedItemsType);
+                console.log("del", result);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        setDelItem(null);
+        fetchUserProjects();
+    };
+    useEffect(() => {
+        if (delItem === "delProject") {
+            handleDelProject();
+        }
+    }, [delItem]);
 
     const modalStyle = show ? { display: "block" } : { display: "none" };
     return (
@@ -467,8 +507,18 @@ const Profile = () => {
                                         <CreateTime>建立時間 {project.create_time}</CreateTime>
                                     </ProjectInfo>
                                     <div style={{ marginLeft: "auto" }}>
-                                        <RenameButton>Rename</RenameButton>
-                                        <DeleteButton>Delete</DeleteButton>
+                                        <DeleteButton
+                                            key={project.project_name}
+                                            onClick={(event) => {
+                                                setDelItem("delProject");
+                                                event.stopPropagation();
+                                                setProjectName(project.project_name);
+                                                setSelectedItemsType(project.itemType);
+                                                setSelectedLanguage(project.items);
+                                            }}
+                                        >
+                                            Delete
+                                        </DeleteButton>
                                     </div>
                                 </ToolBar>
                             ))}
@@ -520,9 +570,11 @@ const Profile = () => {
                                     setSelectedItemsType(fw.service_type);
                                 }}
                             >
-                                <Icon src={images.iconExpress} alt='icon' />
-                                <div>
+                                <WebProjectTitle>
+                                    <Icon src={images.iconExpress} alt='icon' />
                                     <FrameworkName>{fw.framework}</FrameworkName>
+                                </WebProjectTitle>
+                                <div>
                                     <Description>{fw.description}</Description>
                                     <Version>ver. {fw.version}</Version>
                                     <hr />

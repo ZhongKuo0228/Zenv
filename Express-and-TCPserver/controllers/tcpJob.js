@@ -165,3 +165,17 @@ export async function dbOper(req) {
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
+
+export async function delProject(req) {
+    const userName = req.user.name;
+    const projectName = req.body.data.projectName;
+    const serverName = `${userName}_${projectName}`;
+
+    let job = {
+        task: "delProject",
+        serverName: serverName,
+    };
+    console.log("job ", job);
+    const buffer = await socketWrite(job);
+    return bufferToJson(buffer);
+}

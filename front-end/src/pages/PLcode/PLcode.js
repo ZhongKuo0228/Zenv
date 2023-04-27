@@ -11,19 +11,21 @@ import { cpp } from "@codemirror/lang-cpp";
 import api from "../../util/api";
 import { timestamp, timeFormat } from "../../util/timestamp";
 import images from "../../images/image";
-//使用者頁面後自動存檔------------------------
-// function commitPLpage() {
-//     //使用者關閉頁面後
-//     window.onbeforeunload = async function () {
-//         try {
-//             await api.PLcodeSave();
-//         } catch (error) {
-//             console.error(error);
-//         }
-//     };
-// }
+// 使用者頁面後自動存檔------------------------
+function commitPLpage() {
+    //使用者關閉頁面後
+    window.addEventListener("beforeunload", async function (event) {
+        try {
+            await api.PLcodeSave();
+        } catch (error) {
+            console.error(error);
+        }
+        event.preventDefault(); // 阻止默認行為，讓瀏覽器不跳出提示
+        event.returnValue = ""; // 回傳空字串，讓瀏覽器不跳出提示
+    });
+}
 
-// commitPLpage();
+commitPLpage();
 //---styled-------------------------------------------
 const HeaderHeight = "50px";
 const Container_all = styled.div`

@@ -1,6 +1,7 @@
 import express from "express";
-import { plServiceItems, createPLProjects } from "../models/db-PLcode.js";
-import { webServiceItems, createWebProjects } from "../models/db-webServices.js";
+import { plServiceItems, createPLProjects, delPLProjects } from "../models/db-PLcode.js";
+import { webServiceItems, createWebProjects, delWebProjects } from "../models/db-webServices.js";
+import { delProject } from "../controllers/tcpJob.js";
 const serviceItemsRouter = express.Router();
 //---router----------------------------------------------
 serviceItemsRouter.get("/plServices", async (req, res, next) => {
@@ -28,6 +29,21 @@ serviceItemsRouter.post("/createProject", async (req, res, next) => {
         return res.status(401).json({ data: false });
     }
 });
+serviceItemsRouter.delete("/delProject", async (req, res, next) => {
+    // console.log(req.body);
+    let result;
+    if (req.body.data.itemsType == "prog_lang") {
+        result = await delPLProjects(req);
+    } else {
+        await delProject(req);
+        result = await delWebProjects(req);
+    }
 
+    if (result) {
+        return res.status(200).json({ data: result });
+    } else {
+        return res.status(401).json({ data: false });
+    }
+});
 //---export----------------------------------------------
 export { serviceItemsRouter };
