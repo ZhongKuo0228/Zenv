@@ -5,6 +5,8 @@ import api from "../../util/api";
 import styled from "styled-components";
 import images from "../../images/image";
 
+const HeaderHeight = "80px";
+
 const Container_all = styled.div`
     padding-top: 30px;
     font-family: Arial, sans-serif;
@@ -13,6 +15,7 @@ const Container_all = styled.div`
     justify-content: center;
     color: #fff;
     background-color: #272727;
+    height: calc(100vh - ${HeaderHeight});
 `;
 //----
 const UserData = styled.div`
@@ -86,13 +89,16 @@ const UserName = styled.div`
 const UserProject = styled.div`
     display: flex;
     flex-direction: column;
-    height: 500px;
+    height: 50vh;
 `;
 const UserProjectTitle = styled.div`
     font-size: 20px;
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 10px;
+`;
+const OverflowYDiv = styled.div`
+    overflow-y: auto;
 `;
 const ToolBar = styled.div`
     display: flex;
@@ -429,42 +435,44 @@ const Profile = () => {
                     </UserProfile>
                     <UserProject>
                         <UserProjectTitle>你的專案</UserProjectTitle>
-                        {userProjects.map((project) => (
-                            <ToolBar
-                                key={project.project_name}
-                                onClick={() => {
-                                    setEditItem("project");
-                                    setProjectName(project.project_name);
-                                    setSelectedItemsType(project.itemType);
-                                }}
-                            >
-                                <Icon
-                                    src={
-                                        project.items === "JavaScript"
-                                            ? images.iconJs
-                                            : project.items === "Python"
-                                            ? images.iconPython
-                                            : project.items === "Java"
-                                            ? images.iconJava
-                                            : project.items === "C++"
-                                            ? images.iconCpp
-                                            : images.iconExpress
-                                    }
-                                    alt='icon'
-                                />
-                                <ProjectInfo>
-                                    <ProjectNameWrapper>
-                                        <ProjectName>{project.project_name}</ProjectName>
-                                        <ProjectType>({project.items})</ProjectType>
-                                    </ProjectNameWrapper>
-                                    <CreateTime>建立時間 {project.create_time}</CreateTime>
-                                </ProjectInfo>
-                                <div style={{ marginLeft: "auto" }}>
-                                    <RenameButton>Rename</RenameButton>
-                                    <DeleteButton>Delete</DeleteButton>
-                                </div>
-                            </ToolBar>
-                        ))}
+                        <OverflowYDiv>
+                            {userProjects.map((project) => (
+                                <ToolBar
+                                    key={project.project_name}
+                                    onClick={() => {
+                                        setEditItem("project");
+                                        setProjectName(project.project_name);
+                                        setSelectedItemsType(project.itemType);
+                                    }}
+                                >
+                                    <Icon
+                                        src={
+                                            project.items === "JavaScript"
+                                                ? images.iconJs
+                                                : project.items === "Python"
+                                                ? images.iconPython
+                                                : project.items === "Java"
+                                                ? images.iconJava
+                                                : project.items === "C++"
+                                                ? images.iconCpp
+                                                : images.iconExpress
+                                        }
+                                        alt='icon'
+                                    />
+                                    <ProjectInfo>
+                                        <ProjectNameWrapper>
+                                            <ProjectName>{project.project_name}</ProjectName>
+                                            <ProjectType>({project.items})</ProjectType>
+                                        </ProjectNameWrapper>
+                                        <CreateTime>建立時間 {project.create_time}</CreateTime>
+                                    </ProjectInfo>
+                                    <div style={{ marginLeft: "auto" }}>
+                                        <RenameButton>Rename</RenameButton>
+                                        <DeleteButton>Delete</DeleteButton>
+                                    </div>
+                                </ToolBar>
+                            ))}
+                        </OverflowYDiv>
                     </UserProject>
                 </UserData>
                 <CreateProject>

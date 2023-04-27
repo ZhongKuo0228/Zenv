@@ -48,17 +48,25 @@ const ButtonArea1 = styled.div`
     align-items: center;
 `;
 
+const ProjectIconAndTitle = styled.div`
+    display: flex;
+    flex-direction: row;
+    margin-left: 50px;
+    align-items: center;
+`;
+
 const StyledButtonInit = styled.button`
-    background-color: #fff;
-    color: black;
+    background-color: #e4b363;
+    color: #313638;
     border: none;
+    font-weight: bold;
     border-radius: 5px;
     padding: 10px 15px;
     font-size: 14px;
     cursor: pointer;
 
     &:hover {
-        background-color: #444;
+        background-color: #e0dfd5;
     }
 `;
 
@@ -73,13 +81,14 @@ const ButtonWrapper = styled.div`
 `;
 
 const StepNumber = styled.span`
-    color: black;
+    color: #fff;
+    font-size: 24px;
     font-weight: bold;
-    margin-right: 5px;
+    margin-right: 15px;
 `;
 
 const Arrow = styled.span`
-    color: black;
+    color: #fff;
     font-weight: bold;
     font-size: 40px;
     margin: 0 10px;
@@ -96,7 +105,7 @@ const ButtonArea = styled.div`
 const LargeText = styled.div`
     font-size: 40px;
     font-weight: bold;
-    margin-left: 50px;
+    margin-left: 30px;
 `;
 
 const ButtonContainer = styled.div`
@@ -327,9 +336,8 @@ const ExpressLog = styled.div`
 
 //---
 const Express = () => {
-
     const fileContext = useContext(FileContext);
-    const { file, fileName, folderData, setFolderData } = fileContext
+    const { file, fileName, folderData, setFolderData } = fileContext;
 
     const { username, projectName } = useParams();
     // const { file } = useContext(FileContext);
@@ -344,9 +352,9 @@ const Express = () => {
     const [initProgress, setInitProgress] = useState(0);
     const [runPort, setRunPort] = useState(false);
     const [npmCommand, setNpmCommand] = useState("");
-    const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table'");
+    const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table';");
     const [sqliteResult, setSqliteResult] = useState("sqlite執行結果");
-    const [redisCommand, setRedisCommand] = useState("");
+    const [redisCommand, setRedisCommand] = useState("set foo bar");
     const [redisResult, setRedisResult] = useState("redis執行結果");
     const [expressLog, setExpressLog] = useState([]);
     const [selectedFeature, setSelectedFeature] = useState("NodeJs");
@@ -372,8 +380,11 @@ const Express = () => {
         const data = await api.checkInfo(projectName);
         if (data.data === "err") {
             window.location.href = `/profile/${username}`;
+        } else if (data.data[0].start_execution === null) {
+            localStorage.setItem("execTime", 0);
         } else {
             localStorage.setItem("execTime", data.data[0].start_execution);
+            setIsInit(true);
         }
     };
     useEffect(() => {
@@ -419,7 +430,6 @@ const Express = () => {
 
     async function getServerData() {
         const data = await api.fetchData(serverName);
-        console.log("####", data);
         setFolderData(data);
         setShouldFetchData(false);
     }
@@ -427,7 +437,6 @@ const Express = () => {
     useEffect(() => {
         if (shouldFetchData) {
             getServerData();
-            setIsInit(true);
         }
     }, [shouldFetchData]);
 
@@ -464,8 +473,11 @@ const Express = () => {
     useEffect(() => {
         //從localstorage取得現在點擊檔案名稱
         const ChoiceFile = localStorage.getItem("nowChoiceFile");
-        const pathFormat = ChoiceFile.replace(/\//g, " ❯ ");
-        setChoiceFile(pathFormat);
+        if (ChoiceFile) {
+            const pathFormat = ChoiceFile.replace(/\//g, " ❯ ");
+            setChoiceFile(pathFormat);
+        }
+
         //動態觀察
     }, [fileName]);
 
@@ -473,9 +485,16 @@ const Express = () => {
     const handleCreateSubmit = async (event) => {
         event.preventDefault();
         const task = "createServer";
-        await api.resetFile(task, serverName);
-
-        getServerData();
+        setIsActionLoading(true);
+        const result = await api.resetFile(task, serverName);
+        if (result) {
+            getServerData();
+        }
+        setIsActionLoading(false);
+        localStorage.setItem("nowChoiceFile", `gitFolder/app.js`);
+        localStorage.setItem("openedFolders", `{"gitFolder":true}`);
+        localStorage.setItem("sqliteCommand", "SELECT name FROM sqlite_master WHERE type='table';");
+        localStorage.setItem("redisCommand", "set foo bar");
     };
 
     const handleInitSubmit = async (event) => {
@@ -559,9 +578,11 @@ const Express = () => {
     //---
 
     const handleRunSubmit = async (event) => {
-        event.preventDefault();
-
+        if (event) {
+            event.preventDefault();
+        }
         const task = "jsOperRun";
+        setIsActionLoading(true);
         const result = await api.jsOper(task, serverName, projectName);
         if (result) {
             alert(`express running on port : ${result.data}`);
@@ -569,6 +590,7 @@ const Express = () => {
         }
         //使用者進入網頁後自動刷新過期時間------------------------
         await api.updateExpiredTime(username, projectName);
+        setIsActionLoading(false);
         setExpiredTime(timestampWithDaysOffset(7));
         setRunPort(`${api.tcpClientIp}:${result.data}`);
         // Set the remaining time to 30 minutes (1800 seconds)
@@ -580,15 +602,17 @@ const Express = () => {
         if (port) {
             setRunPort(`${api.tcpClientIp}:${port}`);
         } else {
-            setRunPort("伺服器未啓動");
+            setRunPort(false);
             localStorage.removeItem("port");
         }
     }, []);
 
     const handleStopSubmit = async (event) => {
         event.preventDefault();
+        setIsActionLoading(true);
         const task = "jsOperStop";
         const result = await api.jsOper(task, serverName);
+        setIsActionLoading(false);
         if (result) {
             alert("伺服器已停止");
         }
@@ -758,29 +782,29 @@ const Express = () => {
                 )}
                 {!isInit ? (
                     <ButtonArea1>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                            <img src={images.iconExpressBar} alt='Logo' width='50px' />
+                        <ProjectIconAndTitle>
+                            <img src={images.iconExpressBar} alt='Logo' width='50px' height='50px' />
                             <LargeText>{projectName}</LargeText>
-                        </div>
+                        </ProjectIconAndTitle>
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
                             <ButtonWrapper>
                                 <StepNumber>1</StepNumber>
-                                <StyledButtonInit onClick={handleCreateSubmit}>創立專案</StyledButtonInit>
+                                <StyledButtonInit onClick={handleCreateSubmit}>建立伺服器檔案 </StyledButtonInit>
                             </ButtonWrapper>
                             <Arrow>➡</Arrow>
                             <ButtonWrapper>
                                 <StepNumber>2</StepNumber>
-                                <StyledButtonInit onClick={handleInitSubmit}>初始化 INIT</StyledButtonInit>
+                                <StyledButtonInit onClick={handleInitSubmit}>初始化環境</StyledButtonInit>
                             </ButtonWrapper>
                         </div>
                         <StyledButtonInit onClick={handleInitOptionClose}>關閉初始化選單</StyledButtonInit>
                     </ButtonArea1>
                 ) : (
                     <ButtonArea>
-                        <div style={{ display: "flex", alignItems: "center" }}>
-                            <img src={images.iconExpressBar} alt='Logo' width='50px' margin-left='50px' />
+                        <ProjectIconAndTitle>
+                            <img src={images.iconExpressBar} alt='Logo' width='50px' height='50px' />
                             <LargeText>{projectName}</LargeText>
-                        </div>
+                        </ProjectIconAndTitle>
                         <ButtonContainer>
                             {!runPort ? (
                                 <StyledButton type='run' onClick={handleRunSubmit}>

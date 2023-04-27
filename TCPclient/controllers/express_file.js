@@ -9,12 +9,20 @@ import { error } from "console";
 import { stderr, stdout } from "process";
 
 //從github拉資料下來
-function downloadRepo(path, gitUrl) {
+async function downloadRepo(path, gitUrl) {
     //下載到專案資料中
     const downloadCommend = `git clone ${gitUrl} ${path}`;
-    const child = exec(downloadCommend);
-    child.stdout.on("data", async (data) => {
-        console.log(`git clone 結果: ${data}`);
+    return await new Promise((resolve, reject) => {
+        const child = exec(downloadCommend, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            }
+
+            child.stdout.on("exit", async (data) => {
+                console.log(`git clone 結果: ${data}`);
+                resolve(data);
+            });
+        });
     });
 }
 
@@ -28,6 +36,12 @@ async function listFiles(folderPath) {
         }
 
         if (file === ".git") {
+            continue;
+        }
+        if (file === ".gitignore") {
+            continue;
+        }
+        if (file === ".gitkeep") {
             continue;
         }
         const filePath = path.join(folderPath, file);
@@ -59,17 +73,16 @@ export async function createFolder(job) {
         await mkdir(newProjectPath);
         await mkdir(gitFolderPath);
 
-        downloadRepo(gitFolderPath, gitUrl);
-        console.log(`專案:${folderName}建立完成、git資料下載完成`);
-
         await createDockerComposeFile(folderName, newProjectPath);
-        console.log(`docker-compose.yml建立完成`);
+        console.log(`docker compose.yml建立完成`);
 
         await createLogSH(logPath, folderName, newProjectPath);
-        console.log(`docker-compose-express log腳本建立完成`);
-
+        console.log(`docker compose-express log腳本建立完成`);
         await chmodLogSH(folderName, newProjectPath);
-        // await runLogSH(folderName, newProjectPath);
+
+        const result = await downloadRepo(gitFolderPath, gitUrl);
+        console.log("#####", result);
+        console.log(`專案:${folderName}建立完成、git資料下載完成`);
 
         return "專案資料夾初始化完成";
     } catch (e) {

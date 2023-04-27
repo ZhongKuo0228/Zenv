@@ -27,7 +27,7 @@ async function npmCommand(serverName, vPath, doJob) {
 
 async function composeUp(vPath) {
     return new Promise(async (resolve, reject) => {
-        const container = "docker-compose";
+        const container = "docker compose";
         const action = "up -d";
         const command = `${container} -f ${vPath}/docker-compose.yml ${action}`; //使用exec所以-it要拿掉
         exec(command, (error, stdout, stderr) => {
@@ -42,7 +42,7 @@ async function composeUp(vPath) {
 
 async function composeStop(vPath, service) {
     return new Promise(async (resolve, reject) => {
-        const container = "docker-compose";
+        const container = "docker compose";
         const action = "stop";
         const time = "-t 1";
         const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time} ${service}`; //使用exec所以-it要拿掉
@@ -58,7 +58,7 @@ async function composeStop(vPath, service) {
 
 async function composeRun(vPath, service) {
     return new Promise(async (resolve, reject) => {
-        const container = "docker-compose";
+        const container = "docker compose";
         const action = "start";
         const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${service}`; //使用exec所以-it要拿掉
         exec(command, (error, stdout, stderr) => {
@@ -72,7 +72,7 @@ async function composeRun(vPath, service) {
 }
 
 export async function getOutPort(vPath, serviceName) {
-    const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
+    const command = `docker compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
     console.log("command", command);
     try {
         const { stdout } = await execAsync(command);
@@ -117,7 +117,7 @@ export async function createDockerComposeFile(serverName, filePath) {
 }
 
 export async function createLogSH(logPath, folderName, newProjectPath) {
-    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
+    const createLogSH = `docker compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
 
     //生成log的腳本檔案建立
     const fileName = `${folderName}-express.sh`;
@@ -181,7 +181,7 @@ export async function stopLogSH(folderName, newProjectPath) {
 }
 
 export async function jsOperInit(job) {
-    //node/npm-install → docker-compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker-compose stop -t 1 <container>
+    //node/npm-install → docker compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker compose stop -t 1 <container>
     const folderPath = path.join(moduleDir, "../express_project/");
     const serverName = job.serverName;
     const ymlPath = `${folderPath}${serverName}`;

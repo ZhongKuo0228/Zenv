@@ -83,6 +83,16 @@ const App = () => {
     }, []);
 
     const handleProfileClick = () => {
+        // 保留的key
+        const reservedKeys = ["jwt"];
+
+        // 遍歷所有的key
+        for (const key in localStorage) {
+            // 如果key不是保留的key，刪除它
+            if (!reservedKeys.includes(key)) {
+                localStorage.removeItem(key);
+            }
+        }
         window.location.href = `/profile/${username}`;
     };
     const handleLogOut = () => {

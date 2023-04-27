@@ -12,31 +12,28 @@ import api from "../../util/api";
 import { timestamp, timeFormat } from "../../util/timestamp";
 import images from "../../images/image";
 //使用者頁面後自動存檔------------------------
-function commitPLpage() {
-    //使用者關閉頁面後
-    window.onbeforeunload = async function () {
-        try {
-            await api.PLcodeSave();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-}
+// function commitPLpage() {
+//     //使用者關閉頁面後
+//     window.onbeforeunload = async function () {
+//         try {
+//             await api.PLcodeSave();
+//         } catch (error) {
+//             console.error(error);
+//         }
+//     };
+// }
 
-commitPLpage();
+// commitPLpage();
 //---styled-------------------------------------------
-
+const HeaderHeight = "50px";
 const Container_all = styled.div`
-    font-family: Arial, sans-serif;
     display: flex;
-    width: 100vw;
     flex-direction: column;
-    height: 90vh;
+    height: calc(100vh - ${HeaderHeight});
     color: #fff;
     background-color: #272727;
 `;
 const ProjectInfo = styled.div`
-    height: 30px;
     border: solid 1px #6c6c6c;
     padding: 10px;
     display: flex;
@@ -44,11 +41,9 @@ const ProjectInfo = styled.div`
 `;
 const Container_work = styled.div`
     display: flex;
-    height: 100%;
 `;
 const WorkArea = styled.div`
     width: 70%;
-    height: 100%;
     border: solid 1px #6c6c6c;
     padding: 10px;
 `;
@@ -72,14 +67,13 @@ const ProjectName = styled.div`
 
 const ConsoleArea = styled.div`
     width: 30%;
-    height: 100%;
     padding: 10px;
     border: solid 1px #6c6c6c;
 `;
 const ConsoleResult = styled.textarea`
     width: 95%;
     font-size: 16px;
-    height: 73vh;
+    height: 70vh;
     padding: 10px;
     background-color: #272727;
     color: #fff;

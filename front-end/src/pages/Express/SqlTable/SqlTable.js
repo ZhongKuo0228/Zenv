@@ -10,7 +10,7 @@ const Table = ({ data }) => {
         & th {
             background-color: #4f4f4f;
             border: 1px solid white;
-            color: #ffffe0;
+            color: #e6db74;
             font-weight: bold;
             padding: 0.5rem;
             text-align: left;

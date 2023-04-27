@@ -60,7 +60,6 @@ const File = ({ file, path, onFileClick }) => {
 
     async function getServerData() {
         const data = await api.fetchData(serverName);
-        console.log("file", data);
         setFolderData(data);
     }
 
