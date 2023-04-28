@@ -11,8 +11,8 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
     <BrowserRouter>
         <Routes>
-            <Route path='/' element={<App />}>
-                <Route path='/' element={<Navigate to='/profile' />} />
+            <Route path='/' element={<App />} exact>
+                <Route path='profile/' element={<App />} />
                 <Route path='profile/:username' element={<Profile />} />
                 <Route path='PLpage/:username/:projectName' element={<PLpage />} />
                 <Route path='webServices/:username/:projectName' element={<Express />} />

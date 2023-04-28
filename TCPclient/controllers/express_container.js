@@ -11,7 +11,7 @@ const timers = {}; //放置定時器
 async function npmCommand(serverName, vPath, doJob) {
     return new Promise(async (resolve, reject) => {
         const container = "docker";
-        const action = "run --name";
+        const action = "run --rm --name ";
         const containerName = serverName;
         const images = "node/npm";
         const command = `${container} ${action} ${containerName} -v ${vPath}:/usr/src/app ${images} ${doJob}`; //使用exec所以-it要拿掉
@@ -27,7 +27,7 @@ async function npmCommand(serverName, vPath, doJob) {
 
 async function composeUp(vPath) {
     return new Promise(async (resolve, reject) => {
-        const container = "docker-compose";
+        const container = "docker compose";
         const action = "up -d";
         const command = `${container} -f ${vPath}/docker-compose.yml ${action}`; //使用exec所以-it要拿掉
         exec(command, (error, stdout, stderr) => {
@@ -42,7 +42,7 @@ async function composeUp(vPath) {
 
 async function composeStop(vPath, service) {
     return new Promise(async (resolve, reject) => {
-        const container = "docker-compose";
+        const container = "docker compose";
         const action = "stop";
         const time = "-t 1";
         const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time} ${service}`; //使用exec所以-it要拿掉
@@ -55,10 +55,24 @@ async function composeStop(vPath, service) {
         });
     });
 }
-
+async function composeDown(vPath, service) {
+    return new Promise(async (resolve, reject) => {
+        const container = "docker compose";
+        const action = "down";
+        const time = "-t 1";
+        const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time}`; //使用exec所以-it要拿掉
+        exec(command, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
 async function composeRun(vPath, service) {
     return new Promise(async (resolve, reject) => {
-        const container = "docker-compose";
+        const container = "docker compose";
         const action = "start";
         const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${service}`; //使用exec所以-it要拿掉
         exec(command, (error, stdout, stderr) => {
@@ -72,7 +86,7 @@ async function composeRun(vPath, service) {
 }
 
 export async function getOutPort(vPath, serviceName) {
-    const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
+    const command = `docker compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
     console.log("command", command);
     try {
         const { stdout } = await execAsync(command);
@@ -117,7 +131,7 @@ export async function createDockerComposeFile(serverName, filePath) {
 }
 
 export async function createLogSH(logPath, folderName, newProjectPath) {
-    const createLogSH = `docker-compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
+    const createLogSH = `docker compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
 
     //生成log的腳本檔案建立
     const fileName = `${folderName}-express.sh`;
@@ -181,7 +195,7 @@ export async function stopLogSH(folderName, newProjectPath) {
 }
 
 export async function jsOperInit(job) {
-    //node/npm-install → docker-compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker-compose stop -t 1 <container>
+    //node/npm-install → docker compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker compose stop -t 1 <container>
     const folderPath = path.join(moduleDir, "../express_project/");
     const serverName = job.serverName;
     const ymlPath = `${folderPath}${serverName}`;
@@ -263,13 +277,8 @@ export async function jsOperNpm(job) {
         const doJob = job.doJob;
         console.log("doJob", doJob);
 
-        async function executeCommands() {
-            //先安裝一次npm install、並刪除臨時產生的container
-            await npmCommand(serverName, filePath, doJob);
-            await stopPLContainer(serverName);
-            await rmPLContainer(serverName);
-        }
-        await executeCommands();
+        //先安裝一次npm install、並刪除臨時產生的container
+        await npmCommand(serverName, filePath, doJob);
 
         const result = `npm 指令完成 : ${doJob}`;
         return result;
@@ -278,5 +287,42 @@ export async function jsOperNpm(job) {
     } catch (e) {
         console.log("執行 npm 指令發生問題 : ", e);
         return e;
+    }
+}
+
+export async function stopProject(serverName) {
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const ymlPath = `${folderPath}${serverName}`;
+    try {
+        await composeStop(ymlPath, `${serverName}`);
+        const result = `伺服器停止 : ${serverName}`;
+        // await stopLogSH(serverName, ymlPath);
+
+        //清除定時器
+        clearTimeout(timers[serverName]);
+        delete timers[serverName];
+
+        return result;
+    } catch (err) {
+        console.log(`停止 ${serverName} 發生問題: `, err.message);
+        return err.message;
+    }
+}
+export async function downProject(serverName) {
+    const folderPath = path.join(moduleDir, "../express_project/");
+    const ymlPath = `${folderPath}${serverName}`;
+    try {
+        await composeDown(ymlPath, `${serverName}`);
+        const result = `伺服器關閉 : ${serverName}`;
+        // await stopLogSH(serverName, ymlPath);
+
+        //清除定時器
+        clearTimeout(timers[serverName]);
+        delete timers[serverName];
+
+        return result;
+    } catch (err) {
+        console.log(`停止 ${serverName} 發生問題: `, err.message);
+        return err.message;
     }
 }

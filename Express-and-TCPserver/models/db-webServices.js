@@ -100,3 +100,19 @@ export async function createWebProjects(req) {
         return false;
     }
 }
+export async function delWebProjects(req) {
+    const userID = req.user.userID;
+    const projectName = req.body.data.projectName;
+    const checkProject = await checkProjectName(userID, projectName);
+
+    if (checkProject.length > 0) {
+        const itemsID = checkProject[0].service_item;
+        const [rows] = await pool.query(
+            `DELETE FROM web_services WHERE user_id = ? AND project_name = ? AND service_item = ?`,
+            [userID, projectName, itemsID]
+        );
+        return rows;
+    } else {
+        return false;
+    }
+}

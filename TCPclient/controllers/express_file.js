@@ -4,16 +4,35 @@ const promisify = util.promisify;
 import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH } from "./express_container.js";
+import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH, downProject } from "./express_container.js";
+import { error } from "console";
+import { stderr, stdout } from "process";
 
 //從github拉資料下來
-function downloadRepo(path, gitUrl) {
+async function downloadRepo(path, gitUrl) {
     //下載到專案資料中
     const downloadCommend = `git clone ${gitUrl} ${path}`;
-    const child = exec(downloadCommend);
-    child.stdout.on("data", async (data) => {
-        console.log(`git clone 結果: ${data}`);
+    return await new Promise((resolve, reject) => {
+        const child = exec(downloadCommend, (error, stdout, stderr) => {
+            if (error) {
+                reject(error);
+            }
+
+            child.stdout.on("exit", async (data) => {
+                console.log(`git clone 結果: ${data}`);
+                resolve(data);
+            });
+        });
     });
+}
+
+export async function delProjectFiles(filePath) {
+    try {
+        const command = `rm -rf ${filePath}`;
+        exec(command);
+    } catch (e) {
+        console.error("刪除檔案錯誤", e);
+    }
 }
 
 //忽略檔案名稱
@@ -26,6 +45,12 @@ async function listFiles(folderPath) {
         }
 
         if (file === ".git") {
+            continue;
+        }
+        if (file === ".gitignore") {
+            continue;
+        }
+        if (file === ".gitkeep") {
             continue;
         }
         const filePath = path.join(folderPath, file);
@@ -57,17 +82,16 @@ export async function createFolder(job) {
         await mkdir(newProjectPath);
         await mkdir(gitFolderPath);
 
-        downloadRepo(gitFolderPath, gitUrl);
-        console.log(`專案:${folderName}建立完成、git資料下載完成`);
-
         await createDockerComposeFile(folderName, newProjectPath);
-        console.log(`docker-compose.yml建立完成`);
+        console.log(`docker compose.yml建立完成`);
 
         await createLogSH(logPath, folderName, newProjectPath);
-        console.log(`docker-compose-express log腳本建立完成`);
-
+        console.log(`docker compose-express log腳本建立完成`);
         await chmodLogSH(folderName, newProjectPath);
-        // await runLogSH(folderName, newProjectPath);
+
+        const result = await downloadRepo(gitFolderPath, gitUrl);
+        console.log("#####", result);
+        console.log(`專案:${folderName}建立完成、git資料下載完成`);
 
         return "專案資料夾初始化完成";
     } catch (e) {
@@ -160,9 +184,16 @@ export async function operDel(job) {
         const fileName = job.fileName;
         const filePath = `${folderPath}${fileName}`;
         const delCommand = `rm -rf "${filePath}"`;
-        exec(delCommand);
-        let result = `刪除檔案完成 : ${fileName}`;
-        return result;
+        return await new Promise((resolve, reject) => {
+            exec(delCommand, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+
+                let result = `刪除檔案完成 : ${fileName}`;
+                resolve(result);
+            });
+        });
     } catch (e) {
         console.log("新增資料夾、檔案發生問題 : ", e);
         return e;
@@ -175,12 +206,39 @@ export async function operRename(job) {
         const fileName = job.fileName[0];
         const newFileName = job.fileName[1];
         const renameCommand = `mv ${folderPath}${fileName} ${folderPath}${newFileName}`;
-        exec(renameCommand);
-        let result = `重新命名檔案完成 : ${folderPath}${newFileName}`;
-        console.log(`${folderPath}${fileName}`, `${folderPath}${newFileName}`);
-        return result;
+        return await new Promise((resolve, reject) => {
+            exec(renameCommand, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+                let result = `重新命名檔案完成 : ${folderPath}${newFileName}`;
+                console.log(`${folderPath}${fileName}`, `${folderPath}${newFileName}`);
+                resolve(result);
+            });
+        });
     } catch (e) {
         console.log("重新命名檔案發生問題 : ", e);
+        return e;
+    }
+}
+export async function delProject(job) {
+    try {
+        console.job;
+        const serverName = job.serverName;
+        //刪除運行中的容器
+        await downProject(job.serverName);
+        //刪除專案資料夾
+        const folderPath = path.join(moduleDir, "../express_project/");
+        const projectPath = `${folderPath}${serverName}`;
+        await delProjectFiles(projectPath);
+        //刪除專案log檔
+        const logPath = path.join(moduleDir, "../express_project/server_logs");
+        const logFile = `${logPath}/${serverName}.log`;
+        await delProjectFiles(logFile);
+
+        return "專案刪除完畢";
+    } catch (e) {
+        console.log("專案刪除時發生錯誤 : ", e);
         return e;
     }
 }

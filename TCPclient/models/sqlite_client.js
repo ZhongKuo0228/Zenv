@@ -23,6 +23,7 @@ async function runSql(dbPath, sql) {
 export async function sqliteCommand(job) {
     const serverName = job.serverName;
     const command = job.command;
+    console.log("command", command);
 
     const folderPath = path.join(moduleDir, "../express_project/");
     const folderName = serverName;
@@ -35,19 +36,6 @@ export async function sqliteCommand(job) {
         if (result.length === 0) {
             return "Success: Query returned no results.";
         } else {
-            // const table = new Table({
-            //     //顯示table的格式
-            //     wordWrap: true,
-            //     colWidths: [20],
-            //     colAligns: ["left"],
-            //     style: { head: ["cyan"], border: ["grey"] },
-            // });
-            // const columns = Object.keys(result[0]);
-            // table.push(columns);
-            // for (const row of result) {
-            //     table.push(columns.map((column) => row[column]));
-            // }
-            // return stripAnsi(table.toString());
             const data = [];
             const columns = Object.keys(result[0]);
             data.push(columns);

@@ -122,6 +122,28 @@ const api = {
             console.error("Error fileOper fetching POST event data:", error);
         }
     },
+    async delPLProject(projectName, serviceItem, selectedItemsType) {
+        const data = {
+            projectName: projectName,
+            serviceItem: serviceItem,
+            itemsType: selectedItemsType,
+        };
+
+        console.log("data", data);
+        try {
+            const response = await fetch(`${this.hostname}/serviceItems/delProject`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${JWT}`,
+                },
+                body: JSON.stringify({ data: data }),
+            });
+            return await response.json();
+        } catch (error) {
+            console.error("Error fileOper fetching DELETE event data:", error);
+        }
+    },
     async getPLServiceItems() {
         try {
             const response = await fetch(`${this.hostname}/serviceItems/plServices`, {

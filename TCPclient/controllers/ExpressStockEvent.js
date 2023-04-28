@@ -15,13 +15,17 @@ const handlerMap = {
 };
 
 export async function expressEvent(job) {
-    const task = job.task;
-    console.log("task", task);
-    let result;
-    if (handlerMap[task]) {
-        result = await handlerMap[task](job);
-        sendToServer(JSON.stringify(result));
-    } else {
-        throw new Error();
+    try {
+        const task = job.task;
+        console.log("task", task);
+        let result;
+        if (handlerMap[task]) {
+            result = await handlerMap[task](job);
+            sendToServer(JSON.stringify(result));
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        console.log("運行webService時失敗", e);
     }
 }
