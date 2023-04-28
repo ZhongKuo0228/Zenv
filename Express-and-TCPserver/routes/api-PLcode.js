@@ -24,6 +24,7 @@ plCodeRouter.post("/run", async (req, res, next) => {
 });
 
 plCodeRouter.post("/save", async (req, res, next) => {
+    console.log("save", req.body);
     await saveCode(req);
     res.status(200).json({ data: "存檔成功" });
 });

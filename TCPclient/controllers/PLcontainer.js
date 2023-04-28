@@ -24,26 +24,30 @@ function programLanguageSelect(programLanguage) {
 }
 
 export async function createPLContainer(executeId, programLanguage, code) {
-    const prog_lang = programLanguageSelect(programLanguage);
-    console.log(programLanguage);
-    const ext = prog_lang[0];
-    const filePath = path.join("./controllers/tempFile");
-    const fileName = `${executeId}.${ext}`;
-    await writeFile(`${filePath}/${fileName}`, code);
+    try {
+        const prog_lang = programLanguageSelect(programLanguage);
+        console.log(programLanguage);
+        const ext = prog_lang[0];
+        const filePath = path.join("./controllers/tempFile");
+        const fileName = `${executeId}.${ext}`;
+        await writeFile(`${filePath}/${fileName}`, code);
 
-    //控制容器指令
-    const container = "docker";
-    const action = "run --rm --name ";
-    const containerName = executeId;
-    const vPath = path.join(process.cwd(), "./controllers/tempFile");
-    const imagesAndRun = prog_lang[1];
-    //臨時檔案建立
-    if (programLanguage == "C++") {
-        const command = `${container} ${action} ${containerName} -v ${vPath}:/app ${imagesAndRun} "g++ /app/${fileName} -o /app/cpp && /app/cpp"`; //使用exec所以-it要拿掉
-        return command;
-    } else {
-        const command = `${container} ${action} ${containerName} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
-        return command;
+        //控制容器指令
+        const container = "docker";
+        const action = "run --rm --name ";
+        const containerName = executeId;
+        const vPath = path.join(process.cwd(), "./controllers/tempFile");
+        const imagesAndRun = prog_lang[1];
+        //臨時檔案建立
+        if (programLanguage == "C++") {
+            const command = `${container} ${action} ${containerName} -v ${vPath}:/app ${imagesAndRun} "g++ /app/${fileName} -o /app/cpp && /app/cpp"`; //使用exec所以-it要拿掉
+            return command;
+        } else {
+            const command = `${container} ${action} ${containerName} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
+            return command;
+        }
+    } catch (e) {
+        console.error("建立容器時失敗", e);
     }
 }
 
