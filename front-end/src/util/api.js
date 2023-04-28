@@ -6,7 +6,7 @@ const api = {
     tcpClientIp: "http://localhost",
     // hostname: "https://www.rt019.tk/api/1.0",
     // stockIO: "https://www.rt019.tk/",
-    // tcpClientIp: "http://144.24.87.146/",
+    // tcpClientIp: "http://144.24.87.146",
 
     //一些範例：
     async createProduct(data, jwtToken) {

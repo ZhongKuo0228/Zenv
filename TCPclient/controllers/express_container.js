@@ -86,7 +86,8 @@ async function composeRun(vPath, service) {
 }
 
 export async function getOutPort(vPath, serviceName) {
-    const command = `docker compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
+    //使用新版指令docker compose會抓不到port
+    const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
     console.log("command", command);
     try {
         const { stdout } = await execAsync(command);

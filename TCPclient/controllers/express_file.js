@@ -17,11 +17,7 @@ async function downloadRepo(path, gitUrl) {
             if (error) {
                 reject(error);
             }
-
-            child.stdout.on("exit", async (data) => {
-                console.log(`git clone 結果: ${data}`);
-                resolve(data);
-            });
+            resolve();
         });
     });
 }
@@ -89,8 +85,7 @@ export async function createFolder(job) {
         console.log(`docker compose-express log腳本建立完成`);
         await chmodLogSH(folderName, newProjectPath);
 
-        const result = await downloadRepo(gitFolderPath, gitUrl);
-        console.log("#####", result);
+        await downloadRepo(gitFolderPath, gitUrl);
         console.log(`專案:${folderName}建立完成、git資料下載完成`);
 
         return "專案資料夾初始化完成";

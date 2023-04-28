@@ -141,6 +141,7 @@ const WebPageButton = styled.button`
     align-items: center;
     font-size: 18px;
     border-radius: 5px;
+    margin-left: 40px;
 
     & > *:first-child {
         margin-right: 5px;
@@ -400,7 +401,6 @@ const Express = () => {
             const timeThreshold = 30 * 60 * 1000; // 30 minutes in milliseconds
 
             if (timeDifference > timeThreshold) {
-                localStorage.removeItem("port");
                 setRemainingTime(null);
             } else {
                 const remaining = timeThreshold - timeDifference;
@@ -585,7 +585,7 @@ const Express = () => {
         const result = await api.jsOper(task, serverName, projectName);
         if (result) {
             alert(`express running on port : ${result.data}`);
-            localStorage.setItem("port", result.data);
+            window.localStorage.setItem("port", result.data);
         }
         //使用者進入網頁後自動刷新過期時間------------------------
         await api.updateExpiredTime(username, projectName);
@@ -602,7 +602,6 @@ const Express = () => {
             setRunPort(`${api.tcpClientIp}:${port}`);
         } else {
             setRunPort(false);
-            localStorage.removeItem("port");
         }
     }, []);
 
@@ -619,8 +618,10 @@ const Express = () => {
         setRemainingTime(null);
         setRunPort(false);
     };
-    const handleWebPageOpen = () => {
+    const handleWebPageOpen = (event) => {
+        event.stopPropagation();
         const port = localStorage.getItem("port");
+        console.log("port", port);
         if (port) {
             window.open(`${api.tcpClientIp}:${port}`);
         } else {
@@ -811,16 +812,16 @@ const Express = () => {
                                     運行 RUN
                                 </StyledButton>
                             ) : (
-                                <StyledButton type='stop' onClick={handleStopSubmit}>
-                                    <FaPause />
-                                    暫停 STOP
-                                </StyledButton>
-                            )}
-                            {runPort && (
-                                <WebPageButton onClick={handleWebPageOpen}>
-                                    <FaChrome />
-                                    開啓網頁
-                                </WebPageButton>
+                                <>
+                                    <StyledButton type='stop' onClick={handleStopSubmit}>
+                                        <FaPause />
+                                        暫停 STOP
+                                    </StyledButton>
+                                    <WebPageButton onClick={handleWebPageOpen}>
+                                        <FaChrome />
+                                        開啓網頁
+                                    </WebPageButton>
+                                </>
                             )}
                         </ButtonContainer>
                         <div style={{ display: "flex", alignItems: "center" }}>
