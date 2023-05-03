@@ -107,7 +107,7 @@ export async function rewriteFile(req) {
         fileName: project.fileName,
         editCode: project.editCode,
     };
-    console.log("r", project);
+
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
@@ -131,11 +131,10 @@ export async function fileOper(req) {
 
 export async function jsOper(req) {
     const project = req.body.data;
-    console.log("jsOper", project);
 
     //初始化：init  ：node/npm-install → docker-compose up → 取得port → docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
     //啓動： run  : docker-compose start <container>
-    //停止 ：stop : docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
+    //停止 ：stop : docker-compose stop -t 1 <container>
     //npm 操作： npm  :node/npm "指令"
 
     let job = {
@@ -144,23 +143,18 @@ export async function jsOper(req) {
         doJob: project.doJob,
     };
 
-    console.log(job);
-
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
 
 export async function dbOper(req) {
     const project = req.body.data;
-    console.log("dbOper", project);
 
     let job = {
         task: project.task,
         serverName: project.serverName,
         command: project.command,
     };
-
-    console.log(job);
 
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
@@ -175,7 +169,7 @@ export async function delProject(req) {
         task: "delProject",
         serverName: serverName,
     };
-    console.log("job ", job);
+
     const buffer = await socketWrite(job);
     return bufferToJson(buffer);
 }
