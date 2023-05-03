@@ -54,7 +54,7 @@ const File = ({ file, path, onFileClick }) => {
     const [isRenaming, setIsRenaming] = useState(false);
     const [newFileName, setNewFileName] = useState(file.name);
     const fileContext = useContext(FileContext);
-    const { setFolderData, folderData } = fileContext;
+    const { setFolderData, folderData, setSelectedFeature, setFeature } = fileContext;
 
     const serverName = `${username}_${projectName}`;
 
@@ -66,6 +66,8 @@ const File = ({ file, path, onFileClick }) => {
     const handleFileClick = () => {
         if (onFileClick) {
             onFileClick(`${path}/${file.name}`);
+            setSelectedFeature("NodeJs");
+            setFeature("NodeJs");
         }
     };
     const handleDeleteFile = async (event) => {

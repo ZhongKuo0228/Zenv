@@ -107,7 +107,6 @@ const api = {
             itemsType: selectedItemsType,
         };
 
-        console.log("data", data);
         try {
             const response = await fetch(`${this.hostname}/serviceItems/createProject`, {
                 method: "POST",
@@ -129,7 +128,6 @@ const api = {
             itemsType: selectedItemsType,
         };
 
-        console.log("data", data);
         try {
             const response = await fetch(`${this.hostname}/serviceItems/delProject`, {
                 method: "DELETE",

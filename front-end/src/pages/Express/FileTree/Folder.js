@@ -52,7 +52,7 @@ const Folder = ({ folder, path = "" }) => {
     const [isAddingFile, setIsAddingFile] = useState(false);
     const [newSubfileName, setNewSubfileName] = useState("");
     const fileContext = useContext(FileContext);
-    const { setFolderData, folderData } = fileContext;
+    const { setFolderData, folderData, setSelectedFeature, setFeature } = fileContext;
 
     async function getServerData() {
         const data = await api.fetchData(serverName);
@@ -67,6 +67,8 @@ const Folder = ({ folder, path = "" }) => {
 
     //資料夾的點擊狀態確認
     const handleClick = () => {
+        setSelectedFeature("NodeJs");
+        setFeature("NodeJs");
         setIsOpen(!isOpen);
         setOpenedFolders({ ...openedFolders, [fullPath]: !isOpen });
         localStorage.setItem("openedFolders", JSON.stringify({ ...openedFolders, [fullPath]: !isOpen }));

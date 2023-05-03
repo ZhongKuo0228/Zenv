@@ -122,6 +122,14 @@ const CenteredLoading = styled.div`
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 9999;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+`;
+const LoadingTips = styled.div`
+    color: #fff;
 `;
 //---
 const WriteCode = () => {
@@ -131,8 +139,7 @@ const WriteCode = () => {
     const [progLang, setProgLang] = useState("");
     const [execTime, setExecTime] = useState("");
     const [saveTime, setSaveTime] = useState("");
-    const [permissions, setPermissions] = useState("");
-    const [shareBtn, setShareBtn] = useState("");
+    const [isCodeRun, setIsCodeRun] = useState(false);
     const [icon, setIcon] = useState("");
     const [extensions, setExtensions] = useState();
     const [result, setResult] = useState("");
@@ -192,8 +199,10 @@ const WriteCode = () => {
         event.preventDefault();
         try {
             setIsActionLoading(true);
+            setIsCodeRun(true);
             const data = await api.PLcodeRun();
             setIsActionLoading(false);
+            setIsCodeRun(false);
             setResult(data.data);
             setExecTime(timestamp());
             setSaveTime(timestamp());
@@ -201,6 +210,18 @@ const WriteCode = () => {
             console.error(error);
         }
     };
+
+    const handleRunCodeStop = async (event) => {
+        event.preventDefault();
+        try {
+            setIsActionLoading(false);
+            setIsCodeRun(false);
+            setResult("停止程式執行");
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     const handleSaveCodeSubmit = async (event) => {
         event.preventDefault();
         try {
@@ -230,6 +251,7 @@ const WriteCode = () => {
                 {isActionLoading && (
                     <CenteredLoading>
                         <Loading type='spin' color='#00BFFF' height={100} width={100} />
+                        <LoadingTips>提示：執行編譯超過1分鐘無回應將停止當次執行</LoadingTips>
                     </CenteredLoading>
                 )}
             </div>
@@ -242,10 +264,17 @@ const WriteCode = () => {
                         <ProjectName>{projectName}</ProjectName>
                     </ProjectContainer>
                     <ActionButton>
-                        <StyledButton type='run' onClick={handleRunCodeSubmit}>
-                            <FaPlay />
-                            運行 RUN
-                        </StyledButton>
+                        {!isCodeRun ? (
+                            <StyledButton type='run' onClick={handleRunCodeSubmit}>
+                                <FaPlay />
+                                運行 RUN
+                            </StyledButton>
+                        ) : (
+                            <StyledButton onClick={handleRunCodeStop}>
+                                <FaPause />
+                                停止 STOP
+                            </StyledButton>
+                        )}
                         <TimeStamp>上次執行時間 {execTime}</TimeStamp>
                     </ActionButton>
                     <ActionButton>

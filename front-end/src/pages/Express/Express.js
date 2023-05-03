@@ -337,12 +337,9 @@ const ExpressLog = styled.div`
 //---
 const Express = () => {
     const fileContext = useContext(FileContext);
-    const { file, fileName, folderData, setFolderData } = fileContext;
-
+    const { file, fileName, folderData, setFolderData, selectedFeature, setSelectedFeature, feature, setFeature } =
+        fileContext;
     const { username, projectName } = useParams();
-    // const { file } = useContext(FileContext);
-    // const { fileName } = useContext(FileContext);
-    // const { folderData } = useContext(FileContext);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [expiredTime, setExpiredTime] = useState("");
     const [remainingTime, setRemainingTime] = useState(null);
@@ -353,18 +350,18 @@ const Express = () => {
     const [runPort, setRunPort] = useState(false);
     const [npmCommand, setNpmCommand] = useState("");
     const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table';");
-    const [sqliteResult, setSqliteResult] = useState("sqlite執行結果");
+    const [sqliteResult, setSqliteResult] = useState("請先創立並初始化專案");
     const [redisCommand, setRedisCommand] = useState("set foo bar");
-    const [redisResult, setRedisResult] = useState("redis執行結果");
+    const [redisResult, setRedisResult] = useState("請先創立並初始化專案");
     const [expressLog, setExpressLog] = useState([]);
-    const [selectedFeature, setSelectedFeature] = useState("NodeJs");
+    // const [selectedFeature, setSelectedFeature] = useState("NodeJs");
 
     const logEndRef = useRef(null);
 
     const serverName = `${username}_${projectName}`;
 
     //---功能選擇
-    const [feature, setFeature] = useState("NodeJs");
+    // const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
         setFeature(data);
         setSelectedFeature(data);
@@ -378,14 +375,16 @@ const Express = () => {
     //確認使用者是否有此專案----------------------------------------------------
     const checkInfo = async () => {
         const data = await api.checkInfo(projectName);
-        if (data.data === "err") {
+        if (data.data.length < 1) {
             window.location.href = `/profile/${username}`;
         } else if (data.data[0].start_execution === null) {
             localStorage.setItem("execTime", 0);
         } else {
             localStorage.setItem("execTime", data.data[0].start_execution);
-            setIsInit(true);
         }
+        setSqliteResult("sqlite執行結果");
+        setRedisResult("redis執行結果");
+        setIsInit(true);
     };
     useEffect(() => {
         checkInfo();
@@ -500,6 +499,8 @@ const Express = () => {
         event.preventDefault();
         setInitLoading(true);
         setInitProgress(0);
+        setSqliteResult("sqlite執行結果");
+        setRedisResult("redis執行結果");
         setIsInit(true);
 
         // 模擬進度條
@@ -580,6 +581,7 @@ const Express = () => {
         if (event) {
             event.preventDefault();
         }
+        await handlePostRewrite();
         const task = "jsOperRun";
         setIsActionLoading(true);
         const result = await api.jsOper(task, serverName, projectName);
@@ -678,10 +680,8 @@ const Express = () => {
         const task = "sqliteCommand";
         const sqliteCommand = localStorage.getItem("sqliteCommand");
         const result = await api.sqliteCommand(task, serverName, sqliteCommand);
-        console.log("result", result.data);
         if (Array.isArray(result.data)) {
             // 確認資料為陣列
-            console.log("result", result.data);
             setSqliteResult(result.data);
         } else {
             setSqliteResult(result.data);
@@ -753,8 +753,6 @@ const Express = () => {
         const task = "rewriteFile";
         try {
             await api.rewriteFile(task, serverName, fileName, editCode);
-            localStorage.removeItem("nowChoiceFile");
-            localStorage.removeItem("editedFileData");
         } catch (error) {
             console.error("Error fetching POST event data:", error);
         }

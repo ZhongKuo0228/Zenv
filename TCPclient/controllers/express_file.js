@@ -10,16 +10,20 @@ import { stderr, stdout } from "process";
 
 //從github拉資料下來
 async function downloadRepo(path, gitUrl) {
-    //下載到專案資料中
-    const downloadCommend = `git clone ${gitUrl} ${path}`;
-    return await new Promise((resolve, reject) => {
-        const child = exec(downloadCommend, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            }
-            resolve();
+    try {
+        //下載到專案資料中
+        const downloadCommend = `git clone ${gitUrl} ${path}`;
+        return await new Promise((resolve, reject) => {
+            const child = exec(downloadCommend, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                }
+                resolve();
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function delProjectFiles(filePath) {
@@ -33,34 +37,38 @@ export async function delProjectFiles(filePath) {
 
 //忽略檔案名稱
 async function listFiles(folderPath) {
-    const files = await readdir(folderPath);
-    const result = { name: path.basename(folderPath), isDirectory: true, children: [] };
-    for (const file of files) {
-        if (file === "node_modules") {
-            continue;
-        }
+    try {
+        const files = await readdir(folderPath);
+        const result = { name: path.basename(folderPath), isDirectory: true, children: [] };
+        for (const file of files) {
+            if (file === "node_modules") {
+                continue;
+            }
 
-        if (file === ".git") {
-            continue;
-        }
-        if (file === ".gitignore") {
-            continue;
-        }
-        if (file === ".gitkeep") {
-            continue;
-        }
-        const filePath = path.join(folderPath, file);
-        const stats = await stat(filePath);
-        if (stats.isDirectory()) {
-            result.children.push(await listFiles(filePath));
-        } else {
-            // 忽略檔案規則
-            if (!file.includes("package-lock.json")) {
-                result.children.push({ name: file, isDirectory: false });
+            if (file === ".git") {
+                continue;
+            }
+            if (file === ".gitignore") {
+                continue;
+            }
+            if (file === ".gitkeep") {
+                continue;
+            }
+            const filePath = path.join(folderPath, file);
+            const stats = await stat(filePath);
+            if (stats.isDirectory()) {
+                result.children.push(await listFiles(filePath));
+            } else {
+                // 忽略檔案規則
+                if (!file.includes("package-lock.json")) {
+                    result.children.push({ name: file, isDirectory: false });
+                }
             }
         }
+        return result;
+    } catch (e) {
+        console.error(e);
     }
-    return result;
 }
 
 //創立專案後，創立資料夾
