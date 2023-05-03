@@ -14,6 +14,8 @@ export async function PLevent(job) {
         const createCommand = await createPLContainer(executeId, programLanguage, code);
         const child = exec(createCommand);
 
+        let output = "";
+
         timers[executeId] = setTimeout(async () => {
             await stopPLContainer(executeId);
             await rmPLContainer(executeId);
@@ -25,8 +27,6 @@ export async function PLevent(job) {
         child.stdin.on("exit", (code) => {
             console.log(`Child process exited with code ${code}`);
         });
-
-        let output = "";
 
         child.stdout.on("data", (data) => {
             // console.log(`stdout: ${data}`);

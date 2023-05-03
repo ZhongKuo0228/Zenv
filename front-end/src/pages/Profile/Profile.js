@@ -309,6 +309,8 @@ const Profile = () => {
     const [editItem, setEditItem] = useState(null);
     const [delItem, setDelItem] = useState(null);
     const [show, setShow] = useState(false);
+    const [newProject, setNewProject] = useState("");
+    const [isNewProjectValid, setIsNewProjectValid] = useState(false);
     const handleClose = () => setShow(false);
     const handleShow = () => setShow(true);
     const navigate = useNavigate();
@@ -385,28 +387,42 @@ const Profile = () => {
         }
         allWebFrameworkItems();
     }, []);
-
+    //---創立專案-----------
     const handleCreateProject = async () => {
         // 獲取專案名稱
-        const projectName = document.querySelector('input[type="text"]').value;
-        try {
-            const result = await api.createPLProject(projectName, selectedLanguage, selectedItemsType);
-            if (result) {
-                if (selectedItemsType === "prog_lang") {
-                    window.location.href = `/PLpage/${userName}/${projectName}`;
-                    // navigate(`/PLpage/${userName}/${projectName}`);
+        const projectName = newProject;
+        if (isNewProjectValid) {
+            try {
+                const result = await api.createPLProject(projectName, selectedLanguage, selectedItemsType);
+                if (result.data) {
+                    if (selectedItemsType === "prog_lang") {
+                        window.location.href = `/PLpage/${userName}/${projectName}`;
+                        // navigate(`/PLpage/${userName}/${projectName}`);
+                    } else {
+                        window.location.href = `/webServices/${userName}/${projectName}`;
+                        // navigate(`/webServices/${userName}/${projectName}`);
+                    }
                 } else {
-                    window.location.href = `/webServices/${userName}/${projectName}`;
-                    // navigate(`/webServices/${userName}/${projectName}`);
+                    alert("專案名稱重複，請使用其他名稱");
+                    //跳出錯誤，提示專案名稱重複
                 }
-            } else {
-                //跳出錯誤，提示專案名稱重複
+            } catch (error) {
+                console.error(error);
             }
-        } catch (error) {
-            console.error(error);
+            fetchUserProjects();
+        } else {
+            alert("僅限英文及數字，最大字數不能超過20字");
         }
-        fetchUserProjects();
     };
+    useEffect(() => {
+        const regex = /^[A-Za-z0-9]{1,20}$/;
+        setIsNewProjectValid(regex.test(newProject));
+    }, [newProject]);
+
+    const handleProjectCheck = (event) => {
+        setNewProject(event.target.value);
+    };
+    //---編輯專案----------
     const handleEditProject = async () => {
         try {
             if (selectedItemsType === "prog_lang") {
@@ -435,11 +451,9 @@ const Profile = () => {
     const handleDelProject = async () => {
         // 獲取專案名稱
         const confirmed = window.confirm(`確認是否要刪除？ : ${projectName}`);
-        console.log(projectName, selectedLanguage, selectedItemsType);
         if (confirmed) {
             try {
-                const result = await api.delPLProject(projectName, selectedLanguage, selectedItemsType);
-                console.log("del", result);
+                await api.delPLProject(projectName, selectedLanguage, selectedItemsType);
             } catch (error) {
                 console.error(error);
             }
@@ -597,8 +611,13 @@ const Profile = () => {
                         &times;
                     </span>
                     <h2>新建的 {selectedLanguage} 專案名稱</h2>
-                    <input type='text' placeholder='請輸入專案名稱（僅限英文及數字）' pattern='[A-Za-z0-9]+' required />
-
+                    <input
+                        type='text'
+                        value={newProject}
+                        onChange={handleProjectCheck}
+                        placeholder='請輸入專案名稱（僅限英文及數字，最大字數不能超過20字）'
+                        required
+                    />
                     <div>
                         <button onClick={handleClose}>取消</button>
                         <button onClick={handleCreateProject}>新增專案</button>

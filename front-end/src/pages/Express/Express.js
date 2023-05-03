@@ -337,12 +337,9 @@ const ExpressLog = styled.div`
 //---
 const Express = () => {
     const fileContext = useContext(FileContext);
-    const { file, fileName, folderData, setFolderData } = fileContext;
-
+    const { file, fileName, folderData, setFolderData, selectedFeature, setSelectedFeature, feature, setFeature } =
+        fileContext;
     const { username, projectName } = useParams();
-    // const { file } = useContext(FileContext);
-    // const { fileName } = useContext(FileContext);
-    // const { folderData } = useContext(FileContext);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [expiredTime, setExpiredTime] = useState("");
     const [remainingTime, setRemainingTime] = useState(null);
@@ -357,14 +354,14 @@ const Express = () => {
     const [redisCommand, setRedisCommand] = useState("set foo bar");
     const [redisResult, setRedisResult] = useState("redis執行結果");
     const [expressLog, setExpressLog] = useState([]);
-    const [selectedFeature, setSelectedFeature] = useState("NodeJs");
+    // const [selectedFeature, setSelectedFeature] = useState("NodeJs");
 
     const logEndRef = useRef(null);
 
     const serverName = `${username}_${projectName}`;
 
     //---功能選擇
-    const [feature, setFeature] = useState("NodeJs");
+    // const [feature, setFeature] = useState("NodeJs");
     const handleFeature = (data) => {
         setFeature(data);
         setSelectedFeature(data);
@@ -580,6 +577,7 @@ const Express = () => {
         if (event) {
             event.preventDefault();
         }
+        await handlePostRewrite();
         const task = "jsOperRun";
         setIsActionLoading(true);
         const result = await api.jsOper(task, serverName, projectName);
@@ -678,10 +676,8 @@ const Express = () => {
         const task = "sqliteCommand";
         const sqliteCommand = localStorage.getItem("sqliteCommand");
         const result = await api.sqliteCommand(task, serverName, sqliteCommand);
-        console.log("result", result.data);
         if (Array.isArray(result.data)) {
             // 確認資料為陣列
-            console.log("result", result.data);
             setSqliteResult(result.data);
         } else {
             setSqliteResult(result.data);
@@ -753,8 +749,6 @@ const Express = () => {
         const task = "rewriteFile";
         try {
             await api.rewriteFile(task, serverName, fileName, editCode);
-            localStorage.removeItem("nowChoiceFile");
-            localStorage.removeItem("editedFileData");
         } catch (error) {
             console.error("Error fetching POST event data:", error);
         }

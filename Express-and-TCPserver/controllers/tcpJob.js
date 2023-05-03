@@ -17,7 +17,7 @@ async function socketWrite(job) {
             const dataPromise = new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
                     reject(new Error("Data receive timeout"));
-                }, 10000); // Set your desired timeout value (e.g., 10000 milliseconds)
+                }, 60000); // Set your desired timeout value (e.g., 10000 milliseconds)
 
                 socket.on("data", (data) => {
                     // console.log("收到client", data);
@@ -51,19 +51,37 @@ function bufferToJson(buffer) {
         return JSON.parse(buffer.toString()); //buffer轉成JSON格式
     }
 }
+// 檢查 buffer 是否符合 JSON 格式
+function isJsonBuffer(buffer) {
+    try {
+        JSON.parse(buffer.toString());
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
 
 //---PLcode Job
 export async function sendCodeToTcpClient(req) {
-    const code = req.body.data;
-    let job = {
-        task: code.task,
-        executeId: code.executeId,
-        code: code.code,
-        programLanguage: code.programLanguage,
-    };
-    const buffer = await socketWrite(job);
-    // console.log("buffer", buffer);
-    return bufferToJson(buffer);
+    try {
+        const code = req.body.data;
+        let job = {
+            task: code.task,
+            executeId: code.executeId,
+            code: code.code,
+            programLanguage: code.programLanguage,
+        };
+        const buffer = await socketWrite(job);
+        // 檢查 buffer 是否符合 JSON 格式
+        if (!isJsonBuffer(buffer)) {
+            throw new Error("非 JSON 格式的 buffer 物件");
+        }
+        return bufferToJson(buffer);
+    } catch (err) {
+        return {
+            error: "程式編譯時發生非預期錯誤",
+        };
+    }
 }
 
 //---Express Job

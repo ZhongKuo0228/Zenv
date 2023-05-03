@@ -20,7 +20,11 @@ plCodeRouter.post("/run", async (req, res, next) => {
     await updateExecTime(req);
     await saveCode(req);
     const result = await sendCodeToTcpClient(req);
-    res.status(200).json({ data: result.result });
+    if (result.result) {
+        res.status(200).json({ data: result.result });
+    } else {
+        res.status(200).json({ data: result.error });
+    }
 });
 
 plCodeRouter.post("/save", async (req, res, next) => {

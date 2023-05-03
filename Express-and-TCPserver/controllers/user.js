@@ -22,7 +22,7 @@ export async function checkCreateInput(email, password, userName) {
         console.log("輸入的資料不可爲空值");
         const errorType = 1;
         return errorType;
-    } else if (email.includes("@") == false || email.includes(".com") == false) {
+    } else if (email.includes("@") == false || email.includes(".") == false) {
         //檢查email格式;
         console.log("email格式不符");
         const errorType = 2;
@@ -89,14 +89,6 @@ export async function checkEmailAndPassword(email, password) {
             console.log("登入失敗，輸入密碼錯誤");
             return errorType;
         }
-    }
-
-    const result = await checkSignIn(email, password);
-    if (result.length >= 1) {
-        console.log(`${userName}登入成功`);
-    } else {
-        console.log("登入失敗，電子信箱或密碼錯誤");
-        return false;
     }
 }
 
