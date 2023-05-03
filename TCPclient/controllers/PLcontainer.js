@@ -54,34 +54,46 @@ export async function createPLContainer(executeId, programLanguage, code) {
 }
 
 export async function readResult(executeId) {
-    //讀取容器的輸出結果
-    const container = "docker";
-    const action = "logs";
-    const containerName = executeId;
+    try {
+        //讀取容器的輸出結果
+        const container = "docker";
+        const action = "logs";
+        const containerName = executeId;
 
-    const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
-    console.log(command);
-    return command;
+        const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
+        console.log(command);
+        return command;
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function rmPLContainer(executeId) {
-    //刪除已使用的容器
-    const container = "docker";
-    const action = "rm";
-    const containerName = executeId;
+    try {
+        //刪除已使用的容器
+        const container = "docker";
+        const action = "rm";
+        const containerName = executeId;
 
-    const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
-    exec(command);
+        const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
+        exec(command);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function stopPLContainer(executeId) {
-    //停止已使用的容器
-    const container = "docker";
-    const action = "stop";
-    const containerName = executeId;
+    try {
+        //停止已使用的容器
+        const container = "docker";
+        const action = "stop";
+        const containerName = executeId;
 
-    const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
-    exec(command);
+        const command = `${container} ${action} ${containerName}`; //使用exec所以-it要拿掉
+        exec(command);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function delTempFile(executeId, programLanguage) {

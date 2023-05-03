@@ -86,114 +86,146 @@ export async function sendCodeToTcpClient(req) {
 
 //---Express Job
 export async function createExpressProject(req) {
-    const project = req.body.data;
+    try {
+        const project = req.body.data;
 
-    let job = {
-        task: project.task,
-        serverName: project.serverName,
-        gitRepoUrl: project.gitRepoUrl,
-    };
+        let job = {
+            task: project.task,
+            serverName: project.serverName,
+            gitRepoUrl: project.gitRepoUrl,
+        };
 
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function getFolderIndex(req) {
-    const folderName = req.query.getFolderIndex;
-    let job = {
-        task: "getFolderIndex",
-        folderName: folderName,
-    };
+    try {
+        const folderName = req.query.getFolderIndex;
+        let job = {
+            task: "getFolderIndex",
+            folderName: folderName,
+        };
 
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function readFile(req) {
-    let job = {
-        task: "readFile",
-        fileName: req.query.readFile,
-    };
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+    try {
+        let job = {
+            task: "readFile",
+            fileName: req.query.readFile,
+        };
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function rewriteFile(req) {
-    const project = req.body.data;
-    let job = {
-        task: project.task,
-        fileName: project.fileName,
-        editCode: project.editCode,
-    };
-    console.log("r", project);
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+    try {
+        const project = req.body.data;
+        let job = {
+            task: project.task,
+            fileName: project.fileName,
+            editCode: project.editCode,
+        };
+        console.log("r", project);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function fileOper(req) {
-    const project = req.body.data;
+    try {
+        const project = req.body.data;
 
-    //新增檔案 : add
-    //刪除 : del
-    //重新命名 : rename
+        //新增檔案 : add
+        //刪除 : del
+        //重新命名 : rename
 
-    let job = {
-        task: project.task,
-        type: project.type,
-        fileName: project.fileName,
-    };
+        let job = {
+            task: project.task,
+            type: project.type,
+            fileName: project.fileName,
+        };
 
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function jsOper(req) {
-    const project = req.body.data;
-    console.log("jsOper", project);
+    try {
+        const project = req.body.data;
+        console.log("jsOper", project);
 
-    //初始化：init  ：node/npm-install → docker-compose up → 取得port → docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
-    //啓動： run  : docker-compose start <container>
-    //停止 ：stop : docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
-    //npm 操作： npm  :node/npm "指令"
+        //初始化：init  ：node/npm-install → docker-compose up → 取得port → docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
+        //啓動： run  : docker-compose start <container>
+        //停止 ：stop : docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
+        //npm 操作： npm  :node/npm "指令"
 
-    let job = {
-        task: project.task,
-        serverName: project.serverName,
-        doJob: project.doJob,
-    };
+        let job = {
+            task: project.task,
+            serverName: project.serverName,
+            doJob: project.doJob,
+        };
 
-    console.log(job);
+        console.log(job);
 
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function dbOper(req) {
-    const project = req.body.data;
-    console.log("dbOper", project);
+    try {
+        const project = req.body.data;
+        console.log("dbOper", project);
 
-    let job = {
-        task: project.task,
-        serverName: project.serverName,
-        command: project.command,
-    };
+        let job = {
+            task: project.task,
+            serverName: project.serverName,
+            command: project.command,
+        };
 
-    console.log(job);
+        console.log(job);
 
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function delProject(req) {
-    const userName = req.user.name;
-    const projectName = req.body.data.projectName;
-    const serverName = `${userName}_${projectName}`;
+    try {
+        const userName = req.user.name;
+        const projectName = req.body.data.projectName;
+        const serverName = `${userName}_${projectName}`;
 
-    let job = {
-        task: "delProject",
-        serverName: serverName,
-    };
-    console.log("job ", job);
-    const buffer = await socketWrite(job);
-    return bufferToJson(buffer);
+        let job = {
+            task: "delProject",
+            serverName: serverName,
+        };
+        console.log("job ", job);
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
 }

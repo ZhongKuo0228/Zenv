@@ -2,60 +2,92 @@
 import pool from "../models/DBpool.js";
 //sql用的async------------------------------------------
 export async function checkEmail(email) {
-    const [rows] = await pool.query(`SELECT provider FROM users WHERE email = ?`, [email]);
-    // console.log(rows[0].provider);
-    if (rows.length == 0) {
-        return;
-    } else if (rows[0].provider == "native") {
-        const err = "nativeExisted";
-        return err;
+    try {
+        const [rows] = await pool.query(`SELECT provider FROM users WHERE email = ?`, [email]);
+        // console.log(rows[0].provider);
+        if (rows.length == 0) {
+            return;
+        } else if (rows[0].provider == "native") {
+            const err = "nativeExisted";
+            return err;
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 export async function checkName(name) {
-    const [rows] = await pool.query(`SELECT provider FROM users WHERE user_name = ?`, [name]);
-    // console.log(rows[0].provider);
-    if (rows.length == 0) {
-        return;
-    } else if (rows[0].provider == "native") {
-        const err = "nativeExisted";
-        return err;
+    try {
+        const [rows] = await pool.query(`SELECT provider FROM users WHERE user_name = ?`, [name]);
+        // console.log(rows[0].provider);
+        if (rows.length == 0) {
+            return;
+        } else if (rows[0].provider == "native") {
+            const err = "nativeExisted";
+            return err;
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
 export async function getUserID(userName) {
-    const [rows] = await pool.query(`SELECT id FROM users WHERE user_name = ?`, [userName]);
-    return rows[0];
+    try {
+        const [rows] = await pool.query(`SELECT id FROM users WHERE user_name = ?`, [userName]);
+        return rows[0];
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function checkUserTable(email) {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
-    return rows[0];
-    // console.log(rows.length);
+    try {
+        const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+        return rows[0];
+        // console.log(rows.length);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function searchEmail(email) {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
-    return rows;
-    // console.log(rows.length);
+    try {
+        const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
+        return rows;
+        // console.log(rows.length);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function searchPassword(email) {
-    const [rows] = await pool.query(`SELECT password FROM users WHERE email = ?`, [email]);
-    // console.log(rows[0].password);
-    return rows[0].password;
+    try {
+        const [rows] = await pool.query(`SELECT password FROM users WHERE email = ?`, [email]);
+        // console.log(rows[0].password);
+        return rows[0].password;
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function createUserData(email, password, name, time) {
-    const [result] = await pool.query(
-        `INSERT INTO users(email,password,user_name,provider,role,create_time) VALUES(?,?,?,"native","user",?)`,
-        [email, password, name, time]
-    );
-    return result.insertID;
+    try {
+        const [result] = await pool.query(
+            `INSERT INTO users(email,password,user_name,provider,role,create_time) VALUES(?,?,?,"native","user",?)`,
+            [email, password, name, time]
+        );
+        return result.insertID;
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function checkSignIn(email, password) {
-    const [rows] = await pool.query(`SELECT * FROM users WHERE email = ? AND password = ? `, [email, password]);
-    return rows;
+    try {
+        const [rows] = await pool.query(`SELECT * FROM users WHERE email = ? AND password = ? `, [email, password]);
+        return rows;
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 // export async function checkRole(roleID) {
