@@ -350,9 +350,9 @@ const Express = () => {
     const [runPort, setRunPort] = useState(false);
     const [npmCommand, setNpmCommand] = useState("");
     const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table';");
-    const [sqliteResult, setSqliteResult] = useState("請先創立並初始化專案");
+    const [sqliteResult, setSqliteResult] = useState("請先建立伺服器檔案 並 初始化環境");
     const [redisCommand, setRedisCommand] = useState("set foo bar");
-    const [redisResult, setRedisResult] = useState("請先創立並初始化專案");
+    const [redisResult, setRedisResult] = useState("請先建立伺服器檔案 並 初始化環境");
     const [expressLog, setExpressLog] = useState([]);
     // const [selectedFeature, setSelectedFeature] = useState("NodeJs");
 
@@ -375,16 +375,17 @@ const Express = () => {
     //確認使用者是否有此專案----------------------------------------------------
     const checkInfo = async () => {
         const data = await api.checkInfo(projectName);
+        console.log("checkInfo", data.data[0].start_execution);
         if (data.data.length < 1) {
             window.location.href = `/profile/${username}`;
         } else if (data.data[0].start_execution === null) {
             localStorage.setItem("execTime", 0);
         } else {
             localStorage.setItem("execTime", data.data[0].start_execution);
+            setSqliteResult("sqlite執行結果");
+            setRedisResult("redis執行結果");
+            setIsInit(true);
         }
-        setSqliteResult("sqlite執行結果");
-        setRedisResult("redis執行結果");
-        setIsInit(true);
     };
     useEffect(() => {
         checkInfo();

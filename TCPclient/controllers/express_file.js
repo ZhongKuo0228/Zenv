@@ -68,6 +68,7 @@ async function listFiles(folderPath) {
         return result;
     } catch (e) {
         console.error(e);
+        return null;
     }
 }
 
