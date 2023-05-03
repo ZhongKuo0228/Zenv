@@ -33,6 +33,8 @@ export async function createPLContainer(executeId, programLanguage, code) {
         await writeFile(`${filePath}/${fileName}`, code);
 
         //控制容器指令
+        const cpuLimit = "--cpus 0.5";
+        const memLimit = "--memory=192m";
         const container = "docker";
         const action = "run --rm --name ";
         const containerName = executeId;
@@ -40,10 +42,10 @@ export async function createPLContainer(executeId, programLanguage, code) {
         const imagesAndRun = prog_lang[1];
         //臨時檔案建立
         if (programLanguage == "C++") {
-            const command = `${container} ${action} ${containerName} -v ${vPath}:/app ${imagesAndRun} "g++ /app/${fileName} -o /app/cpp && /app/cpp"`; //使用exec所以-it要拿掉
+            const command = `${container} ${action} ${containerName} ${cpuLimit} ${memLimit} -v ${vPath}:/app ${imagesAndRun} "g++ /app/${fileName} -o /app/cpp && /app/cpp"`; //使用exec所以-it要拿掉
             return command;
         } else {
-            const command = `${container} ${action} ${containerName} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
+            const command = `${container} ${action} ${containerName}  ${cpuLimit} ${memLimit} -v ${vPath}/${fileName}:/app/${fileName} ${imagesAndRun} /app/${fileName}`; //使用exec所以-it要拿掉
             return command;
         }
     } catch (e) {
