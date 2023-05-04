@@ -5,19 +5,23 @@ dotenv.config();
 let io;
 
 export async function websStock(httpServer) {
-    io = new Server(httpServer, {
-        cors: {
-            origin: process.env.FrontEnd,
-        },
-    });
-    io.on("connect", (socket) => {
-        console.log(`Client connected with ID: ${socket.id}`);
-        socket.on("disconnect", () => {
-            console.log(`Client disconnected with ID: ${socket.id}`);
+    try {
+        io = new Server(httpServer, {
+            cors: {
+                origin: process.env.FrontEnd,
+            },
         });
-    });
+        io.on("connect", (socket) => {
+            console.log(`Client connected with ID: ${socket.id}`);
+            socket.on("disconnect", () => {
+                console.log(`Client disconnected with ID: ${socket.id}`);
+            });
+        });
 
-    return io;
+        return io;
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export function getIo() {

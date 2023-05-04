@@ -9,97 +9,122 @@ import { stopPLContainer, rmPLContainer } from "../controllers/PLcontainer.js";
 const timers = {}; //放置定時器
 
 async function npmCommand(serverName, vPath, doJob) {
-    return new Promise(async (resolve, reject) => {
-        const container = "docker";
-        const action = "run --rm --name ";
-        const containerName = serverName;
-        const images = "node/npm";
-        const command = `${container} ${action} ${containerName} -v ${vPath}:/usr/src/app ${images} ${doJob}`; //使用exec所以-it要拿掉
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+    try {
+        return new Promise(async (resolve, reject) => {
+            const container = "docker";
+            const action = "run --rm --name ";
+            const containerName = serverName;
+            const images = "node/npm";
+            const command = `${container} ${action} ${containerName} -v ${vPath}:/usr/src/app ${images} ${doJob}`; //使用exec所以-it要拿掉
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function composeUp(vPath) {
-    return new Promise(async (resolve, reject) => {
-        const container = "docker compose";
-        const action = "up -d";
-        const command = `${container} -f ${vPath}/docker-compose.yml ${action}`; //使用exec所以-it要拿掉
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+    try {
+        return new Promise(async (resolve, reject) => {
+            const container = "docker compose";
+            const action = "up -d";
+            const command = `${container} -f ${vPath}/docker-compose.yml ${action}`; //使用exec所以-it要拿掉
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 async function composeStop(vPath, service) {
-    return new Promise(async (resolve, reject) => {
-        const container = "docker compose";
-        const action = "stop";
-        const time = "-t 1";
-        const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time} ${service}`; //使用exec所以-it要拿掉
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+    try {
+        return new Promise(async (resolve, reject) => {
+            const container = "docker compose";
+            const action = "stop";
+            const time = "-t 1";
+            const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time} ${service}`; //使用exec所以-it要拿掉
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 async function composeDown(vPath, service) {
-    return new Promise(async (resolve, reject) => {
-        const container = "docker compose";
-        const action = "down";
-        const time = "-t 1";
-        const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time}`; //使用exec所以-it要拿掉
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+    try {
+        return new Promise(async (resolve, reject) => {
+            const container = "docker compose";
+            const action = "down";
+            const time = "-t 1";
+            const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${time}`; //使用exec所以-it要拿掉
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 async function composeRun(vPath, service) {
-    return new Promise(async (resolve, reject) => {
-        const container = "docker compose";
-        const action = "start";
-        const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${service}`; //使用exec所以-it要拿掉
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+    try {
+        return new Promise(async (resolve, reject) => {
+            const container = "docker compose";
+            const action = "start";
+            const command = `${container} -f ${vPath}/docker-compose.yml ${action} ${service}`; //使用exec所以-it要拿掉
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function getOutPort(vPath, serviceName) {
-    //使用新版指令docker compose會抓不到port
-    const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
-    console.log("command", command);
     try {
-        const { stdout } = await execAsync(command);
-        console.log(`取得port: ${stdout}`);
-        return stdout;
-    } catch (error) {
-        console.error(`執行命令時出錯: ${error}`);
+        //使用新版指令docker compose會抓不到port
+        const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
+        console.log("command", command);
+        try {
+            const { stdout } = await execAsync(command);
+            console.log(`取得port: ${stdout}`);
+            return stdout;
+        } catch (error) {
+            console.error(`執行命令時出錯: ${error}`);
+        }
+    } catch (e) {
+        console.error(e);
     }
 }
 
 export async function createDockerComposeFile(serverName, filePath) {
-    const dockerComposeFile = `
+    try {
+        const dockerComposeFile = `
     version: "3.8"
 
     services:
@@ -126,73 +151,92 @@ export async function createDockerComposeFile(serverName, filePath) {
     networks:
        ${serverName}-network:`;
 
-    //dockerfile檔案建立
-    const fileName = `docker-compose.yml`;
-    await writeFile(`${filePath}/${fileName}`, dockerComposeFile);
+        //dockerfile檔案建立
+        const fileName = `docker-compose.yml`;
+        await writeFile(`${filePath}/${fileName}`, dockerComposeFile);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function createLogSH(logPath, folderName, newProjectPath) {
-    const createLogSH = `docker compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
+    try {
+        const createLogSH = `docker compose -f ${newProjectPath}/docker-compose.yml logs -f -t --no-log-prefix ${folderName}-express > ${logPath}/${folderName}.log`;
 
-    //生成log的腳本檔案建立
-    const fileName = `${folderName}-express.sh`;
-    await writeFile(`${newProjectPath}/${fileName}`, createLogSH);
+        //生成log的腳本檔案建立
+        const fileName = `${folderName}-express.sh`;
+        await writeFile(`${newProjectPath}/${fileName}`, createLogSH);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function chmodLogSH(folderName, newProjectPath) {
-    return new Promise((resolve, reject) => {
-        const command = `chmod +x ${newProjectPath}/${folderName}-express.sh`;
-        console.log("chmodLogSH", command);
+    try {
+        return new Promise((resolve, reject) => {
+            const command = `chmod +x ${newProjectPath}/${folderName}-express.sh`;
+            console.log("chmodLogSH", command);
 
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function runLogSH(folderName, newProjectPath) {
-    return new Promise((resolve, reject) => {
-        const command = `${newProjectPath}/${folderName}-express.sh &`;
-        console.log("runLogSH", command);
-        //使用exec會需要等待回覆，但這個腳本會在後臺執行，所以會有卡住的感覺
-        const childProcess = spawn(command, {
-            detached: true,
-            stdio: "ignore",
-            shell: true,
-        });
+    try {
+        return new Promise((resolve, reject) => {
+            const command = `${newProjectPath}/${folderName}-express.sh &`;
+            console.log("runLogSH", command);
+            //使用exec會需要等待回覆，但這個腳本會在後臺執行，所以會有卡住的感覺
+            const childProcess = spawn(command, {
+                detached: true,
+                stdio: "ignore",
+                shell: true,
+            });
 
-        childProcess.on("error", (error) => {
-            reject(error);
-        });
+            childProcess.on("error", (error) => {
+                reject(error);
+            });
 
-        childProcess.on("close", (code) => {
-            if (code !== 0) {
-                reject(new Error(`子進程退出，退出碼：${code}`));
-            } else {
-                resolve();
-            }
-        });
+            childProcess.on("close", (code) => {
+                if (code !== 0) {
+                    reject(new Error(`子進程退出，退出碼：${code}`));
+                } else {
+                    resolve();
+                }
+            });
 
-        childProcess.unref();
-    });
+            childProcess.unref();
+        });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function stopLogSH(folderName, newProjectPath) {
-    return new Promise((resolve, reject) => {
-        const command = `pkill -f ${newProjectPath}/${folderName}-express.sh`;
-        console.log("stopLogSH", command);
-        exec(command, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            } else {
-                resolve();
-            }
+    try {
+        return new Promise((resolve, reject) => {
+            const command = `pkill -f ${newProjectPath}/${folderName}-express.sh`;
+            console.log("stopLogSH", command);
+            exec(command, (error, stdout, stderr) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve();
+                }
+            });
         });
-    });
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export async function jsOperInit(job) {
