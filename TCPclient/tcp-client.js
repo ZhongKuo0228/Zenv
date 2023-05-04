@@ -2,6 +2,7 @@
 import net from "net";
 import { PLevent } from "./controllers/PLstockEvent.js";
 import { expressEvent } from "./controllers/ExpressStockEvent.js";
+import { countRunningExpress } from "./monitor/containerMonitor.js";
 //---tcp server------------------------------------
 
 let isConnected = false;
@@ -23,7 +24,10 @@ function connectToServer() {
         console.log("從 TCP server 收到訊息:", data.toString());
         const temp = data.toString();
         const job = JSON.parse(temp);
-
+        if (job.task == "checkStats") {
+            const stats = await countRunningExpress();
+            console.log("stats", stats);
+        }
         if (job.programLanguage != undefined) {
             //處理PLevent
             await PLevent(job);

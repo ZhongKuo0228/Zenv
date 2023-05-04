@@ -229,3 +229,15 @@ export async function delProject(req) {
         console.error(e);
     }
 }
+
+export async function checkWorkerStats() {
+    try {
+        let job = {
+            task: "checkStats",
+        };
+        const buffer = await socketWrite(job);
+        return bufferToJson(buffer);
+    } catch (e) {
+        console.error(e);
+    }
+}

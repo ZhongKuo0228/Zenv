@@ -133,7 +133,7 @@ export async function createDockerComposeFile(serverName, filePath) {
             environment:
                 - REDIS_HOST=${serverName}-redis
             networks:
-                - ${serverName}-network
+                - ${serverName}-Znetwork
             #不指定外部訪問的port，讓系統自動分配
             ports:
                 - 3000
@@ -144,12 +144,12 @@ export async function createDockerComposeFile(serverName, filePath) {
         ${serverName}-redis:
             image: redis:7-alpine
             networks:
-                - ${serverName}-network
+                - ${serverName}-Znetwork
             ports:
                 - 6379
 
     networks:
-       ${serverName}-network:`;
+       ${serverName}-Znetwork:`;
 
         //dockerfile檔案建立
         const fileName = `docker-compose.yml`;

@@ -67,7 +67,6 @@ export async function updateExecTime(userId, projectName) {
             `UPDATE web_services SET start_execution  = ? WHERE user_id = ? AND project_name = ?`,
             [nowTime, userId, projectName]
         );
-        console.log("nowTime", rows);
         return rows[0];
     } catch (e) {
         console.error(e);

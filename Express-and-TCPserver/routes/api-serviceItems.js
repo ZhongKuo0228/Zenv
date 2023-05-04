@@ -1,7 +1,7 @@
 import express from "express";
 import { plServiceItems, createPLProjects, delPLProjects } from "../models/db-PLcode.js";
 import { webServiceItems, createWebProjects, delWebProjects } from "../models/db-webServices.js";
-import { delProject } from "../controllers/tcpJob.js";
+import { delProject, checkWorkerStats } from "../controllers/tcpJob.js";
 const serviceItemsRouter = express.Router();
 //---router----------------------------------------------
 serviceItemsRouter.get("/plServices", async (req, res, next) => {
@@ -16,18 +16,21 @@ serviceItemsRouter.get("/webServices", async (req, res, next) => {
 
 serviceItemsRouter.post("/createProject", async (req, res, next) => {
     // console.log(req.body);
+
     let result;
     if (req.body.data.itemsType == "prog_lang") {
         result = await createPLProjects(req);
     } else {
-        result = await createWebProjects(req);
+        const workersStats = await checkWorkerStats();
+        console.log("workersStats", workersStats);
+        // result = await createWebProjects(req);
     }
 
-    if (result) {
-        return res.status(200).json({ data: result });
-    } else {
-        return res.status(401).json({ data: false });
-    }
+    // if (result) {
+    //     return res.status(200).json({ data: result });
+    // } else {
+    //     return res.status(401).json({ data: false });
+    // }
 });
 serviceItemsRouter.delete("/delProject", async (req, res, next) => {
     // console.log(req.body);
