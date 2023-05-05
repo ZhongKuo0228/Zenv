@@ -11,6 +11,8 @@ export const FileContext = React.createContext({
     selectedFeature: {},
     setSelectedFeature: () => {},
     setFeature: () => {},
+    isEditedFileDataPresent: {},
+    setIsEditedFileDataPresent: () => {},
 });
 export const FileContextProvider = ({ children }) => {
     const [file, setFile] = React.useState(null);
@@ -18,6 +20,7 @@ export const FileContextProvider = ({ children }) => {
     const [folderData, setFolderData] = React.useState(null);
     const [selectedFeature, setSelectedFeature] = React.useState("NodeJs");
     const [feature, setFeature] = React.useState("NodeJs");
+    const [isEditedFileDataPresent, setIsEditedFileDataPresent] = React.useState(false);
     return (
         <FileContext.Provider
             value={{
@@ -31,6 +34,8 @@ export const FileContextProvider = ({ children }) => {
                 setSelectedFeature,
                 feature,
                 setFeature,
+                isEditedFileDataPresent,
+                setIsEditedFileDataPresent,
             }}
         >
             {children}

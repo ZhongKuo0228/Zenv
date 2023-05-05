@@ -84,7 +84,7 @@ const ActionButton = styled.div`
 `;
 
 const StyledButton = styled.button`
-    background-color: ${(props) => (props.type === "run" ? "#2ecc71" : "#95a5a6")};
+    background-color: ${(props) => (props.type === "run" ? "#73BF00" : "#95a5a6")};
     color: #fff;
     border: none;
     padding: 5px 10px;
@@ -149,7 +149,6 @@ const WriteCode = () => {
     const getProjectInfo = async () => {
         try {
             const data = await api.getPLInfo(username, projectName);
-            console.log("PL", data);
             if (data.data === "err") {
                 window.location.href = `/profile/${username}`;
             } else {
@@ -159,7 +158,6 @@ const WriteCode = () => {
                 setProgLang(usePL);
                 //非第一次創立專案進入時
                 if (data.data.save_time != null && data.data.last_execution != null) {
-                    console.log("data.data.last_execution", data.data.last_execution);
                     setExecTime(timeFormat(data.data.last_execution));
                     setSaveTime(timeFormat(data.data.save_time));
                 }

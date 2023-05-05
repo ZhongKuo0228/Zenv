@@ -11,7 +11,7 @@ import {
 } from "react-icons/ai";
 import File from "./File";
 import { FileContext } from "../../../context/fileContext";
-
+import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 const folderStyle = {
     paddingLeft: "20px",
     display: "flex",
@@ -56,7 +56,6 @@ const Folder = ({ folder, path = "" }) => {
 
     async function getServerData() {
         const data = await api.fetchData(serverName);
-        console.log("file", data);
         setFolderData(data);
     }
 
@@ -83,7 +82,15 @@ const Folder = ({ folder, path = "" }) => {
     const FolderIcon = ({ isOpen }) => {
         return (
             <span>
-                {isOpen ? <span style={{ marginRight: "5px" }}>∨</span> : <span style={{ marginRight: "5px" }}>❯</span>}
+                {isOpen ? (
+                    <span style={{ marginRight: "5px" }}>
+                        <FaChevronDown />
+                    </span>
+                ) : (
+                    <span style={{ marginRight: "5px" }}>
+                        <FaChevronRight />
+                    </span>
+                )}
                 {isOpen ? <AiOutlineFolderOpen /> : <AiOutlineFolder />}
             </span>
         );
@@ -134,7 +141,6 @@ const Folder = ({ folder, path = "" }) => {
             const task = "operDel";
             const type = "folder";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfileName}`;
-            console.log(task, type, fileName);
             const result = await api.fileOper(task, type, fileName);
             if (result) {
                 await getServerData();

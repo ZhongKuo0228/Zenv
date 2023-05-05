@@ -1,13 +1,11 @@
 import React from "react";
 import { useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
-import { css } from "@emotion/react";
-import { FaPlay, FaPause, FaChrome, FaSync, FaSave } from "react-icons/fa";
+import { FaPlay, FaPause, FaChrome, FaSync, FaSave, FaCopy } from "react-icons/fa";
 import styled from "styled-components";
-import { useState, useEffect, useContext, useRef, CSSProperties, useCallback } from "react";
+import { useState, useEffect, useContext, useRef, useCallback } from "react";
 import Folder from "./FileTree/Folder";
 import Table from "./SqlTable/SqlTable";
-import CodeEditor from "@uiw/react-textarea-code-editor";
 import { FileContext } from "../../context/fileContext";
 import CodeMirror from "@uiw/react-codemirror";
 import { okaidia } from "@uiw/codemirror-theme-okaidia";
@@ -55,13 +53,14 @@ const ProjectIconAndTitle = styled.div`
 `;
 
 const StyledButtonInit = styled.button`
-    background-color: #e4b363;
+    background-color: #d9b300;
     color: #313638;
     border: none;
     font-weight: bold;
     border-radius: 5px;
     padding: 10px 15px;
     font-size: 14px;
+    margin-right: 10px;
     cursor: pointer;
 
     &:hover {
@@ -109,14 +108,15 @@ const LargeText = styled.div`
 
 const ButtonContainer = styled.div`
     display: flex;
+    justify-content: center;
     align-items: center;
-
+    width: 40%;
     & > *:not(:last-child) {
         margin-right: 10px;
     }
 `;
 const StyledButton = styled.button`
-    background-color: ${(props) => (props.type === "run" ? "#2ecc71" : "#95a5a6")};
+    background-color: ${(props) => (props.type === "run" ? "#73BF00" : "#95a5a6")};
     color: #fff;
     border: none;
     padding: 5px 10px;
@@ -125,29 +125,37 @@ const StyledButton = styled.button`
     align-items: center;
     font-size: 18px;
     border-radius: 5px;
-
     & > *:first-child {
-        margin-right: 5px;
+        margin-right: 15px;
     }
 `;
-const WebPageButton = styled.button`
-    background-color: #000;
-    color: #fff;
-    border: none;
+const OpenWebContainer = styled.div`
+    background-color: #bbb;
+    display: flex;
+    border-radius: 5px;
+    margin-left: 30px;
     padding: 5px 10px;
+`;
+
+const WebPageButton = styled.button`
+    color: #272727;
+    background-color: #bbb;
+    border: none;
     cursor: pointer;
     text-decoration: none;
     display: flex;
     align-items: center;
     font-size: 18px;
-    border-radius: 5px;
-    margin-left: 40px;
-
     & > *:first-child {
-        margin-right: 5px;
+        margin-right: 15px;
     }
 `;
-
+const CopyURLButton = styled.button`
+    background-color: #bbb;
+    cursor: pointer;
+    color: #272727;
+    margin-left: 10px;
+`;
 const SmallText = styled.div`
     font-size: 12px;
 `;
@@ -248,15 +256,26 @@ const EditArea = styled.div`
     width: 100%;
     border-top: 4px solid #ccc;
 `;
+const HintArea = styled.div`
+    display: flex;
+    align-items: center;
+    height: 40px;
+`;
 const FileName = styled.div`
-    width: 97.5%;
+    width: 60%;
     border: 0px;
     background-color: #272727;
     color: #fff;
-    padding: 5px 0 0 10px;
+    padding-left: 10px;
     font-size: 20px;
     display: flex;
     align-items: center;
+`;
+const ChangeHint = styled.div`
+    display: flex;
+    color: #ffaf60;
+    font-size: 15px;
+    width: 40%;
 `;
 const ResultArea = styled.div`
     border-left: solid 1px #ccc;
@@ -291,9 +310,7 @@ const FeatureName = styled.div`
     align-items: center;
     justify-content: space-between;
 `;
-const DBcommandLoading = styled.div`
-    z-index: 9999;
-`;
+
 const SqliteCommand = styled.div`
     width: 100%;
 `;
@@ -337,10 +354,21 @@ const ExpressLog = styled.div`
 //---
 const Express = () => {
     const fileContext = useContext(FileContext);
-    const { file, fileName, folderData, setFolderData, selectedFeature, setSelectedFeature, feature, setFeature } =
-        fileContext;
+    const {
+        file,
+        fileName,
+        folderData,
+        setFolderData,
+        selectedFeature,
+        setSelectedFeature,
+        feature,
+        setFeature,
+        isEditedFileDataPresent,
+        setIsEditedFileDataPresent,
+    } = fileContext;
     const { username, projectName } = useParams();
     const [isActionLoading, setIsActionLoading] = useState(false);
+    const [isActionLoadingHint, setIsActionLoadingHint] = useState(false);
     const [expiredTime, setExpiredTime] = useState("");
     const [remainingTime, setRemainingTime] = useState(null);
     const [shouldFetchData, setShouldFetchData] = useState(true);
@@ -349,11 +377,14 @@ const Express = () => {
     const [initProgress, setInitProgress] = useState(0);
     const [runPort, setRunPort] = useState(false);
     const [npmCommand, setNpmCommand] = useState("");
-    const [sqliteCommand, setSqliteCommand] = useState("SELECT name FROM sqlite_master WHERE type='table';");
+    const [sqliteCommand, setSqliteCommand] = useState(
+        "請輸入sqlite指令(例如：SELECT name FROM sqlite_master WHERE type='table';)"
+    );
     const [sqliteResult, setSqliteResult] = useState("請先建立伺服器檔案 並 初始化環境");
-    const [redisCommand, setRedisCommand] = useState("set foo bar");
+    const [redisCommand, setRedisCommand] = useState("請輸入redis指令(例如：set foo bar)");
     const [redisResult, setRedisResult] = useState("請先建立伺服器檔案 並 初始化環境");
     const [expressLog, setExpressLog] = useState([]);
+    const runPortRef = useRef(null);
     // const [selectedFeature, setSelectedFeature] = useState("NodeJs");
 
     const logEndRef = useRef(null);
@@ -370,18 +401,24 @@ const Express = () => {
 
     //---資料夾樹狀結構
     // const [folderData, setFolderData] = useState(null);
-    const [code, setCode] = useState("");
+    const [code, setCode] = useState("//請從左邊檔案目錄選取檔案，可從app.js開始");
     const [choiceFile, setChoiceFile] = useState("檔名");
     //確認使用者是否有此專案----------------------------------------------------
     const checkInfo = async () => {
         const data = await api.checkInfo(projectName);
-        console.log("checkInfo", data.data[0].start_execution);
+
         if (data.data.length < 1) {
             window.location.href = `/profile/${username}`;
         } else if (data.data[0].start_execution === null) {
-            localStorage.setItem("execTime", 0);
+            await handleCreateSubmit(); // 等待 handleCreateSubmit 函數完成
+            await new Promise((resolve) => setTimeout(resolve, 300)); // 等待 1 秒
+            handleInitSubmit(); // 執行 handleInitSubmit 函數
+            setIsInit(true);
+            //記錄已經執行------------------------
+            await api.updateExpiredTime(username, projectName);
         } else {
             localStorage.setItem("execTime", data.data[0].start_execution);
+            localStorage.setItem("openedFolders", `{"gitFolder":true}`);
             setSqliteResult("sqlite執行結果");
             setRedisResult("redis執行結果");
             setIsInit(true);
@@ -447,6 +484,7 @@ const Express = () => {
     const handleCodeChange = React.useCallback((value, viewUpdate, event) => {
         setCode(value);
         localStorage.setItem("editedFileData", value);
+        setIsEditedFileDataPresent(true);
     }, []);
 
     useEffect(() => {
@@ -481,23 +519,35 @@ const Express = () => {
     }, [fileName]);
 
     //NodeJS按鈕動作
-    const handleCreateSubmit = async (event) => {
-        event.preventDefault();
+    const handleCreateSubmit = (event) => {
+        if (event) {
+            event.preventDefault();
+        }
         const task = "createServer";
         setIsActionLoading(true);
-        const result = await api.resetFile(task, serverName);
-        if (result) {
-            getServerData();
-        }
-        setIsActionLoading(false);
-        localStorage.setItem("nowChoiceFile", `gitFolder/app.js`);
-        localStorage.setItem("openedFolders", `{"gitFolder":true}`);
-        localStorage.setItem("sqliteCommand", "SELECT name FROM sqlite_master WHERE type='table';");
-        localStorage.setItem("redisCommand", "set foo bar");
+
+        return new Promise(async (resolve, reject) => {
+            try {
+                const result = await api.resetFile(task, serverName);
+                if (result) {
+                    await getServerData();
+                }
+                setIsActionLoading(false);
+                localStorage.setItem("openedFolders", `{"gitFolder":true}`);
+                // 在這裡使用 resolve() 方法，表示 handleCreateSubmit 函數已經完成
+                console.log("######");
+                resolve();
+            } catch (error) {
+                // 在這裡使用 reject() 方法，表示 handleCreateSubmit 函數遇到了錯誤
+                reject(error);
+            }
+        });
     };
 
     const handleInitSubmit = async (event) => {
-        event.preventDefault();
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
         setInitLoading(true);
         setInitProgress(0);
         setSqliteResult("sqlite執行結果");
@@ -621,10 +671,19 @@ const Express = () => {
         setRemainingTime(null);
         setRunPort(false);
     };
+    const handleRestartSubmit = async (event) => {
+        event.preventDefault();
+        setIsActionLoading(true);
+        const task = "jsOperStop";
+        const result = await api.jsOper(task, serverName);
+        if (result) {
+            handleRunSubmit();
+        }
+    };
     const handleWebPageOpen = (event) => {
         event.stopPropagation();
         const port = localStorage.getItem("port");
-        console.log("port", port);
+
         if (port) {
             window.open(`${api.tcpClientIp}:${port}`);
         } else {
@@ -707,7 +766,6 @@ const Express = () => {
         const task = "redisCommand";
         const redisCommand = localStorage.getItem("redisCommand");
         const result = await api.redisCommand(task, serverName, redisCommand);
-        console.log("redis", result.data);
         setRedisResult(result.data);
     };
     const handleRedisChange = React.useCallback((value, viewUpdate, event) => {
@@ -731,7 +789,6 @@ const Express = () => {
             console.log("Successfully connected to server!");
         });
         socket.on(serverName, (data) => {
-            console.log("Received log data:", data);
             setExpressLog((prevLogs) => [...prevLogs, data]); // 將接收到的資料設置為 expressLog 的新值
         });
         socketRef.current = socket;
@@ -757,6 +814,14 @@ const Express = () => {
         } catch (error) {
             console.error("Error fetching POST event data:", error);
         }
+        localStorage.removeItem("editedFileData");
+        setIsEditedFileDataPresent(false);
+    };
+    const handleCopyClick = () => {
+        const runPortContent = runPortRef.current.innerText;
+        navigator.clipboard.writeText(runPortContent).then(() => {
+            window.alert("已複製網址");
+        });
     };
 
     //---------------------------------------------------------------------------
@@ -766,6 +831,7 @@ const Express = () => {
                 {isActionLoading && (
                     <CenteredLoading>
                         <Loading type='spin' color='#00BFFF' height={100} width={100} />
+                        <div>{}</div>
                     </CenteredLoading>
                 )}
             </div>
@@ -777,6 +843,7 @@ const Express = () => {
                             <div style={progressStyle} />
                         </div>
                         <p style={progressTextStyle}>{`${initProgress}%`}</p>
+                        <p style={progressTextStyle}>專案首次建立，環境初始化中，請稍候</p>
                     </div>
                 )}
                 {!isInit ? (
@@ -808,27 +875,36 @@ const Express = () => {
                             {!runPort ? (
                                 <StyledButton type='run' onClick={handleRunSubmit}>
                                     <FaPlay />
-                                    運行 RUN
+                                    RUN
                                 </StyledButton>
                             ) : (
                                 <>
                                     <StyledButton type='stop' onClick={handleStopSubmit}>
                                         <FaPause />
-                                        暫停 STOP
+                                        STOP
                                     </StyledButton>
-                                    <WebPageButton onClick={handleWebPageOpen}>
-                                        <FaChrome />
-                                        開啓網頁
-                                    </WebPageButton>
+                                    <StyledButton type='run' onClick={handleRestartSubmit}>
+                                        <FaSync />
+                                        RESTART
+                                    </StyledButton>
+                                    <OpenWebContainer ref={runPortRef}>
+                                        <WebPageButton onClick={handleWebPageOpen}>
+                                            <FaChrome />
+                                            {runPort}
+                                        </WebPageButton>
+                                        <CopyURLButton>
+                                            <FaCopy onClick={handleCopyClick} />
+                                        </CopyURLButton>
+                                    </OpenWebContainer>
                                 </>
                             )}
                         </ButtonContainer>
                         <div style={{ display: "flex", alignItems: "center" }}>
-                            <div style={{ display: "flex", flexDirection: "column" }}>
+                            <div style={{ display: "flex", flexDirection: "column", width: "150px" }}>
                                 {remainingTime && remainingTime > 0 && (
                                     <SmallText>倒數{formatRemainingTime(remainingTime)}停止伺服器</SmallText>
                                 )}
-                                <SmallText>伺服器資料{expiredTime}後進行封存</SmallText>
+                                {/* <SmallText>伺服器資料{expiredTime}後進行封存</SmallText> */}
                             </div>
                             <StyledButtonInit onClick={handleInitOptionOpen}>開啓初始化選單</StyledButtonInit>
                         </div>
@@ -846,7 +922,7 @@ const Express = () => {
                             </FileManager>
                             <ButtonFileContainer>
                                 <button onClick={handleIndexRefresh}>
-                                    <FaSync /> 更新檔案
+                                    <FaSync /> 更新目錄
                                 </button>
                                 <button onClick={handlePostRewrite}>
                                     <FaSave /> 存檔
@@ -869,7 +945,7 @@ const Express = () => {
                                     ))}
                                 </ButtonGroup>
                                 <NpmForm onSubmit={handleNpmSubmit}>
-                                    <NpmLabel>npm指令</NpmLabel>
+                                    <NpmLabel>npm 指令</NpmLabel>
                                     <NpmInput
                                         type='text'
                                         placeholder='npm install ... (按下ENTER送出)'
@@ -881,7 +957,14 @@ const Express = () => {
                             </FeatureTabsContainer>
                             {feature === "NodeJs" ? (
                                 <EditArea>
-                                    <FileName onChange={choiceFileChange}>{choiceFile}</FileName>
+                                    <HintArea>
+                                        <FileName onChange={choiceFileChange}>{choiceFile}</FileName>
+                                        {isEditedFileDataPresent && (
+                                            <ChangeHint>
+                                                <p>偵測檔案異動，可重新啓動伺服器載入最新資料</p>
+                                            </ChangeHint>
+                                        )}
+                                    </HintArea>
                                     <hr />
                                     <div style={{ fontSize: "1.2em" }}>
                                         <CodeMirror
