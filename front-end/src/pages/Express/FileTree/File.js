@@ -6,8 +6,6 @@ import { AiOutlineFile, AiOutlineFileText, AiOutlineEdit, AiOutlineDelete } from
 import api from "../../../util/api";
 import { FileContext } from "../../../context/fileContext";
 
-const serverName = `testman_firstServer`; //TODO:後續要從localstorage取得${userName}_${projectName}
-
 const FileIcon = ({ file }) => {
     const fileExtension = file.name.split(".").pop();
 
@@ -150,7 +148,6 @@ const File = ({ file, path, onFileClick }) => {
 
                 {isHovering && (
                     <div style={buttonContainerStyle}>
-                        {" "}
                         <button onClick={handleRenameFile}>
                             <AiOutlineEdit />
                         </button>
