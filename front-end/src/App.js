@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
 import { FileContextProvider } from "./context/fileContext";
 import images from "./images/image";
 import api from "./util/api";
@@ -57,6 +57,8 @@ const Button = styled.button`
 const App = () => {
     const [isValidToken, setIsValidToken] = useState(false);
     const [username, setUsername] = useState(null);
+    const [isInitialized, setIsInitialized] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         // 在此檢查JWT是否正確
@@ -69,19 +71,21 @@ const App = () => {
                     setUsername(result.name);
                     setIsValidToken(true);
                 } else {
-                    window.location.href = "/AuthPage";
+                    localStorage.clear();
+                    navigate("/AuthPage");
                 }
             } catch (error) {
-                window.location.href = "/AuthPage";
+                localStorage.clear();
+                navigate("/AuthPage");
             }
         };
 
         if (jwt) {
             checkTokenValidity();
         } else {
-            window.location.href = "/AuthPage";
+            navigate("/AuthPage");
         }
-    }, []);
+    }, [navigate]);
 
     const handleProfileClick = () => {
         window.location.href = `/profile/${username}`;
