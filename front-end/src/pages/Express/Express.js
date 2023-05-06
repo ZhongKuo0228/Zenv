@@ -27,6 +27,9 @@ const CenteredLoading = styled.div`
     transform: translate(-50%, -50%);
     z-index: 9999;
 `;
+const CreateHint = styled.div`
+    color: #fff;
+`;
 
 const Area = styled.div`
     width: 100%;
@@ -352,6 +355,8 @@ const ExpressLog = styled.div`
 `;
 
 //---
+
+//---
 const Express = () => {
     const fileContext = useContext(FileContext);
     const {
@@ -368,13 +373,13 @@ const Express = () => {
     } = fileContext;
     const { username, projectName } = useParams();
     const [isActionLoading, setIsActionLoading] = useState(false);
-    const [isActionLoadingHint, setIsActionLoadingHint] = useState(false);
     const [expiredTime, setExpiredTime] = useState("");
     const [remainingTime, setRemainingTime] = useState(null);
     const [shouldFetchData, setShouldFetchData] = useState(true);
     const [isInit, setIsInit] = useState(false);
     const [initLoading, setInitLoading] = useState(false);
     const [initProgress, setInitProgress] = useState(0);
+    const [initHint, setInitHint] = useState(0);
     const [runPort, setRunPort] = useState(false);
     const [npmCommand, setNpmCommand] = useState("");
     const [sqliteCommand, setSqliteCommand] = useState(
@@ -518,83 +523,40 @@ const Express = () => {
         //動態觀察
     }, [fileName]);
 
-    //NodeJS按鈕動作
-    const handleCreateSubmit = (event) => {
-        if (event) {
-            event.preventDefault();
-        }
-        const task = "createServer";
-        setIsActionLoading(true);
-
-        return new Promise(async (resolve, reject) => {
-            try {
-                const result = await api.resetFile(task, serverName);
-                if (result) {
-                    await getServerData();
-                }
-                setIsActionLoading(false);
-                localStorage.setItem("openedFolders", `{"gitFolder":true}`);
-                // 在這裡使用 resolve() 方法，表示 handleCreateSubmit 函數已經完成
-                console.log("######");
-                resolve();
-            } catch (error) {
-                // 在這裡使用 reject() 方法，表示 handleCreateSubmit 函數遇到了錯誤
-                reject(error);
+    // 模擬進度條-----
+    let intervalId = null; // 在函數外部聲明 intervalId 變量
+    const simulateProgress = () => {
+        return new Promise((resolve) => {
+            // 在執行新的 setInterval 之前，清除先前的 intervalId
+            if (intervalId) {
+                clearInterval(intervalId);
             }
+
+            let progress = 0;
+            let decimalPlaces = 0; // 重置 decimalPlaces
+            intervalId = setInterval(() => {
+                // 不再使用 const 聲明
+                if (progress < 99) {
+                    const remainingProgress = 99 - progress;
+                    const randomIncrement = Math.floor(Math.random() * 20);
+
+                    // 確保進度值不超過 99
+                    progress += Math.min(randomIncrement, remainingProgress);
+                } else {
+                    // 每秒添加一個小數位的 9
+                    decimalPlaces += 1;
+                    progress = parseFloat((progress + 9 * Math.pow(10, -decimalPlaces)).toFixed(decimalPlaces));
+                }
+                setInitProgress(progress);
+
+                if (decimalPlaces >= 99) {
+                    clearInterval(intervalId);
+                    resolve();
+                }
+            }, 500); // 更新間隔
         });
     };
 
-    const handleInitSubmit = async (event) => {
-        if (event && event.preventDefault) {
-            event.preventDefault();
-        }
-        setInitLoading(true);
-        setInitProgress(0);
-        setSqliteResult("sqlite執行結果");
-        setRedisResult("redis執行結果");
-        setIsInit(true);
-
-        // 模擬進度條
-        const simulateProgress = () => {
-            return new Promise((resolve) => {
-                let progress = 0;
-                let decimalPlaces = 0;
-                const intervalId = setInterval(() => {
-                    if (progress < 99) {
-                        const remainingProgress = 99 - progress;
-                        const randomIncrement = Math.floor(Math.random() * 20);
-
-                        // 確保進度值不超過 99
-                        progress += Math.min(randomIncrement, remainingProgress);
-                    } else {
-                        // 每秒添加一個小數位的 9
-                        decimalPlaces += 1;
-                        progress = parseFloat((progress + 9 * Math.pow(10, -decimalPlaces)).toFixed(decimalPlaces));
-                    }
-                    setInitProgress(progress);
-
-                    if (decimalPlaces >= 99) {
-                        clearInterval(intervalId);
-                        resolve();
-                    }
-                }, 300); // 每秒更新一次
-            });
-        };
-
-        // 調用 API
-        const callApi = async () => {
-            const task = "jsOperInit";
-            const result = await api.jsOper(task, serverName);
-            if (result) {
-                setInitProgress(100);
-                alert("初始化完成");
-            }
-            setInitLoading(false); // 隱藏動畫
-        };
-
-        // 同時運行進度條模擬和 API 調用
-        await Promise.all([simulateProgress(), callApi()]);
-    };
     const spinnerStyle = {
         display: "flex",
         flexDirection: "column",
@@ -626,6 +588,60 @@ const Express = () => {
         color: "#fff",
         marginTop: "10px",
     };
+    //NodeJS按鈕動作---
+    const handleCreateSubmit = async (event) => {
+        if (event) {
+            event.preventDefault();
+        }
+        setInitHint("第一階段：建立專案檔案，請稍候");
+        setInitLoading(true);
+        setInitProgress(0);
+        simulateProgress();
+        const task = "createServer";
+        return new Promise(async (resolve, reject) => {
+            try {
+                const result = await api.resetFile(task, serverName);
+                if (result) {
+                    await getServerData();
+                    setInitProgress(100);
+                }
+                setInitLoading(false); // 隱藏動畫
+                localStorage.setItem("openedFolders", `{"gitFolder":true}`);
+                // 在這裡使用 resolve() 方法，表示 handleCreateSubmit 函數已經完成
+                resolve();
+            } catch (error) {
+                // 在這裡使用 reject() 方法，表示 handleCreateSubmit 函數遇到了錯誤
+                reject(error);
+            }
+        });
+    };
+
+    const handleInitSubmit = async (event) => {
+        if (event && event.preventDefault) {
+            event.preventDefault();
+        }
+        setInitHint("第二階段：環境初始化中，請稍候");
+        setInitLoading(true);
+        setInitProgress(0);
+        setSqliteResult("sqlite執行結果");
+        setRedisResult("redis執行結果");
+        setIsInit(true);
+
+        // 調用 API
+        const callApi = async () => {
+            const task = "jsOperInit";
+            const result = await api.jsOper(task, serverName);
+            if (result) {
+                setInitProgress(100);
+                alert("初始化完成");
+            }
+            setInitLoading(false); // 隱藏動畫
+        };
+
+        // 同時運行進度條模擬和 API 調用
+        await Promise.all([simulateProgress(), callApi()]);
+    };
+
     //---
 
     const handleRunSubmit = async (event) => {
@@ -831,7 +847,6 @@ const Express = () => {
                 {isActionLoading && (
                     <CenteredLoading>
                         <Loading type='spin' color='#00BFFF' height={100} width={100} />
-                        <div>{}</div>
                     </CenteredLoading>
                 )}
             </div>
@@ -843,7 +858,7 @@ const Express = () => {
                             <div style={progressStyle} />
                         </div>
                         <p style={progressTextStyle}>{`${initProgress}%`}</p>
-                        <p style={progressTextStyle}>專案首次建立，環境初始化中，請稍候</p>
+                        <p style={progressTextStyle}>{initHint}</p>
                     </div>
                 )}
                 {!isInit ? (
