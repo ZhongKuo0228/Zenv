@@ -39,14 +39,13 @@ const SignIn = () => {
 
         try {
             const result = await api.userSignIn(email, password);
-            if (result) {
+            if (result.data) {
                 localStorage.setItem("jwt", result.data.access_token);
                 window.location.href = `/profile/${result.data.user.name}`;
             } else {
                 setError(result.errorMessage);
             }
         } catch (error) {
-            console.error(error);
             setError("An error occurred while creating the user. Please try again later.");
         }
     };

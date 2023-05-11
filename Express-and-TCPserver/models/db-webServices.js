@@ -28,23 +28,6 @@ export async function getServiceID(item) {
         console.error(e);
     }
 }
-// export async function DBcreateService(userId, webServices, projectName) {
-//     const userName = await getUserName(userId);
-//     const serviceID = await getServiceID(webServices);
-//     const createTime = timestamp();
-//     const expired_time = new Date(new Date(createTime).getTime() + 7 * 24 * 60 * 60 * 1000);
-//     const [rows] = await pool.query(``, [id]);
-//     return rows[0].items;
-// }
-
-// export async function getWebInfo(userId, webServices, projectName) {
-//     const userName = await getUserName(userId);
-//     const serviceID = await getServiceID(webServices);
-//     const createTime = timestamp();
-//     const expired_time = new Date(new Date(createTime).getTime() + 7 * 24 * 60 * 60 * 1000);
-//     const [rows] = await pool.query(``, [id]);
-//     return rows[0].items;
-// }
 
 export async function updateExpiredTime(userId, projectName) {
     try {
@@ -67,7 +50,6 @@ export async function updateExecTime(userId, projectName) {
             `UPDATE web_services SET start_execution  = ? WHERE user_id = ? AND project_name = ?`,
             [nowTime, userId, projectName]
         );
-        console.log("nowTime", rows);
         return rows[0];
     } catch (e) {
         console.error(e);
@@ -109,6 +91,7 @@ export async function checkProjectName(userId, projectName) {
         return false;
     }
 }
+
 export async function createWebProjects(req) {
     try {
         const userID = req.user.userID;
@@ -132,6 +115,7 @@ export async function createWebProjects(req) {
         console.error(e);
     }
 }
+
 export async function delWebProjects(req) {
     try {
         const userID = req.user.userID;

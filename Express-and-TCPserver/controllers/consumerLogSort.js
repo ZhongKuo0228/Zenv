@@ -1,6 +1,6 @@
 import { consumeFromQueue } from "../models/queue.js";
 
-import { logFormat } from "../models/logAgent/reviceLogAgent.js";
+import { logFormat } from "../models/logAgent/receiveLogAgent.js";
 // 將log用webSocket送到前端
 import { getIo } from "../models/webSocket.js";
 
