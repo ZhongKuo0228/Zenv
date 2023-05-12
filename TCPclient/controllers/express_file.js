@@ -1,12 +1,10 @@
 import { exec } from "child_process";
 import util from "util";
 const promisify = util.promisify;
-import { writeFile, mkdir, unlink, readdir, stat, readFile } from "node:fs/promises";
+import { writeFile, mkdir, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { createDockerComposeFile, createLogSH, chmodLogSH, runLogSH, downProject } from "./express_container.js";
-import { error } from "console";
-import { stderr, stdout } from "process";
+import { createDockerComposeFile, createLogSH, chmodLogSH, downProject } from "./express_container.js";
 
 //從github拉資料下來
 async function downloadRepo(path, gitUrl) {
@@ -82,10 +80,10 @@ export async function createFolder(job) {
         const logPath = path.join(moduleDir, "../express_project/server_logs");
         const folderName = serverName;
         const newProjectPath = `${folderPath}${folderName}`;
-        const gitFolderPath = `${newProjectPath}/gitFolder`;
+        const ProjectFolderPath = `${newProjectPath}/ProjectFolder`;
 
         await mkdir(newProjectPath);
-        await mkdir(gitFolderPath);
+        await mkdir(ProjectFolderPath);
 
         await createDockerComposeFile(folderName, newProjectPath);
         console.log(`docker compose.yml建立完成`);
@@ -94,7 +92,7 @@ export async function createFolder(job) {
         console.log(`docker compose-express log腳本建立完成`);
         await chmodLogSH(folderName, newProjectPath);
 
-        await downloadRepo(gitFolderPath, gitUrl);
+        await downloadRepo(ProjectFolderPath, gitUrl);
         console.log(`專案:${folderName}建立完成、git資料下載完成`);
 
         return "專案資料夾初始化完成";
@@ -111,9 +109,9 @@ export async function getFolderIndex(job) {
         const folderPath = path.join(moduleDir, "../express_project/");
         const folderName = job.folderName;
         const newProjectPath = `${folderPath}${folderName}`;
-        const gitFolderPath = `${newProjectPath}/gitFolder`;
+        const ProjectFolderPath = `${newProjectPath}/ProjectFolder`;
 
-        const folderTree = await listFiles(gitFolderPath);
+        const folderTree = await listFiles(ProjectFolderPath);
         const json = JSON.stringify(folderTree);
 
         return json;
@@ -161,7 +159,7 @@ export async function rewriteFile(job) {
 }
 
 //檔案操作：新增、刪除、重新命名
-export async function operAdd(job) {
+export async function operateAdd(job) {
     try {
         const folderPath = path.join(moduleDir, "../express_project/");
         const fileName = job.fileName;
@@ -182,7 +180,7 @@ export async function operAdd(job) {
     }
 }
 
-export async function operDel(job) {
+export async function operateDel(job) {
     try {
         const folderPath = path.join(moduleDir, "../express_project/");
         const fileName = job.fileName;
@@ -204,7 +202,7 @@ export async function operDel(job) {
     }
 }
 
-export async function operRename(job) {
+export async function operateRename(job) {
     try {
         const folderPath = path.join(moduleDir, "../express_project/");
         const fileName = job.fileName[0];

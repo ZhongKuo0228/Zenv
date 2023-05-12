@@ -6,15 +6,15 @@ import {
     getFolderIndex,
     readFile,
     rewriteFile,
-    fileOper,
-    jsOper,
-    dbOper,
+    fileOperate,
+    jsOperate,
+    dbOperate,
 } from "../controllers/tcpJob.js";
 
 export async function updateExpired(req) {
     try {
         const projectName = req.body.data.projectName;
-        const userID = req.user.userI;
+        const userID = req.user.userID;
         await updateExpiredTime(userID, projectName);
         await updateExecTime(userID, projectName);
     } catch (e) {
@@ -22,19 +22,19 @@ export async function updateExpired(req) {
     }
 }
 //---For API---------------------------------------------------
-export async function checkInfo(req, res, next) {
+export async function checkInfo(req, res) {
     const userId = req.user.userID;
     const projectName = req.body.data;
     const result = await checkProjectName(userId, projectName);
     return res.status(200).json({ data: result });
 }
 
-export async function resetFile(req, res, next) {
+export async function resetFile(req, res) {
     const result = await createExpressProject(req);
     return res.status(200).json({ data: result });
 }
 
-export async function getFilesData(req, res, next) {
+export async function getFilesData(req, res) {
     const job = Object.keys(req.query);
     let result = "";
     if (job == "getFolderIndex") {
@@ -48,32 +48,32 @@ export async function getFilesData(req, res, next) {
     }
 }
 
-export async function updateData(req, res, next) {
+export async function updateData(req, res) {
     const result = await updateExpired(req);
     return res.status(200).json({ data: result });
 }
 
-export async function rewriteFileData(req, res, next) {
+export async function rewriteFileData(req, res) {
     const result = await rewriteFile(req);
     return res.status(200).json({ data: result });
 }
 
-export async function fileOperate(req, res, next) {
-    const result = await fileOper(req);
+export async function allFileOperate(req, res) {
+    const result = await fileOperate(req);
     return res.status(200).json({ data: result });
 }
 
-export async function jsOperate(req, res, next) {
-    const result = await jsOper(req);
+export async function allJSOperate(req, res) {
+    const result = await jsOperate(req);
     return res.status(200).json({ data: result });
 }
 
-export async function dbOperate(req, res, next) {
-    const result = await dbOper(req);
+export async function allDBOperate(req, res) {
+    const result = await dbOperate(req);
     return res.status(200).json({ data: result });
 }
 
-export async function receiveLog(req, res, next) {
+export async function receiveLog(req, res) {
     const logs = req.body;
     const queue = "logSort";
     sendToQueue(queue, logs);

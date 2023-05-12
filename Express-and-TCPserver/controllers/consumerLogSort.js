@@ -14,7 +14,7 @@ export async function sendLogToWeb() {
 
         const handleBatch = async (batchDataArray) => {
             const formattedLogs = await Promise.all(batchDataArray.map(logFormat));
-            // console.log("formattedLogs", formattedLogs);
+    
 
             formattedLogs.sort((a, b) => {
                 const dateA = new Date(a.data.timestamp);
@@ -28,7 +28,6 @@ export async function sendLogToWeb() {
                     return dateA - dateB;
                 }
             });
-            // console.log("Sorted formatted logs:", formattedLogs);
             //將排序好的資料送回前端
             formattedLogs.forEach((log) => {
                 const io = getIo();

@@ -1,8 +1,6 @@
 import sqlite3 from "sqlite3";
 import { open } from "sqlite";
 import path from "path";
-import Table from "cli-table3";
-import stripAnsi from "strip-ansi";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
 
 async function runSql(dbPath, sql) {
@@ -28,7 +26,7 @@ export async function sqliteCommand(job) {
     const folderPath = path.join(moduleDir, "../express_project/");
     const folderName = serverName;
     const newProjectPath = `${folderPath}${folderName}`;
-    const dbPath = `${newProjectPath}/gitFolder/models/default_db.db`;
+    const dbPath = `${newProjectPath}/ProjectFolder/models/default_db.db`;
     console.log("dbPath", dbPath);
 
     try {

@@ -196,7 +196,7 @@ export async function userProjects(jwt) {
 }
 
 //---For API---------------------------------------------------
-export async function signUp(req, res, next) {
+export async function signUp(req, res) {
     const email = req.body.data.email;
     const password = req.body.data.password;
     const userName = req.body.data.username;
@@ -228,7 +228,7 @@ export async function signUp(req, res, next) {
     return res.status(200).json({ data: sendUserData });
 }
 
-export async function signIn(req, res, next) {
+export async function signIn(req, res) {
     const provider = req.body.data.provider;
     if (provider == "native") {
         const email = req.body.data.email;
@@ -252,7 +252,7 @@ export async function signIn(req, res, next) {
     }
 }
 
-export async function getUserProfile(req, res, next) {
+export async function getUserProfile(req, res) {
     const getToke = req.headers.authorization;
     //獲取 Authorization 標頭，並確認其是否為 Bearer Token
     if (!getToke || !getToke.startsWith("Bearer ")) {
@@ -268,7 +268,7 @@ export async function getUserProfile(req, res, next) {
     }
 }
 
-export async function getUserProjects(req, res, next) {
+export async function getUserProjects(req, res) {
     const getToke = req.headers.authorization;
     //獲取 Authorization 標頭，並確認其是否為 Bearer Token
     if (!getToke || !getToke.startsWith("Bearer ")) {

@@ -34,7 +34,7 @@ httpServer.listen(process.env.EXPRESS_SERVER_PORT, async () => {
 });
 
 //---view-------------------------------------------
-app.use("/healthCheck", function (req, res, next) {
+app.use("/healthCheck", function (req, res) {
     return res.status(200).json({ data: "OK" });
 });
 

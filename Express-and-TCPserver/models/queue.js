@@ -1,8 +1,11 @@
 import amqp from "amqplib";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const sendToQueue = async (queue, message) => {
     try {
-        const connection = await amqp.connect("amqp://127.0.0.1:5672");
+        const connection = await amqp.connect(process.env.QUEUE_URL);
         const channel = await connection.createChannel();
 
         await channel.assertQueue(queue, { durable: false });
@@ -20,7 +23,7 @@ const sendToQueue = async (queue, message) => {
 
 const consumeFromQueue = async (queue, handleMessage, handleBatch) => {
     try {
-        const connection = await amqp.connect("amqp://127.0.0.1:5672");
+        const connection = await amqp.connect(process.env.QUEUE_URL);
         const channel = await connection.createChannel();
 
         await channel.assertQueue(queue, { durable: false });
@@ -46,10 +49,6 @@ const consumeFromQueue = async (queue, handleMessage, handleBatch) => {
                     batchData.timestamp = now;
                 }
             }, batchInterval);
-        };
-        const stopTimer = () => {
-            clearInterval(timerId);
-            timerId = null;
         };
 
         channel.consume(queue, (msg) => {

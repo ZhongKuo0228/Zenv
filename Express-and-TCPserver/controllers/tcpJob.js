@@ -1,6 +1,4 @@
 import tcpServer from "../models/tcpServer.js";
-import { updateExpiredTime } from "../models/db-webServices.js";
-import { getUserID } from "../models/db-user.js";
 
 //---使用TCP功能
 const connections = tcpServer();
@@ -135,7 +133,6 @@ export async function rewriteFile(req) {
             fileName: project.fileName,
             editCode: project.editCode,
         };
-        console.log("r", project);
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
     } catch (e) {
@@ -143,7 +140,7 @@ export async function rewriteFile(req) {
     }
 }
 
-export async function fileOper(req) {
+export async function fileOperate(req) {
     try {
         const project = req.body.data;
 
@@ -164,7 +161,7 @@ export async function fileOper(req) {
     }
 }
 
-export async function jsOper(req) {
+export async function jsOperate(req) {
     try {
         const project = req.body.data;
         //初始化：init
@@ -178,8 +175,6 @@ export async function jsOper(req) {
             doJob: project.doJob,
         };
 
-        console.log(job);
-
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
     } catch (e) {
@@ -187,18 +182,15 @@ export async function jsOper(req) {
     }
 }
 
-export async function dbOper(req) {
+export async function dbOperate(req) {
     try {
         const project = req.body.data;
-        console.log("dbOper", project);
 
         let job = {
             task: project.task,
             serverName: project.serverName,
             command: project.command,
         };
-
-        console.log(job);
 
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
@@ -217,7 +209,6 @@ export async function delProject(req) {
             task: "delProject",
             serverName: serverName,
         };
-        console.log("job ", job);
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
     } catch (e) {

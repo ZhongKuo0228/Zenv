@@ -2,7 +2,6 @@ import * as fileHandler from "./express_file.js";
 import * as jsHandler from "./express_container.js";
 import { sqliteCommand } from "../models/sqlite_client.js";
 import { redisCommand } from "../models/redis_client.js";
-//TODO: sqlite , redis command
 import { sendToServer } from "../tcp-client.js";
 
 const handlerMap = {

@@ -75,11 +75,11 @@ const File = ({ file, path, onFileClick }) => {
 
         // 若用戶確定刪除
         if (confirmed) {
-            const task = "operDel";
+            const task = "operateDel";
             const type = "file";
             const fileName = `${serverName}/${path}/${file.name}`;
             try {
-                const result = await api.fileOper(task, type, fileName);
+                const result = await api.fileOperate(task, type, fileName);
                 if (result) {
                     await getServerData();
                 }
@@ -108,12 +108,12 @@ const File = ({ file, path, onFileClick }) => {
             event.preventDefault();
             setIsRenaming(false);
             // 處理將修改後的檔名保存到後端的邏輯
-            const task = "operRename";
+            const task = "operateRename";
             const type = "file";
             const oldName = `${serverName}/${path}/${file.name}`;
             const newName = `${serverName}/${path}/${newFileName}`;
             const fileName = [oldName, newName];
-            const result = await api.fileOper(task, type, fileName);
+            const result = await api.fileOperate(task, type, fileName);
             if (result) {
                 await getServerData();
             }

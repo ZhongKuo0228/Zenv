@@ -1,12 +1,12 @@
 import { sendCodeToTcpClient } from "./tcpJob.js";
 import { getPLInfo, updateExecTime, saveCode } from "../models/db-PLcode.js";
 
-export async function getInfo(req, res, next) {
+export async function getInfo(req, res) {
     const result = await getPLInfo(req);
     res.status(200).json({ data: result });
 }
 
-export async function runCode(req, res, next) {
+export async function runCode(req, res) {
     await updateExecTime(req);
     await saveCode(req);
     const result = await sendCodeToTcpClient(req);
@@ -17,7 +17,7 @@ export async function runCode(req, res, next) {
     }
 }
 
-export async function saveCodeFile(req, res, next) {
+export async function saveCodeFile(req, res) {
     await saveCode(req);
     res.status(200).json({ data: "存檔成功" });
 }

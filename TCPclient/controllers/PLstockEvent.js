@@ -6,7 +6,6 @@ const timers = {}; //放置定時器
 
 export async function PLevent(job) {
     try {
-        console.log("job", job);
         const executeId = job.executeId;
         const programLanguage = job.programLanguage;
         const code = job.code;

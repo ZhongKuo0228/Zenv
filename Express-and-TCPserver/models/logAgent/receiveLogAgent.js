@@ -1,12 +1,3 @@
-function messageFormat(message) {
-    const regex = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z (.*)/;
-    const match = message.match(regex);
-    if (match) {
-        const message = match[1];
-        return message;
-    }
-}
-
 export async function logFormat(batchData) {
     try {
         // console.log("batchData", batchData);
@@ -21,7 +12,7 @@ export async function logFormat(batchData) {
         } else {
             const regex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{9}Z) (.*)$/;
             const match = logMessage.match(regex);
-            // console.log("match", match);
+
             let timestamp;
             let message;
 
@@ -42,4 +33,3 @@ export async function logFormat(batchData) {
     }
 }
 
-export async function groupedLogs(logs) {}

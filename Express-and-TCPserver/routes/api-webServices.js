@@ -6,9 +6,9 @@ import {
     getFilesData,
     updateData,
     rewriteFileData,
-    fileOperate,
-    jsOperate,
-    dbOperate,
+    allFileOperate,
+    allJSOperate,
+    allDBOperate,
     receiveLog,
 } from "../controllers/webServices.js";
 import wrapAsync from "../util/wrapAsync.js";
@@ -19,9 +19,9 @@ expressRouter.post("/resetFile", wrapAsync(resetFile));
 expressRouter.get("/get", wrapAsync(getFilesData));
 expressRouter.post("/update", wrapAsync(updateData));
 expressRouter.post("/rewriteFile", wrapAsync(rewriteFileData));
-expressRouter.post("/fileOper", wrapAsync(fileOperate));
-expressRouter.post("/jsOper", wrapAsync(jsOperate));
-expressRouter.post("/dbOper", wrapAsync(dbOperate));
+expressRouter.post("/fileOperate", wrapAsync(allFileOperate));
+expressRouter.post("/jsOperate", wrapAsync(allJSOperate));
+expressRouter.post("/dbOperate", wrapAsync(allDBOperate));
 expressRouter.post("/reviceLog", wrapAsync(receiveLog));
 
 //---export----------------------------------------------
