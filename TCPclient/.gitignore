@@ -8,7 +8,7 @@
 #資料夾--------------
 .DS_Store
 node_modules/
-gitFolder/
+ProjectFolder/
 
 #環境檔--------------
 .env
@@ -32,3 +32,6 @@ webimage/
 
 #隨express專案生成的docker-compose.yml---------
 docker-compose.yml
+
+#隨cpp專案生成的臨時檔--------
+cpp

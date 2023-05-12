@@ -4,7 +4,7 @@ dotenv.config();
 
 let io;
 
-export async function websStock(httpServer) {
+export async function websSocket(httpServer) {
     try {
         io = new Server(httpServer, {
             cors: {
@@ -26,7 +26,7 @@ export async function websStock(httpServer) {
 
 export function getIo() {
     if (!io) {
-        throw new Error("websStock must be called before getting io instance.");
+        throw new Error("websSocket must be called before getting io instance.");
     }
     return io;
 }

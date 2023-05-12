@@ -1,6 +1,4 @@
 import tcpServer from "../models/tcpServer.js";
-import { updateExpiredTime } from "../models/db-webServices.js";
-import { getUserID } from "../models/db-user.js";
 
 //---使用TCP功能
 const connections = tcpServer();
@@ -11,16 +9,15 @@ async function socketWrite(job) {
             const socket = connections[0];
             socket.write(JSON.stringify(job));
 
-            // Remove existing 'data' event handler before adding a new one
+            // 移除已經存在的socket
             socket.removeAllListeners("data");
 
             const dataPromise = new Promise((resolve, reject) => {
                 const timeout = setTimeout(() => {
                     reject(new Error("Data receive timeout"));
-                }, 60000); // Set your desired timeout value (e.g., 10000 milliseconds)
+                }, 60000); //一分鐘內無回應就回覆系統逾時
 
                 socket.on("data", (data) => {
-                    // console.log("收到client", data);
                     clearTimeout(timeout);
                     resolve(data);
                 });
@@ -35,7 +32,6 @@ async function socketWrite(job) {
     } catch (error) {
         if (error.message === "Data receive timeout") {
             console.error("Data receive timeout. Retrying...");
-            // Retry sending data or notify the user...
         } else {
             console.error("An error occurred:", error);
         }
@@ -45,7 +41,6 @@ async function socketWrite(job) {
 function bufferToJson(buffer) {
     if (buffer == undefined) {
         buffer = "tcp Client 回覆異常";
-        // console.log(buffer);
         return buffer;
     } else {
         return JSON.parse(buffer.toString()); //buffer轉成JSON格式
@@ -138,7 +133,6 @@ export async function rewriteFile(req) {
             fileName: project.fileName,
             editCode: project.editCode,
         };
-        console.log("r", project);
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
     } catch (e) {
@@ -146,7 +140,7 @@ export async function rewriteFile(req) {
     }
 }
 
-export async function fileOper(req) {
+export async function fileOperate(req) {
     try {
         const project = req.body.data;
 
@@ -167,23 +161,19 @@ export async function fileOper(req) {
     }
 }
 
-export async function jsOper(req) {
+export async function jsOperate(req) {
     try {
         const project = req.body.data;
-        console.log("jsOper", project);
-
-        //初始化：init  ：node/npm-install → docker-compose up → 取得port → docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
-        //啓動： run  : docker-compose start <container>
-        //停止 ：stop : docker-compose stop -t 1 <container> //TODO:後續要優化停止方式
-        //npm 操作： npm  :node/npm "指令"
+        //初始化：init
+        //啓動： run
+        //停止 ：stop
+        //npm 操作
 
         let job = {
             task: project.task,
             serverName: project.serverName,
             doJob: project.doJob,
         };
-
-        console.log(job);
 
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
@@ -192,18 +182,15 @@ export async function jsOper(req) {
     }
 }
 
-export async function dbOper(req) {
+export async function dbOperate(req) {
     try {
         const project = req.body.data;
-        console.log("dbOper", project);
 
         let job = {
             task: project.task,
             serverName: project.serverName,
             command: project.command,
         };
-
-        console.log(job);
 
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
@@ -222,7 +209,6 @@ export async function delProject(req) {
             task: "delProject",
             serverName: serverName,
         };
-        console.log("job ", job);
         const buffer = await socketWrite(job);
         return bufferToJson(buffer);
     } catch (e) {

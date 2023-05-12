@@ -4,7 +4,7 @@ import pool from "../models/DBpool.js";
 export async function checkEmail(email) {
     try {
         const [rows] = await pool.query(`SELECT provider FROM users WHERE email = ?`, [email]);
-        // console.log(rows[0].provider);
+
         if (rows.length == 0) {
             return;
         } else if (rows[0].provider == "native") {
@@ -18,7 +18,7 @@ export async function checkEmail(email) {
 export async function checkName(name) {
     try {
         const [rows] = await pool.query(`SELECT provider FROM users WHERE user_name = ?`, [name]);
-        // console.log(rows[0].provider);
+
         if (rows.length == 0) {
             return;
         } else if (rows[0].provider == "native") {
@@ -43,7 +43,7 @@ export async function checkUserTable(email) {
     try {
         const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
         return rows[0];
-        // console.log(rows.length);
+
     } catch (e) {
         console.error(e);
     }
@@ -53,7 +53,7 @@ export async function searchEmail(email) {
     try {
         const [rows] = await pool.query(`SELECT * FROM users WHERE email = ?`, [email]);
         return rows;
-        // console.log(rows.length);
+
     } catch (e) {
         console.error(e);
     }
@@ -62,7 +62,7 @@ export async function searchEmail(email) {
 export async function searchPassword(email) {
     try {
         const [rows] = await pool.query(`SELECT password FROM users WHERE email = ?`, [email]);
-        // console.log(rows[0].password);
+
         return rows[0].password;
     } catch (e) {
         console.error(e);
@@ -90,8 +90,4 @@ export async function checkSignIn(email, password) {
     }
 }
 
-// export async function checkRole(roleID) {
-//     const [rows] = await pool.query(`SELECT * FROM roles WHERE id = ?`, [role]);
-//     return rows[0];
-//     // console.log(rows.length);
-// }
+

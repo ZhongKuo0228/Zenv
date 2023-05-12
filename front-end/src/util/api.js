@@ -51,7 +51,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     async userSignIn(email, password) {
@@ -70,7 +70,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     //Profile----------------------------------------------------------------------------------------
@@ -118,7 +118,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     async delPLProject(projectName, serviceItem, selectedItemsType) {
@@ -139,7 +139,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching DELETE event data:", error);
+            console.error("Error fileOperate fetching DELETE event data:", error);
         }
     },
     async getPLServiceItems() {
@@ -184,7 +184,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     //PL----------------------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     async PLcodeRun() {
@@ -228,7 +228,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     async PLcodeSave() {
@@ -250,7 +250,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
 
@@ -307,7 +307,7 @@ const api = {
                 userName: userName,
                 projectName: projectName,
             };
-            const response = await fetch(`${this.hostname}/WebServices/update`, {
+            const response = await fetch(`${this.hostname}/webServices/update`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -317,7 +317,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
     //NodeJS操作
@@ -364,17 +364,17 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
-    async fileOper(task, type, fileName) {
+    async fileOperate(task, type, fileName) {
         const data = {
             task: task,
             type: type,
             fileName: fileName,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/fileOper`, {
+            const response = await fetch(`${this.hostname}/webServices/fileOperate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -384,10 +384,10 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error fileOper fetching POST event data:", error);
+            console.error("Error fileOperate fetching POST event data:", error);
         }
     },
-    async jsOper(task, serverName, doJob, projectName) {
+    async jsOperate(task, serverName, doJob, projectName) {
         const data = {
             task: task,
             userId: localStorage.getItem("editor"),
@@ -396,7 +396,7 @@ const api = {
             doJob: doJob,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/jsOper`, {
+            const response = await fetch(`${this.hostname}/webServices/jsOperate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -406,7 +406,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error jsOper fetching POST event data:", error);
+            console.error("Error jsOperate fetching POST event data:", error);
         }
     },
     //Sqlite操作
@@ -417,7 +417,7 @@ const api = {
             command: command,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/dbOper`, {
+            const response = await fetch(`${this.hostname}/webServices/dbOperate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -427,7 +427,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error jsOper fetching POST event data:", error);
+            console.error("Error jsOperate fetching POST event data:", error);
         }
     },
     //redis操作
@@ -438,7 +438,7 @@ const api = {
             command: command,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/dbOper`, {
+            const response = await fetch(`${this.hostname}/webServices/dbOperate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -448,7 +448,7 @@ const api = {
             });
             return await response.json();
         } catch (error) {
-            console.error("Error jsOper fetching POST event data:", error);
+            console.error("Error jsOperate fetching POST event data:", error);
         }
     },
 };

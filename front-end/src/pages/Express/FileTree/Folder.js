@@ -138,10 +138,10 @@ const Folder = ({ folder, path = "" }) => {
 
         // 若用戶確定刪除
         if (confirmed) {
-            const task = "operDel";
+            const task = "operateDel";
             const type = "folder";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfileName}`;
-            const result = await api.fileOper(task, type, fileName);
+            const result = await api.fileOperate(task, type, fileName);
             if (result) {
                 await getServerData();
             }
@@ -169,12 +169,12 @@ const Folder = ({ folder, path = "" }) => {
             event.preventDefault();
             setIsRenaming(false);
             // 處理將修改後的檔名保存到後端的邏輯
-            const task = "operRename";
+            const task = "operateRename";
             const type = "file";
             const oldName = `${serverName}/${path}/${folder.name}`;
             const newName = `${serverName}/${path}/${newFolderName}`;
             const fileName = [oldName, newName];
-            const result = await api.fileOper(task, type, fileName);
+            const result = await api.fileOperate(task, type, fileName);
             if (result) {
                 await getServerData();
             }
@@ -196,10 +196,10 @@ const Folder = ({ folder, path = "" }) => {
             event.preventDefault();
             setIsAddingFolder(false);
             // 處理新增資料夾的邏輯
-            const task = "operAdd";
+            const task = "operateAdd";
             const type = "folder";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfolderName}`;
-            const result = await api.fileOper(task, type, fileName);
+            const result = await api.fileOperate(task, type, fileName);
             if (result) {
                 await getServerData();
             }
@@ -221,10 +221,10 @@ const Folder = ({ folder, path = "" }) => {
             event.preventDefault();
             setIsAddingFile(false);
             // 處理新增資料夾的邏輯
-            const task = "operAdd";
+            const task = "operateAdd";
             const type = "file";
             const fileName = `${serverName}/${path}/${folder.name}/${newSubfileName}`;
-            const result = await api.fileOper(task, type, fileName);
+            const result = await api.fileOperate(task, type, fileName);
             if (result) {
                 await getServerData();
             }

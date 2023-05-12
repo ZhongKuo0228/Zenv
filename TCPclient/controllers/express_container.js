@@ -138,7 +138,7 @@ export async function createDockerComposeFile(serverName, filePath) {
             ports:
                 - 3000
             volumes:
-                - "./gitFolder:/usr/src/app"
+                - "./ProjectFolder:/usr/src/app"
     
 
         ${serverName}-redis:
@@ -239,12 +239,12 @@ export async function stopLogSH(folderName, newProjectPath) {
     }
 }
 
-export async function jsOperInit(job) {
+export async function jsOperateInit(job) {
     //node/npm-install → docker compose up → 取得port(每次啓動port都不一樣，所以第一次初始化就不用抓) → docker compose stop -t 1 <container>
     const folderPath = path.join(moduleDir, "../express_project/");
     const serverName = job.serverName;
     const ymlPath = `${folderPath}${serverName}`;
-    const filePath = `${folderPath}${serverName}/gitFolder`;
+    const filePath = `${folderPath}${serverName}/ProjectFolder`;
     try {
         async function executeCommands() {
             //先安裝一次npm install、並刪除臨時產生的container
@@ -270,7 +270,7 @@ export async function jsOperInit(job) {
     }
 }
 
-export async function jsOperRun(job) {
+export async function jsOperateRun(job) {
     const folderPath = path.join(moduleDir, "../express_project/");
     const serverName = job.serverName;
     const ymlPath = `${folderPath}${serverName}`;
@@ -294,7 +294,7 @@ export async function jsOperRun(job) {
     }
 }
 
-export async function jsOperStop(job) {
+export async function jsOperateStop(job) {
     const folderPath = path.join(moduleDir, "../express_project/");
     const serverName = job.serverName;
     const ymlPath = `${folderPath}${serverName}`;
@@ -314,11 +314,11 @@ export async function jsOperStop(job) {
     }
 }
 
-export async function jsOperNpm(job) {
+export async function jsOperateNpm(job) {
     try {
         const folderPath = path.join(moduleDir, "../express_project/");
         const serverName = job.serverName;
-        const filePath = `${folderPath}${serverName}/gitFolder`;
+        const filePath = `${folderPath}${serverName}/ProjectFolder`;
         const doJob = job.doJob;
         console.log("doJob", doJob);
 

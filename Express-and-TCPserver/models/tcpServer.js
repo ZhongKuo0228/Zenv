@@ -1,4 +1,7 @@
 import net from "net";
+import dotenv from "dotenv";
+dotenv.config();
+
 const connections = [];
 
 function tcpServer() {
@@ -8,19 +11,6 @@ function tcpServer() {
         // 將 socket 物件保存到陣列中
         connections.push(socket);
         console.log(`There are currently ${connections.length} connections.`);
-        // console.log(socket);
-
-        // // 當接收到資料時，將資料廣播給所有連線
-        // socket.on("data", (data) => {
-        //     console.log(`Received data from client: ${data}`);
-        // });
-        //     // 將資料廣播給所有連線
-        //     connections.forEach((conn) => {
-        //         if (conn !== socket && conn.writable) {
-        //             conn.write(data);
-        //         }
-        //     });
-        // });
 
         // 當連線關閉時，從陣列中移除 socket 物件
         socket.on("close", () => {
@@ -37,10 +27,8 @@ function tcpServer() {
         });
     });
 
-    const PORT = 8000;
-
-    server.listen(PORT, () => {
-        console.log(`Server listening on port ${PORT}`);
+    server.listen(process.env.TCP_SERVER_PORT, () => {
+        console.log(`Server listening on port ${process.env.TCP_SERVER_PORT}`);
     });
 
     // tcpServer.connections = connections;

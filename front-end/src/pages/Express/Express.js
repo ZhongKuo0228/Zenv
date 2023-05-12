@@ -411,7 +411,6 @@ const Express = () => {
     //確認使用者是否有此專案----------------------------------------------------
     const checkInfo = async () => {
         const data = await api.checkInfo(projectName);
-
         if (data.data.length < 1) {
             window.location.href = `/profile/${username}`;
         } else if (data.data[0].start_execution === null) {
@@ -423,7 +422,7 @@ const Express = () => {
             await api.updateExpiredTime(username, projectName);
         } else {
             localStorage.setItem("execTime", data.data[0].start_execution);
-            localStorage.setItem("openedFolders", `{"gitFolder":true}`);
+            localStorage.setItem("openedFolders", `{"ProjectFolder":true}`);
             setSqliteResult("sqlite執行結果");
             setRedisResult("redis執行結果");
             setIsInit(true);
@@ -463,11 +462,6 @@ const Express = () => {
         return `${minutes}分${seconds}秒`;
     };
     //讀取資料夾目錄------------------------------------------------------------
-    // const fetchData = async () => {
-    //     const data = await api.getFolderIndex(serverName);
-    //     setFolderData(data);
-    //     setShouldFetchData(false);
-    // };
 
     async function getServerData() {
         const data = await api.fetchData(serverName);
@@ -606,7 +600,7 @@ const Express = () => {
                     setInitProgress(100);
                 }
                 setInitLoading(false); // 隱藏動畫
-                localStorage.setItem("openedFolders", `{"gitFolder":true}`);
+                localStorage.setItem("openedFolders", `{"ProjectFolder":true}`);
                 // 在這裡使用 resolve() 方法，表示 handleCreateSubmit 函數已經完成
                 resolve();
             } catch (error) {
@@ -629,8 +623,8 @@ const Express = () => {
 
         // 調用 API
         const callApi = async () => {
-            const task = "jsOperInit";
-            const result = await api.jsOper(task, serverName);
+            const task = "jsOperateInit";
+            const result = await api.jsOperate(task, serverName);
             if (result) {
                 setInitProgress(100);
                 alert("初始化完成");
@@ -649,9 +643,9 @@ const Express = () => {
             event.preventDefault();
         }
         await handlePostRewrite();
-        const task = "jsOperRun";
+        const task = "jsOperateRun";
         setIsActionLoading(true);
-        const result = await api.jsOper(task, serverName, projectName);
+        const result = await api.jsOperate(task, serverName, projectName);
         if (result) {
             alert(`express running on port : ${result.data}`);
             window.localStorage.setItem("port", result.data);
@@ -677,8 +671,8 @@ const Express = () => {
     const handleStopSubmit = async (event) => {
         event.preventDefault();
         setIsActionLoading(true);
-        const task = "jsOperStop";
-        const result = await api.jsOper(task, serverName);
+        const task = "jsOperateStop";
+        const result = await api.jsOperate(task, serverName);
         setIsActionLoading(false);
         if (result) {
             alert("伺服器已停止");
@@ -690,8 +684,8 @@ const Express = () => {
     const handleRestartSubmit = async (event) => {
         event.preventDefault();
         setIsActionLoading(true);
-        const task = "jsOperStop";
-        const result = await api.jsOper(task, serverName);
+        const task = "jsOperateStop";
+        const result = await api.jsOperate(task, serverName);
         if (result) {
             handleRunSubmit();
         }
@@ -729,9 +723,9 @@ const Express = () => {
                 return;
             }
 
-            const task = "jsOperNpm";
+            const task = "jsOperateNpm";
             setIsActionLoading(true);
-            const result = await api.jsOper(task, serverName, command);
+            const result = await api.jsOperate(task, serverName, command);
             setIsActionLoading(false);
             if (result.data.code) {
                 alert(`npm 指令 ${command} 輸入錯誤 或找不到此名稱套件`);
@@ -801,9 +795,9 @@ const Express = () => {
 
     useEffect(() => {
         const socket = webSocket(`${api.stockIO}`);
-        socket.on("connect", () => {
-            console.log("Successfully connected to server!");
-        });
+        // socket.on("connect", () => {
+        //     console.log("Successfully connected to server!");
+        // });
         socket.on(serverName, (data) => {
             setExpressLog((prevLogs) => [...prevLogs, data]); // 將接收到的資料設置為 expressLog 的新值
         });

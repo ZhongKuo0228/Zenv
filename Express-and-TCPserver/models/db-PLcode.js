@@ -131,12 +131,10 @@ export async function createPLProjects(req) {
 export async function delPLProjects(req) {
     try {
         const userID = req.user.userID;
-        const serviceItem = req.body.data.serviceItem;
         const projectName = req.body.data.projectName;
         const checkProject = await checkProjectName(userID, projectName);
         if (checkProject.length > 0) {
             const itemsID = checkProject[0].service_item;
-            console.log(userID, projectName, itemsID);
             const [rows] = await pool.query(
                 `DELETE FROM prog_lang_services WHERE user_id = ? AND project_name = ? AND service_item = ?`,
                 [userID, projectName, itemsID]

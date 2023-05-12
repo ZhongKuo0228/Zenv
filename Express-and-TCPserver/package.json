@@ -22,5 +22,9 @@
         "monent": "^0.0.2-security",
         "mysql2": "^3.2.3",
         "socket.io": "^4.6.1"
+    },
+    "devDependencies": {
+        "eslint": "^8.40.0",
+        "eslint-plugin-react": "^7.32.2"
     }
 }
