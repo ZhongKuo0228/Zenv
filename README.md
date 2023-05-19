@@ -16,8 +16,11 @@ Zenv是一個提供線上coding及架設後端伺服器的網站，讓使用者�
 2. 爲了能夠更精確的將Logs排序交付給使用者，Server會將收到的資料送到RabbitMQ儲存，待收集到一個量或一段時間後，在送出進行排序，
 3. 最後將排序結果透過Socket.IO送到前端，作出像編譯器實時顯示log的效果。
 
-## 網站架構
-
+## 網站架構與運作方式
+### 程式語言編譯
+![PLpage (1)](https://github.com/ZhongKuo0228/Zenv/assets/119053086/8c66f021-a74d-4d3a-be58-1e30561355a3)
+### 後端伺服器運作
+![WebServer (1)](https://github.com/ZhongKuo0228/Zenv/assets/119053086/ea5b848d-72f4-476c-8453-ec10fbc27a8f)
 
 ## 資料庫 Table Schema
 
