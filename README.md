@@ -1,7 +1,7 @@
 # Zenv
-Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用者不再受硬體及環境限制，在電腦、平板上都可以隨時隨地進行開發。
-* Coding 部分提供 JavaScrpit 、 Python 、 Java 、 C++，等四種常見的程式語言
-* 後端伺服器以 Express 框架，並提供一種關聯式資料庫 Sqlite 和快取資料庫Redis可以使用。
+Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用者不再受硬體及環境限制，可以在電腦、平板上都可以隨時隨地進行開發。
+* Coding 部分提供 JavaScrpit 、 Python 、 Java 、 C++，等四種常見的程式語言。
+* 後端伺服器使用 Express 框架，並提供一種關聯式資料庫 Sqlite 和快取資料庫Redis可以使用。
 
 ##### 網站連結：https://www.zenv.codes/
 ##### Demo影片：https://www.youtube.com/watch?v=aEUfZeOUhOM 
