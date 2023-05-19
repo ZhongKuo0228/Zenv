@@ -3,7 +3,7 @@ import tcpServer from "../models/tcpServer.js";
 //---使用TCP功能
 const connections = tcpServer();
 
-async function socketWrite(job) {
+export async function socketWrite(job) {
     try {
         if (connections.length > 0) {
             const socket = connections[0];
@@ -38,7 +38,7 @@ async function socketWrite(job) {
     }
 }
 
-function bufferToJson(buffer) {
+export function bufferToJson(buffer) {
     if (buffer == undefined) {
         buffer = "tcp Client 回覆異常";
         return buffer;
@@ -47,7 +47,7 @@ function bufferToJson(buffer) {
     }
 }
 // 檢查 buffer 是否符合 JSON 格式
-function isJsonBuffer(buffer) {
+export function isJsonBuffer(buffer) {
     try {
         JSON.parse(buffer.toString());
         return true;

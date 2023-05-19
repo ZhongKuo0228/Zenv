@@ -72,18 +72,18 @@ const App = () => {
                     setIsValidToken(true);
                 } else {
                     localStorage.clear();
-                    navigate("/AuthPage");
+                    navigate("/auth-page");
                 }
             } catch (error) {
                 localStorage.clear();
-                navigate("/AuthPage");
+                navigate("/auth-page");
             }
         };
 
         if (jwt) {
             checkTokenValidity();
         } else {
-            navigate("/AuthPage");
+            navigate("/auth-page");
         }
     }, [navigate]);
 
@@ -92,7 +92,7 @@ const App = () => {
     };
     const handleLogOut = () => {
         localStorage.clear();
-        window.location.href = "/AuthPage";
+        window.location.href = "/auth-page";
     };
     return (
         <>

@@ -396,11 +396,11 @@ const Profile = () => {
                 const result = await api.createPLProject(projectName, selectedLanguage, selectedItemsType);
                 if (result.data) {
                     if (selectedItemsType === "prog_lang") {
-                        window.location.href = `/PLpage/${userName}/${projectName}`;
-                        // navigate(`/PLpage/${userName}/${projectName}`);
+                        window.location.href = `/prog_lang_page/${userName}/${projectName}`;
+                        // navigate(`/prog_lang_page/${userName}/${projectName}`);
                     } else {
-                        window.location.href = `/webServices/${userName}/${projectName}`;
-                        // navigate(`/webServices/${userName}/${projectName}`);
+                        window.location.href = `/web-services/${userName}/${projectName}`;
+                        // navigate(`/web-services/${userName}/${projectName}`);
                     }
                 } else {
                     alert("專案名稱重複，請使用其他名稱");
@@ -426,11 +426,11 @@ const Profile = () => {
     const handleEditProject = async () => {
         try {
             if (selectedItemsType === "prog_lang") {
-                window.location.href = `/PLpage/${userName}/${projectName}`;
-                // navigate(`/PLpage/${userName}/${projectName}`);
+                window.location.href = `/prog_lang_page/${userName}/${projectName}`;
+                // navigate(`/prog_lang_page/${userName}/${projectName}`);
             } else {
-                // navigate(`/webServices/${userName}/${projectName}`);
-                window.location.href = `/webServices/${userName}/${projectName}`;
+                // navigate(`/web-services/${userName}/${projectName}`);
+                window.location.href = `/web-services/${userName}/${projectName}`;
             }
         } catch (error) {
             console.error(error);

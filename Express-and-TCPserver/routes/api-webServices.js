@@ -18,10 +18,10 @@ expressRouter.post("/checkInfo", wrapAsync(checkInfo));
 expressRouter.post("/resetFile", wrapAsync(resetFile));
 expressRouter.get("/get", wrapAsync(getFilesData));
 expressRouter.post("/update", wrapAsync(updateData));
-expressRouter.post("/rewriteFile", wrapAsync(rewriteFileData));
-expressRouter.post("/fileOperate", wrapAsync(allFileOperate));
-expressRouter.post("/jsOperate", wrapAsync(allJSOperate));
-expressRouter.post("/dbOperate", wrapAsync(allDBOperate));
+expressRouter.post("/rewrite-files", wrapAsync(rewriteFileData));
+expressRouter.post("/file-operate", wrapAsync(allFileOperate));
+expressRouter.post("/js-operate", wrapAsync(allJSOperate));
+expressRouter.post("/db-operate", wrapAsync(allDBOperate));
 expressRouter.post("/reviceLog", wrapAsync(receiveLog));
 
 //---export----------------------------------------------

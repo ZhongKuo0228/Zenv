@@ -4,6 +4,7 @@ import { timestamp } from "../util/timestamp.js";
 //sql用的async------------------------------------------
 
 export async function plServiceItems() {
+    //做unit test
     try {
         const [rows] = await pool.query(`SELECT * FROM service_items WHERE service_type = "prog_lang" `);
         return rows;

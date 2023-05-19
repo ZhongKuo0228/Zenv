@@ -106,7 +106,7 @@ const NotFound = () => {
             <GlitchText title='404'>404</GlitchText>
             <Description>Page Not Found</Description>
             <Description>抱歉，您訪問的頁面並不存在</Description>
-            <Link to='/AuthPage'>
+            <Link to='/auth-page'>
                 <Button>返回首頁</Button>
             </Link>
         </Container>

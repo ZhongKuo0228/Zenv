@@ -19,10 +19,10 @@ app.use(cors());
 const httpServer = createServer(app);
 //---router----------------------------------------
 
-app.use("/api/1.0/PLcode", userCheck, plServicesRouter);
-app.use("/api/1.0/webServices", userCheck, expressRouter);
+app.use("/api/1.0/prog_lang_page", userCheck, plServicesRouter);
+app.use("/api/1.0/web-services", userCheck, expressRouter);
 app.use("/api/1.0/user", userApiRouter);
-app.use("/api/1.0/serviceItems", userCheck, serviceItemsRouter);
+app.use("/api/1.0/service-items", userCheck, serviceItemsRouter);
 app.use("/api/1.0/log", receiveWebServicesLogRouter);
 
 //---listen-----------------------------------------

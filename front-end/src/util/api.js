@@ -8,32 +8,6 @@ const api = {
     // stockIO: "https://www.rt019.tk/",
     // tcpClientIp: "http://144.24.87.146",
 
-    //一些範例：
-    async createProduct(data, jwtToken) {
-        const response = await fetch(`${this.hostname}/admin/product`, {
-            body: data,
-            headers: new Headers({
-                Authorization: `Bearer ${jwtToken}`,
-            }),
-            method: "POST",
-        });
-        return await response.json();
-    },
-    async updateVariant(data, jwtToken) {
-        const response = await fetch(`${this.hostname}/admin/product`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${jwtToken}`,
-            },
-            body: JSON.stringify(data),
-        });
-        return await response.json();
-    },
-    async getRevenue() {
-        const response = await fetch(`${this.hostname}/reports/revenue`);
-        return await response.json();
-    },
     //登入及註冊--------------------------------------------------------------------------------------
     async userSignUp(username, email, password) {
         const data = {
@@ -89,7 +63,7 @@ const api = {
     },
     async getUserProjects() {
         try {
-            const response = await fetch(`${this.hostname}/user/userProjects`, {
+            const response = await fetch(`${this.hostname}/user/user-projects`, {
                 headers: {
                     Authorization: `Bearer ${JWT}`,
                 },
@@ -108,7 +82,7 @@ const api = {
         };
 
         try {
-            const response = await fetch(`${this.hostname}/serviceItems/createProject`, {
+            const response = await fetch(`${this.hostname}/service-items/create-project`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -129,7 +103,7 @@ const api = {
         };
 
         try {
-            const response = await fetch(`${this.hostname}/serviceItems/delProject`, {
+            const response = await fetch(`${this.hostname}/service-items/del-project`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -144,7 +118,7 @@ const api = {
     },
     async getPLServiceItems() {
         try {
-            const response = await fetch(`${this.hostname}/serviceItems/plServices`, {
+            const response = await fetch(`${this.hostname}/service-items/pl-services`, {
                 headers: {
                     Authorization: `Bearer ${JWT}`,
                 },
@@ -157,7 +131,7 @@ const api = {
     },
     async getWebServiceItems() {
         try {
-            const response = await fetch(`${this.hostname}/serviceItems/webServices`, {
+            const response = await fetch(`${this.hostname}/service-items/web-services`, {
                 headers: {
                     Authorization: `Bearer ${JWT}`,
                 },
@@ -174,7 +148,7 @@ const api = {
             projectId: projectId,
         };
         try {
-            const response = await fetch(`${this.hostname}/serviceItems/createPLProject`, {
+            const response = await fetch(`${this.hostname}/service-items/createPLProject`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -194,7 +168,7 @@ const api = {
             projectName: projectName,
         };
         try {
-            const response = await fetch(`${this.hostname}/PLcode/getInfo`, {
+            const response = await fetch(`${this.hostname}/prog_lang_page/getInfo`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -218,7 +192,7 @@ const api = {
                 projectID: localStorage.getItem("PLprojectID"),
                 editorID: localStorage.getItem("editor"),
             };
-            const response = await fetch(`${this.hostname}/PLcode/run`, {
+            const response = await fetch(`${this.hostname}/prog_lang_page/run`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -240,7 +214,7 @@ const api = {
                 projectID: localStorage.getItem("PLprojectID"),
                 editorID: localStorage.getItem("editor"),
             };
-            const response = await fetch(`${this.hostname}/PLcode/save`, {
+            const response = await fetch(`${this.hostname}/prog_lang_page/save`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -258,7 +232,7 @@ const api = {
     //創建專案
     async checkInfo(projectName) {
         try {
-            const response = await fetch(`${this.hostname}/webServices/checkInfo`, {
+            const response = await fetch(`${this.hostname}/web-services/checkInfo`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -285,7 +259,7 @@ const api = {
                 serverName: serverName,
                 gitRepoUrl: gitRepoUrl,
             };
-            const response = await fetch(`${this.hostname}/webServices/resetFile`, {
+            const response = await fetch(`${this.hostname}/web-services/resetFile`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -307,7 +281,7 @@ const api = {
                 userName: userName,
                 projectName: projectName,
             };
-            const response = await fetch(`${this.hostname}/webServices/update`, {
+            const response = await fetch(`${this.hostname}/web-services/update`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -323,7 +297,7 @@ const api = {
     //NodeJS操作
     async getFolderIndex(serverName) {
         try {
-            const response = await fetch(`${this.hostname}/webServices/get?getFolderIndex=${serverName}`, {
+            const response = await fetch(`${this.hostname}/web-services/get?getFolderIndex=${serverName}`, {
                 headers: {
                     Authorization: `Bearer ${JWT}`,
                 },
@@ -336,7 +310,7 @@ const api = {
     },
     async readFile(serverName, filePath) {
         try {
-            const response = await fetch(`${this.hostname}/webServices/get?readFile=${serverName}/${filePath}`, {
+            const response = await fetch(`${this.hostname}/web-services/get?readFile=${serverName}/${filePath}`, {
                 headers: {
                     Authorization: `Bearer ${JWT}`,
                 },
@@ -354,7 +328,7 @@ const api = {
             editCode: editCode,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/rewriteFile`, {
+            const response = await fetch(`${this.hostname}/web-services/rewrite-files`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -374,7 +348,7 @@ const api = {
             fileName: fileName,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/fileOperate`, {
+            const response = await fetch(`${this.hostname}/web-services/file-operate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -396,7 +370,7 @@ const api = {
             doJob: doJob,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/jsOperate`, {
+            const response = await fetch(`${this.hostname}/web-services/js-operate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -417,7 +391,7 @@ const api = {
             command: command,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/dbOperate`, {
+            const response = await fetch(`${this.hostname}/web-services/db-operate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -438,7 +412,7 @@ const api = {
             command: command,
         };
         try {
-            const response = await fetch(`${this.hostname}/webServices/dbOperate`, {
+            const response = await fetch(`${this.hostname}/web-services/db-operate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

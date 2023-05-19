@@ -3,10 +3,10 @@ import { getPlServices, getWebServices, createProject, deleteProject } from "../
 import wrapAsync from "../util/wrapAsync.js";
 const serviceItemsRouter = express.Router();
 //---router----------------------------------------------
-serviceItemsRouter.get("/plServices", wrapAsync(getPlServices));
-serviceItemsRouter.get("/webServices", wrapAsync(getWebServices));
-serviceItemsRouter.post("/createProject", wrapAsync(createProject));
-serviceItemsRouter.delete("/delProject", wrapAsync(deleteProject));
+serviceItemsRouter.get("/pl-services", wrapAsync(getPlServices));
+serviceItemsRouter.get("/web-services", wrapAsync(getWebServices));
+serviceItemsRouter.post("/create-project", wrapAsync(createProject));
+serviceItemsRouter.delete("/del-project", wrapAsync(deleteProject));
 
 //---export----------------------------------------------
 export { serviceItemsRouter };
