@@ -17,10 +17,10 @@ root.render(
             <Route path='profile/' element={<Home />}></Route>
             <Route element={<App />}>
                 <Route path='profile/:username' element={<Profile />} />
-                <Route path='PLpage/:username/:projectName' element={<PLpage />} />
-                <Route path='webServices/:username/:projectName' element={<Express />} />
+                <Route path='prog_lang_page/:username/:projectName' element={<PLpage />} />
+                <Route path='web-services/:username/:projectName' element={<Express />} />
             </Route>
-            <Route path='/AuthPage' element={<AuthPage />}></Route>
+            <Route path='/auth-page' element={<AuthPage />}></Route>
             <Route path='*' element={<PageNotFound />} />
         </Routes>
     </BrowserRouter>

@@ -1,4 +1,5 @@
 import { profileAPI } from "../controllers/user.js";
+
 async function userCheck(req, res, next) {
     try {
         const getToke = req.headers.authorization;
@@ -20,5 +21,8 @@ async function userCheck(req, res, next) {
         console.error(e);
     }
 }
+
+
+
 
 export { userCheck };

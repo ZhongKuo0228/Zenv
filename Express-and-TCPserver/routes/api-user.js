@@ -7,7 +7,7 @@ const userApiRouter = express.Router();
 userApiRouter.post("/signup", wrapAsync(signUp));
 userApiRouter.post("/signin", wrapAsync(signIn));
 userApiRouter.get("/profile", userCheck, wrapAsync(getUserProfile));
-userApiRouter.get("/userProjects", userCheck, wrapAsync(getUserProjects));
+userApiRouter.get("/user-projects", userCheck, wrapAsync(getUserProjects));
 
 //---export----------------------------------------------
 export { userApiRouter };

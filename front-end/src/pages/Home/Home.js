@@ -14,17 +14,17 @@ const Home = () => {
                 if (result.name) {
                     navigate(`/profile/${result.name}`);
                 } else {
-                    navigate("/AuthPage");
+                    navigate("/auth-page");
                 }
             } catch (error) {
-                navigate("/AuthPage");
+                navigate("/auth-page");
             }
         };
 
         if (jwt) {
             checkTokenValidity();
         } else {
-            navigate("/AuthPage");
+            navigate("/auth-page");
         }
     }, [navigate]);
 
