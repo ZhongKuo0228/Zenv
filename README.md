@@ -8,8 +8,8 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 ---
 ## 技術與功能說明
 ### 主要核心技術：
-1. 以 JavaScrpit 作爲腳本語言來操作系統進行操作 Docker 、檔案、Sh腳本等任務。
-2. 使用者從瀏覽器送到Server的請求， Server 會包裝成任務，透過TCP協定送給 Worker ， Worker 再將結果透過 TCP 回覆給 Server。
+1. 以 JavaScrpit 作爲腳本語言來操作系統進行操作 Docker 、檔案、sh 腳本等任務。
+2. 使用者從瀏覽器送到 Server 的請求， Server 會包裝成任務，透過 TCP 送給 Worker ， Worker 再將結果透過 TCP 回覆給 Server。
 3. 使用 Docker 的容器技術，將每個使用者要運行的程式碼、指令或伺服器操作都獨立，不會互相影響。
 4. 使用 Docker compose 來串聯 Express、Redis 等服務，創立一個獨立的後端伺服器開發環境。
 ### 如何在前端呈現編譯器Console log
@@ -29,28 +29,29 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 
 ![db](https://github.com/ZhongKuo0228/Zenv/assets/119053086/c2056f51-4bd6-4d7a-b23f-2a3155f505b6)
 
-## 資源概算
+## 資源估算
 爲避免部分任務佔用太多運算資源，每個服務使用的 Docker 資源都會有所限制，
 ### 程式語言編譯：
 #### 測試條件：（讓程式語言生成了一個包含10萬個隨機數的陣列，然後通過重複呼叫函式，將這些隨機數的索引與值存儲到物件中。最後，計算出執行這個負載測試的時間。）
-➤資源配置方案 : 每次程式語言執行使用最大0.5cpu及192MB的記憶做使用。
+➤資源配置方案 : 每次程式語言執行使用最大 0.5cpu 及 192MB 的記憶做使用。
 ![截圖 2023-05-19 下午5 25 39](https://github.com/ZhongKuo0228/Zenv/assets/119053086/2f9e7eed-750b-4fbb-86f0-5593d95609db)
 程式碼請參考：https://github.com/ZhongKuo0228/docker_practice/blob/main/dockerLimitTest/heavyTas4js.js
-### Express 伺服器：（以一個自製的電商網站爲壓測對象，使用K6進行壓測，以每秒100個請求爲標準進行記錄）
+### Express 伺服器：（以一個自製的電商網站爲壓測對象，使用 K6 進行壓測，以每秒100個請求爲標準進行記錄）
 ➤資源配置方案 : 給與每位使用者 0.5cpu 及 128MB 的記憶做使用。
 ![截圖 2023-05-19 下午5 25 51](https://github.com/ZhongKuo0228/Zenv/assets/119053086/9f447a52-b81f-4677-918a-a64a9a6824eb)
-### 每個 Express 配置的 Redis 資料庫：（使用redis 自帶的壓測工具 redis benchmark，以每秒1000個快取需求進行測試）
+### 每個 Express 配置的 Redis 資料庫：（使用 redis 自帶的壓測工具 redis benchmark，以每秒1000個快取需求進行測試）
 ➤資源配置方案 : 給與每位使用者 0.25cpu 及 16MB 的記憶做使用。
 https://drive.google.com/file/d/1TGkUuSkK_BQDTb6NZkOLQ_TVhMd1uNiU/view?usp=sharing
 
 ## 監視系統
 使用 Prometheus 與 Grafana 來進行系統的監視
 * 伺服器本身的狀態：採用 Prometheus 的套件 node-exporter 作爲 Exporter，來抓取目前伺服器的狀態。
+![截圖 2023-05-19 下午6 27 19](https://github.com/ZhongKuo0228/Zenv/assets/119053086/e2b080c2-f29b-4262-96f3-98eff4db0cc7)
+
 * 伺服器上Docker容器的狀態：使用 Cadvisor 作爲 Exporter 來獲取目前伺服上Docker各個容器使用資源的狀態。
+![截圖 2023-05-19 下午7 25 33](https://github.com/ZhongKuo0228/Zenv/assets/119053086/44fa5609-83df-4008-877b-025e9ff5408e)
 
 以上服務都使用Docker來啓動，設定檔請參考：https://github.com/ZhongKuo0228/docker_practice/blob/main/monitor/docker-compose.yml
-
-## 程式部署
 
 ## 與我聯絡
 作者 ： Zhong Kuo (郭耀中)
