@@ -1,0 +1,25 @@
+#忽略規則
+#target       忽略這個target目錄
+#angular.json 忽略這個angular.json文件
+#log/*        忽略log下的所有文件
+#CSS/*.CSS    忽略CSS目錄下的。 CSS文件
+
+#--------------------------------------
+#資料夾--------------
+.DS_Store
+node_modules/
+
+
+#環境檔--------------
+.env
+
+#網站圖檔資料夾--------
+/images/*.bmp
+/images/*.jpg
+/images/*.jpge
+/images/*.gif 
+/images/*.png 
+/images/*.tiff
+images/
+origin/
+webimage/

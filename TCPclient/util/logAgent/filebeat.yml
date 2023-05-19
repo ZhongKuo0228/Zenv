@@ -1,0 +1,8 @@
+filebeat.inputs:
+    - type: log
+      paths:
+          - /Users/zhongkuo/Desktop/Back-End-Class-Batch19/Zenv/TCPclient/express_project/server_logs/*.log
+      scan_frequency: 500ms
+
+output.logstash:
+    hosts: ["localhost:5044"]
