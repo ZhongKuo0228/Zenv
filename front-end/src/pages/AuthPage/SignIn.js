@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import api from "../../util/api";
 
-//TODO
-
 const Form = styled.form`
     display: flex;
     flex-direction: column;
@@ -27,6 +25,18 @@ const Button = styled.button`
     border: none;
     cursor: pointer;
     font-size: 16px;
+`;
+
+const Hint = styled.div`
+    color: white;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    font-size: 14px;
+    width: 300px;
+`;
+const PS = styled.div`
+    font-size: 14px;
 `;
 const ErrorMessage = styled.p`
     color: red;
@@ -71,6 +81,16 @@ const SignIn = () => {
                     onChange={(event) => setPassword(event.target.value)}
                 />
                 <Button type='submit'>確認登入</Button>
+                <Hint>
+                    測試帳號：
+                    <br />
+                    E-mail : guest@test.com
+                    <br />
+                    Password : guest1234
+                    <br />
+                    <hr />
+                    <PS>測試帳號屬於共用帳號，每日會定期清除資料，若想要有較完整體驗，可以註冊自己的專屬帳號。</PS>
+                </Hint>
             </Form>
         </>
     );
