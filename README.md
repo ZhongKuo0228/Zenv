@@ -18,6 +18,8 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 3. 最後將排序結果透過 Socket.IO 送到前端，作出像編譯器實時顯示 log 的效果。
 
 ## 網站架構與運作方式
+### 架構圖：
+![截圖 2023-05-19 下午6 06 06](https://github.com/ZhongKuo0228/Zenv/assets/119053086/d70b1743-7122-4367-94ce-e8c577155137)
 ### 程式語言編譯
 ![PLpage (1)](https://github.com/ZhongKuo0228/Zenv/assets/119053086/8c66f021-a74d-4d3a-be58-1e30561355a3)
 ### 後端伺服器運作
@@ -43,11 +45,8 @@ https://drive.google.com/file/d/1TGkUuSkK_BQDTb6NZkOLQ_TVhMd1uNiU/view?usp=shari
 
 ## 監視系統
 使用 Prometheus 與 Grafana 來進行系統的監視
-### 伺服器本身的狀態
-採用 Prometheus 的套件 node-exporter 作爲 Exporter，來抓取目前伺服器的狀態。
-### 伺服器上Docker容器的狀態
-使用 Cadvisor 作爲 Exporter 來獲取目前伺服上Docker各個容器使用資源的狀態。
-
+* 伺服器本身的狀態：採用 Prometheus 的套件 node-exporter 作爲 Exporter，來抓取目前伺服器的狀態。
+* 伺服器上Docker容器的狀態：使用 Cadvisor 作爲 Exporter 來獲取目前伺服上Docker各個容器使用資源的狀態。
 以上服務都使用Docker來啓動，設定檔請參考：https://github.com/ZhongKuo0228/docker_practice/blob/main/monitor/docker-compose.yml
 
 ## 程式部署
