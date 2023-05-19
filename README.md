@@ -16,6 +16,8 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 1. 使用 Filebeat 來收集每個 Docker compose 的 Logs，Filebeat 會將資料送至 Logstash 進行初步的處理，最後再傳給 Server。
 2. 爲了能夠更精確的將 Logs 排序交付給使用者，Server 會將收到的資料送到 RabbitMQ 儲存，待收集到一個量或一段時間後，在送出進行排序，
 3. 最後將排序結果透過 Socket.IO 送到前端，作出像編譯器實時顯示 log 的效果。
+![consolelog_demo](https://github.com/ZhongKuo0228/Zenv/assets/119053086/246af9f4-0722-4506-b574-96f10e2c14c9)
+
 
 ## 網站架構與運作方式
 ### 架構圖：
