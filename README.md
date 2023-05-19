@@ -14,7 +14,7 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 4. 使用 Docker compose 來串聯 Express、Redis 等服務，創立一個獨立的後端伺服器開發環境。
 ### 如何在前端呈現編譯器Console log
 1. 使用 Filebeat 來收集每個 Docker compose 的 Logs，Filebeat 會將資料送至 Logstash 進行初步的處理，最後再傳給 Server。
-2. 爲了能夠更精確的將 Logs 排序交付給使用者，Server 會將收到的資料送到 RabbitMQ 儲存，待收集到一個量或一段時間後，在送出進行排序，
+2. 爲了能夠更精確的將 Logs 排序交付給使用者，Server 會將收到的資料送到 RabbitMQ 儲存，待收集到一個量或一段時間後，在送出進行排序。
 3. 最後將排序結果透過 Socket.IO 送到前端，作出像編譯器實時顯示 log 的效果。
 ![consolelog_demo](https://github.com/ZhongKuo0228/Zenv/assets/119053086/246af9f4-0722-4506-b574-96f10e2c14c9)
 
@@ -34,7 +34,7 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 ## 資源估算
 爲避免部分任務佔用太多運算資源，每個服務使用的 Docker 資源都會有所限制，
 ### 程式語言編譯：
-#### 測試條件：（讓程式語言生成了一個包含10萬個隨機數的陣列，然後通過重複呼叫函式，將這些隨機數的索引與值存儲到物件中。最後，計算出執行這個負載測試的時間。）
+#### 測試條件：（讓程式語言生成了一個包含10萬個隨機數的陣列，然後通過重複呼叫函式，將這些隨機數的索引與值存儲到物件中。最後，計算出執行這個負載測試的時間）
 ➤資源配置方案 : 每次程式語言執行使用最大 0.5cpu 及 192MB 的記憶做使用。
 ![截圖 2023-05-19 下午5 25 39](https://github.com/ZhongKuo0228/Zenv/assets/119053086/2f9e7eed-750b-4fbb-86f0-5593d95609db)
 程式碼請參考：https://github.com/ZhongKuo0228/docker_practice/blob/main/dockerLimitTest/heavyTas4js.js
@@ -50,10 +50,10 @@ https://drive.google.com/file/d/1TGkUuSkK_BQDTb6NZkOLQ_TVhMd1uNiU/view?usp=shari
 * 伺服器本身的狀態：採用 Prometheus 的套件 node-exporter 作爲 Exporter，來抓取目前伺服器的狀態。
 ![截圖 2023-05-19 下午6 27 19](https://github.com/ZhongKuo0228/Zenv/assets/119053086/e2b080c2-f29b-4262-96f3-98eff4db0cc7)
 
-* 伺服器上Docker容器的狀態：使用 Cadvisor 作爲 Exporter 來獲取目前伺服上Docker各個容器使用資源的狀態。
+* 伺服器上 Docker 容器的狀態：使用 Cadvisor 作爲 Exporter 來獲取目前伺服上 Docker 各個容器使用資源的狀態。
 ![截圖 2023-05-19 下午7 25 33](https://github.com/ZhongKuo0228/Zenv/assets/119053086/44fa5609-83df-4008-877b-025e9ff5408e)
 
-以上服務都使用Docker來啓動，設定檔請參考：https://github.com/ZhongKuo0228/docker_practice/blob/main/monitor/docker-compose.yml
+以上服務都使用 Docker 來啓動，設定檔請參考：https://github.com/ZhongKuo0228/docker_practice/blob/main/monitor/docker-compose.yml
 
 ## 與我聯絡
 作者 ： Zhong Kuo (郭耀中)
