@@ -41,9 +41,18 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 ➤資源配置方案 : 給與每位使用者 0.25cpu 及 16MB 的記憶做使用。
 https://drive.google.com/file/d/1TGkUuSkK_BQDTb6NZkOLQ_TVhMd1uNiU/view?usp=sharing
 
-## 監控系統
+## 監視系統
+使用Prometheus與Grafana來進行系統的監視
+### 伺服器本身的狀態
+採用Prometheus的套件
+
 
 ## 程式部署
 
 ## 與我聯絡
+作者 ： Zhong Kuo (郭耀中)
+信箱 ： rt019623@gmail.com
+
+若網站使用上有遇到任何狀況或建議，請與我聯絡，感謝您的回饋。
+
 
