@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from "uuid";
 const JWT = localStorage.getItem("jwt");
 const api = {
-    hostname: "http://localhost:3001/api/1.0",
-    stockIO: "http://localhost:3001",
-    tcpClientIp: "http://localhost",
-    // hostname: "https://www.rt019.tk/api/1.0",
-    // stockIO: "https://www.rt019.tk/",
-    // tcpClientIp: "http://144.24.87.146",
+    // hostname: "http://localhost:3001/api/1.0",
+    // stockIO: "http://localhost:3001",
+    // tcpClientIp: "http://localhost",
+    hostname: "https://www.rt019.tk/api/1.0",
+    stockIO: "https://www.rt019.tk/",
+    tcpClientIp: "http://144.24.87.146",
 
     //登入及註冊--------------------------------------------------------------------------------------
     async userSignUp(username, email, password) {
