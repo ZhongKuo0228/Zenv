@@ -1,4 +1,4 @@
-name: Unit Test
+name: UnitTest&Deploy
 
 on:
     workflow_dispatch: # 手動觸發
@@ -16,17 +16,16 @@ jobs:
 
     deploy:
         needs: unit_test
-        runs-on: ubuntu-latest 
+        runs-on: ubuntu-latest
         steps:
-          - name: Deploy to EC2
-            uses: appleboy/ssh-action@master
-            with:
-              KEY: ${{ secrets.VPC_SSH_KEY }} # SSH 金鑰密碼
-              HOST: ${{ secrets.VPC_HOST }} # 伺服器的IP
-              USERNAME: ${{ secrets.VPC_USER }} # 伺服器的使用者名稱
-              PORT: ${{ secrets.VPC_PORT }} # SSH 連接埠號
-              script: |
-                cd Zenv
-                git pull origin develop
-                sudo pm2 restart all
-            
+            - name: Deploy to EC2
+              uses: appleboy/ssh-action@master
+              with:
+                  KEY: ${{ secrets.VPC_SSH_KEY }} # SSH 金鑰密碼
+                  HOST: ${{ secrets.VPC_HOST }} # 伺服器的IP
+                  USERNAME: ${{ secrets.VPC_USER }} # 伺服器的使用者名稱
+                  PORT: ${{ secrets.VPC_PORT }} # SSH 連接埠號
+                  script: |
+                      cd Zenv
+                      git pull origin develop
+                      sudo pm2 restart all
