@@ -29,3 +29,5 @@ jobs:
                       cd Zenv
                       git pull origin develop
                       sudo pm2 restart all
+
+                      
