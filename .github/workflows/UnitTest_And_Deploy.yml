@@ -1,0 +1,32 @@
+name: Unit Test
+
+on:
+    workflow_dispatch: # 手動觸發
+
+jobs:
+    unit_test:
+        runs-on: ubuntu-latest # 執行環境在Linux最新版
+
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v3 # 檢查和檢出程式碼
+
+            - name: Unit tests for Express-and-TCPserver
+              run: cd Express-and-TCPserver && npm install && npm test # 在 Express-and-TCPserver 資料夾執行單元測試
+
+    deploy:
+        needs: unit_test
+        runs-on: ubuntu-latest 
+        steps:
+          - name: Deploy to EC2
+            uses: appleboy/ssh-action@master
+            with:
+              KEY: ${{ secrets.VPC_SSH_KEY }} # SSH 金鑰密碼
+              HOST: ${{ secrets.VPC_HOST }} # 伺服器的IP
+              USERNAME: ${{ secrets.VPC_USER }} # 伺服器的使用者名稱
+              PORT: ${{ secrets.VPC_PORT }} # SSH 連接埠號
+              script: |
+                cd Zenv
+                git pull origin develop
+                sudo pm2 restart all
+            
