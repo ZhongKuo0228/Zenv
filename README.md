@@ -24,8 +24,12 @@ Zenv是一個提供線上 coding 及架設後端伺服器的網站，讓使用�
 ![截圖 2023-05-19 下午6 06 06](https://github.com/ZhongKuo0228/Zenv/assets/119053086/d70b1743-7122-4367-94ce-e8c577155137)
 ### 程式語言編譯
 ![PLpage (1)](https://github.com/ZhongKuo0228/Zenv/assets/119053086/8c66f021-a74d-4d3a-be58-1e30561355a3)
-### 後端伺服器運作
-![WebServer (1)](https://github.com/ZhongKuo0228/Zenv/assets/119053086/ea5b848d-72f4-476c-8453-ec10fbc27a8f)
+### 使用者個人後端伺服器運作
+![WebServer](https://github.com/ZhongKuo0228/Zenv/assets/119053086/71fcfa06-3373-45a3-9630-8222cc4d6f50)
+### 個人後端伺服器架構
+![image](https://github.com/ZhongKuo0228/Zenv/assets/119053086/735f41b5-666a-42b6-869a-39e5ce505f82)
+
+
 
 ## 資料庫 Table Schema
 
