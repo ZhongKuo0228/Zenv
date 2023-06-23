@@ -109,6 +109,7 @@ export async function getOutPort(vPath, serviceName) {
     try {
         //使用新版指令docker compose會抓不到port
         const command = `docker-compose -f ${vPath}/docker-compose.yml ps | grep ${serviceName}| awk '{print $NF}' | cut -d ':' -f 2 | cut -d '-' -f 1`;
+        console.log("serviceName", serviceName);
         console.log("command", command);
         try {
             const { stdout } = await execAsync(command);
@@ -117,6 +118,34 @@ export async function getOutPort(vPath, serviceName) {
         } catch (error) {
             console.error(`執行命令時出錯: ${error}`);
         }
+    } catch (e) {
+        console.error(e);
+    }
+}
+export async function createNginxFile(serverName, filePath) {
+    try {
+        const nginxFile = `
+        server {
+            listen 80;
+            listen [::]:80;
+        
+            server_name _; 
+        
+            location / {
+                proxy_pass http://${serverName}-express:3000;
+                proxy_http_version 1.1;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection 'upgrade';
+                #proxy_set_header Host $host;
+                proxy_set_header X-Real-IP $remote_addr;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_cache_bypass $http_upgrade;
+            }
+        }`;
+
+        //dockerfile檔案建立
+        const fileName = `default.conf`;
+        await writeFile(`${filePath}/${fileName}`, nginxFile);
     } catch (e) {
         console.error(e);
     }
@@ -134,7 +163,6 @@ export async function createDockerComposeFile(serverName, filePath) {
                 - REDIS_HOST=${serverName}-redis
             networks:
                 - ${serverName}-network
-            #不指定外部訪問的port，讓系統自動分配
             ports:
                 - 3000
             volumes:
@@ -147,7 +175,16 @@ export async function createDockerComposeFile(serverName, filePath) {
                 - ${serverName}-network
             ports:
                 - 6379
-
+                
+        ${serverName}-nginx:
+            image: nginx:stable-alpine3.17-perl
+            networks:
+                - ${serverName}-network
+            #不指定外部訪問的port，讓系統自動分配
+            ports:
+                - 80
+            volumes:
+                - ./default.conf:/etc/nginx/conf.d/default.conf
     networks:
        ${serverName}-network:`;
 
@@ -276,7 +313,7 @@ export async function jsOperateRun(job) {
     const ymlPath = `${folderPath}${serverName}`;
     try {
         await composeRun(ymlPath, `${serverName}-express`);
-        const result = await getOutPort(ymlPath, `${serverName}-express`);
+        const result = await getOutPort(ymlPath, `${serverName}-nginx`);
         //開啓log記錄
         await runLogSH(serverName, ymlPath);
 

@@ -4,7 +4,7 @@ const promisify = util.promisify;
 import { writeFile, mkdir, readdir, stat, readFile } from "node:fs/promises";
 import path from "path";
 const moduleDir = path.dirname(new URL(import.meta.url).pathname);
-import { createDockerComposeFile, createLogSH, chmodLogSH, downProject } from "./express_container.js";
+import { createNginxFile, createDockerComposeFile, createLogSH, chmodLogSH, downProject } from "./express_container.js";
 
 //從github拉資料下來
 async function downloadRepo(path, gitUrl) {
@@ -84,6 +84,9 @@ export async function createFolder(job) {
 
         await mkdir(newProjectPath);
         await mkdir(ProjectFolderPath);
+
+        await createNginxFile(folderName, newProjectPath);
+        console.log(`nginx.conf建立完成`);
 
         await createDockerComposeFile(folderName, newProjectPath);
         console.log(`docker compose.yml建立完成`);
